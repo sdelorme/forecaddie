@@ -1,6 +1,6 @@
-import Home from "./Pages/Home";
-import IndividualPlayerInfo from "./Pages/IndividualPlayer";
-import PgaEvents from "./Pages/PgaEvents";
+import Home from "./pages/Home";
+import IndividualPlayerInfo from "./pages/IndividualPlayer";
+import PgaEvents from "./pages/PgaEvents";
 
 // other
 import { FC } from "react";
