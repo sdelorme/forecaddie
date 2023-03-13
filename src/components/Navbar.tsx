@@ -21,6 +21,7 @@ const Navbar: FC = (): ReactElement => {
         width: "100%",
         height: "auto",
         backgroundColor: "primary.main",
+        color: "secondary.main",
       }}
     >
       <Container maxWidth="xl">
@@ -33,7 +34,7 @@ const Navbar: FC = (): ReactElement => {
               display: { xs: "none", md: "flex" },
             }}
           >
-            Starter App
+            Forecaddie
           </Typography>
           <Box sx={{ flexGrow: 1, display: { xs: "flex", md: "none" } }}>
             <IconButton
@@ -94,7 +95,7 @@ const Navbar: FC = (): ReactElement => {
                   color="black"
                   underline="none"
                   variant="button"
-                  sx={{ fontSize: "large", marginLeft: "2rem" }}
+                  sx={{ fontSize: "large", marginLeft: "2rem", color: "white" }}
                 >
                   {page.title}
                 </Link>

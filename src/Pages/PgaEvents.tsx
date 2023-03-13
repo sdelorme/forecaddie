@@ -1,4 +1,5 @@
-import { Box, Typography } from "@mui/material";
+import { Box, Card, Container, Grid, Typography } from "@mui/material";
+import React from "react";
 
 export default function PgaEvents() {
   return (
@@ -11,7 +12,90 @@ export default function PgaEvents() {
         alignItems: "center",
       }}
     >
-      <Typography variant="h3">PGA Events</Typography>
+      <Container>
+        <Grid container rowSpacing={6} columnSpacing={3} direction="row">
+          <Grid item xs={12} sm={6} md={3}>
+            <Card>
+              <Typography variant="h3">Tour Event </Typography>
+            </Card>
+          </Grid>
+          <Grid item xs={12} sm={6} md={3}>
+            <Card>
+              <Typography variant="h3">Tour Event </Typography>
+            </Card>
+          </Grid>
+          <Grid item xs={12} sm={6} md={3}>
+            <Card>
+              <Typography variant="h3">Tour Event </Typography>
+            </Card>
+          </Grid>
+          <Grid item xs={12} sm={6} md={3}>
+            <Card>
+              <Typography variant="h3">Tour Event </Typography>
+            </Card>
+          </Grid>
+          <Grid item xs={12} sm={6} md={3}>
+            <Card>
+              <Typography variant="h3">Tour Event </Typography>
+            </Card>
+          </Grid>
+          <Grid item xs={12} sm={6} md={3}>
+            <Card>
+              <Typography variant="h3">Tour Event </Typography>
+            </Card>
+          </Grid>
+          <Grid item xs={12} sm={6} md={3}>
+            <Card>
+              <Typography variant="h3">Tour Event </Typography>
+            </Card>
+          </Grid>
+          <Grid item xs={12} sm={6} md={3}>
+            <Card>
+              <Typography variant="h3">Tour Event </Typography>
+            </Card>
+          </Grid>
+          <Grid item xs={12} sm={6} md={3}>
+            <Card>
+              <Typography variant="h3">Tour Event </Typography>
+            </Card>
+          </Grid>
+          <Grid item xs={12} sm={6} md={3}>
+            <Card>
+              <Typography variant="h3">Tour Event </Typography>
+            </Card>
+          </Grid>
+          <Grid item xs={12} sm={6} md={3}>
+            <Card>
+              <Typography variant="h3">Tour Event </Typography>
+            </Card>
+          </Grid>
+          <Grid item xs={12} sm={6} md={3}>
+            <Card>
+              <Typography variant="h3">Tour Event </Typography>
+            </Card>
+          </Grid>
+          <Grid item xs={12} sm={6} md={3}>
+            <Card>
+              <Typography variant="h3">Tour Event </Typography>
+            </Card>
+          </Grid>
+          <Grid item xs={12} sm={6} md={3}>
+            <Card>
+              <Typography variant="h3">Tour Event </Typography>
+            </Card>
+          </Grid>
+          <Grid item xs={12} sm={6} md={3}>
+            <Card>
+              <Typography variant="h3">Tour Event </Typography>
+            </Card>
+          </Grid>
+          <Grid item xs={12} sm={6} md={3}>
+            <Card>
+              <Typography variant="h3">Tour Event </Typography>
+            </Card>
+          </Grid>
+        </Grid>
+      </Container>
     </Box>
   );
 }
