@@ -1,4 +1,4 @@
-export interface Event {
+export interface TourEvent {
   course: string
   course_key: string
   event_id: number
@@ -12,5 +12,5 @@ export interface Event {
 export interface TourSchedule {
   tour: string
   current_season: number
-  schedule: Event[]
+  schedule: TourEvent[]
 }

@@ -10,13 +10,18 @@ async function getPlayerList() {
 export default async function FetchPlayers() {
   const playerList = await getPlayerList()
   return (
-    <div>
+    <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-4">
       {playerList.map((player: Player) => (
         <div key={player.dg_id} className="card">
-          <h2>{player.player_name}</h2>
+          <h2>{formatPlayerName(player)}</h2>
           <p>{player.country}</p>
         </div>
       ))}
     </div>
   )
 }
+
+function formatPlayerName (player: Player) {
+  const [lastName, firstName] = player.player_name.split(', ');
+  return `${firstName} ${lastName}`;
+};

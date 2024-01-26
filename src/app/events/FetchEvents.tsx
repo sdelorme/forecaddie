@@ -1,5 +1,5 @@
 import moment from 'moment'
-import { Event, TourSchedule } from './types'
+import { TourEvent, TourSchedule } from './types'
 
 const SCHEDULE_URL = `https://feeds.datagolf.com/get-schedule?tour=pga&file_format=json&key=${process.env.DATA_GOLF_API_KEY}`
 
@@ -25,19 +25,20 @@ export default async function FetchEvents() {
     return currentDate.diff(eventDate, 'days') >= 5
   }
   return (
-    <>
-      {sortedEvents.map((event: Event) => (
+    <main>
+      {sortedEvents.map((event: TourEvent) => (
         <div
           key={event.event_id}
           className={`card my-5 ${
             renderTransparent(event.start_date) ? 'card-secondary' : ''
           }`}
         >
+          <h2>{event.event_id}</h2>
           <h2>{event.event_name}</h2>
           <p>{event.location}</p>
           <h3>{event.start_date}</h3>
         </div>
       ))}
-    </>
+    </main>
   )
 }
