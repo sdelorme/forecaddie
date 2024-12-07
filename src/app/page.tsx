@@ -1,17 +1,21 @@
-import Link from 'next/link'
+// pages/index.tsx
 
-export default function Home() {
+import Footer from './components/Footer'
+import Header from './components/Header'
+import ImageGrid from './components/ImageGrid'
+import HeroSection from './components/LandingHero'
+import Steps from './components/LandingStepByStep'
+
+const Home: React.FC = () => {
   return (
-    <main>
-      <div className="card">
-        <h1>Hello and welcome to Forecaddie</h1>
-      </div>
-      <button className="btn-primary m-2">
-        <Link href="/events">Events Page</Link>
-      </button>
-      <button className="btn-secondary m-2">
-        <Link href="/players">Players Page</Link>
-      </button>
-    </main>
+    <>
+      <Header />
+      <HeroSection />
+      <ImageGrid />
+      <Steps />
+      <Footer />
+    </>
   )
 }
+
+export default Home
