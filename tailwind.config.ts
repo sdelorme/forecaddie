@@ -14,6 +14,9 @@ const config: Config = {
         /* masters yellow*/
         secondary: '#fce300',
       },
+      fontFamily: {
+        sans: ['Poppins', 'sans-serif'], // Override the default "sans" with Poppins
+      },
     },
   },
   plugins: [],
