@@ -2,10 +2,10 @@ import Image from 'next/image'
 
 const ImageGrid: React.FC = () => {
   const images = [
-    '/image1.jpg',
-    '/image2.jpg',
-    '/image3.jpg',
-    '/image4.jpg', // Replace these paths with your actual image paths in the public/ folder
+    '/Bones.png',
+    '/Gretzkey.png',
+    '/JT.png',
+    '/Tiger.png', // Replace these paths with your actual image paths in the public/ folder
   ]
 
   return (
