@@ -13,12 +13,12 @@ const ImageGrid: React.FC = () => {
       <div className="container mx-auto px-4">
         <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-4">
           {images.map((src, idx) => (
-            <div key={idx} className="relative w-full h-48">
+            <div key={idx} className="relative aspect-w-4 aspect-h-3">
               <Image
                 src={src}
                 alt={`Image ${idx + 1}`}
-                layout="fill" // Ensures the image covers the container
-                objectFit="cover" // Maintains aspect ratio and covers the container
+                fill
+                style={{ objectFit: "cover" }}
                 className="rounded shadow-md"
               />
             </div>
