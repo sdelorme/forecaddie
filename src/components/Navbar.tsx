@@ -1,11 +1,11 @@
-"use client";
+'use client'
 
-import { useState } from "react";
-import Link from "next/link";
-import Image from "next/image";
+import { useState } from 'react'
+import Link from 'next/link'
+import Image from 'next/image'
 
 const Navbar = () => {
-  const [menuOpen, setMenuOpen] = useState(false);
+  const [menuOpen, setMenuOpen] = useState(false)
 
   return (
     <nav className="bg-green-700">
@@ -30,17 +30,17 @@ const Navbar = () => {
         >
           <div
             className={`h-1 w-6 bg-white transform transition-transform duration-300 ${
-              menuOpen ? "rotate-45 translate-y-2" : ""
+              menuOpen ? 'rotate-45 translate-y-2' : ''
             }`}
           ></div>
           <div
             className={`h-1 w-6 bg-white transform transition-transform duration-300 ${
-              menuOpen ? "opacity-0" : ""
+              menuOpen ? 'opacity-0' : ''
             }`}
           ></div>
           <div
             className={`h-1 w-6 bg-white transform transition-transform duration-300 ${
-              menuOpen ? "-rotate-45 -translate-y-2" : ""
+              menuOpen ? '-rotate-45 -translate-y-2' : ''
             }`}
           ></div>
         </div>
@@ -53,8 +53,11 @@ const Navbar = () => {
           <Link href="/odds" className="text-yellow-400 hover:underline">
             Odds
           </Link>
-          <Link href="/pga-tour-info" className="text-yellow-400 hover:underline">
-            PGA Tour Info
+          <Link
+            href="/tour-schedule"
+            className="text-yellow-400 hover:underline"
+          >
+            Schedule
           </Link>
           <Link href="/login" className="text-white hover:underline">
             Log in
@@ -80,7 +83,10 @@ const Navbar = () => {
               </Link>
             </li>
             <li>
-              <Link href="/pga-tour-info" className="text-yellow-400 hover:underline">
+              <Link
+                href="/pga-tour-info"
+                className="text-yellow-400 hover:underline"
+              >
                 PGA Tour Info
               </Link>
             </li>
@@ -98,7 +104,7 @@ const Navbar = () => {
         </div>
       )}
     </nav>
-  );
-};
+  )
+}
 
-export default Navbar;
+export default Navbar

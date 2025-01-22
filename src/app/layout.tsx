@@ -16,7 +16,11 @@ export default function RootLayout({
 }) {
   return (
     <html lang="en">
-      <body className={lora.className}>{children}</body>
+      <body className={`${lora.className} bg-black`}>
+        <div className="shadow-xl bg-green-50 rounded-lg mx-auto my-8 max-w-5xl p-4">
+          {children}
+        </div>
+      </body>
     </html>
   )
 }

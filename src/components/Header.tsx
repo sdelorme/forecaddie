@@ -4,7 +4,7 @@ import Navbar from './Navbar'
 
 const Header: React.FC = () => {
   return (
-    <header className="bg-green-700 text-white">
+    <header className="bg-green-700 text-white rounded-t-lg">
       {/* Tournament Info */}
       <div className="p-2 text-center text-sm">
         <span>Pebble Beach Pro-Am • Round 4</span> |{' '}
