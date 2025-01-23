@@ -53,11 +53,8 @@ const Navbar = () => {
           <Link href="/odds" className="text-yellow-400 hover:underline">
             Odds
           </Link>
-          <Link
-            href="/tour-schedule"
-            className="text-yellow-400 hover:underline"
-          >
-            Schedule
+          <Link href="/events" className="text-yellow-400 hover:underline">
+            PGA Schedule
           </Link>
           <Link href="/login" className="text-white hover:underline">
             Log in
@@ -83,11 +80,8 @@ const Navbar = () => {
               </Link>
             </li>
             <li>
-              <Link
-                href="/pga-tour-info"
-                className="text-yellow-400 hover:underline"
-              >
-                PGA Tour Info
+              <Link href="/events" className="text-yellow-400 hover:underline">
+                PGA Schedule
               </Link>
             </li>
             <li>
