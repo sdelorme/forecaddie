@@ -1,3 +1,4 @@
+import Link from 'next/link'
 import { LiveEventStats } from '../types'
 
 const LiveTournamentStats: React.FC<LiveEventStats> = ({
@@ -14,7 +15,7 @@ const LiveTournamentStats: React.FC<LiveEventStats> = ({
         <h2 className="text-lg text-gray-600">{course_name}</h2>
         <p className="text-sm text-gray-500">Last updated: {last_updated}</p>
       </header>
-
+      <Link href="/">Back to home Page</Link>
       {/* Leaderboard */}
       <div className="bg-white shadow rounded-lg overflow-hidden">
         <table className="min-w-full divide-y divide-gray-200">
