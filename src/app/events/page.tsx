@@ -1,5 +1,5 @@
 import Link from 'next/link'
-import EventsUI from './components/EventsUI'
+import EventsUI from './components/all-events'
 
 export default async function EventsPage() {
   const response = await fetch(

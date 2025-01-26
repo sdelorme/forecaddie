@@ -37,3 +37,13 @@ export interface LiveEventStats {
   stat_display: string
   stat_round: string
 }
+
+export type Player = {
+  amateur: number
+  country: string
+  country_code: string
+  dg_id: number
+  player_name: string
+}
+
+export type PlayerList = Player[]

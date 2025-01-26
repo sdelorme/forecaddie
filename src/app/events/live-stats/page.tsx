@@ -1,18 +1,16 @@
-import { LiveEventStats } from '../../../lib/types'
-import LiveTournamentStats from './FetchLiveEventStats'
-
-const LIVE_EVENT_URL = `https://feeds.datagolf.com/preds/live-tournament-stats?key=${process.env.DATA_GOLF_API_KEY}`
-
-async function getLiveStats(): Promise<LiveEventStats> {
-  const response = await fetch(LIVE_EVENT_URL, { next: { revalidate: 300 } }) // Revalidate every 5 minutes
-  if (!response.ok) {
-    throw new Error('Failed to fetch live stats')
-  }
-  return response.json()
-}
+import LiveTournamentStats from '../components/live-tournament-stats'
 
 const LiveEventPage = async () => {
-  const liveStats = await getLiveStats()
+  const response = await fetch(
+    `${process.env.NEXT_PUBLIC_BASE_URL}/api/live/live-stats`,
+    { cache: 'no-store' }
+  )
+
+  if (!response.ok) {
+    throw new Error('Failed to fetch live event stats')
+  }
+
+  const liveStats = await response.json()
 
   return <LiveTournamentStats {...liveStats} />
 }

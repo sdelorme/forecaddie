@@ -1,5 +1,6 @@
 import Link from 'next/link'
-import { LiveEventStats } from '../../../lib/types'
+import { LiveEventStats } from '@/lib/types'
+import { formatPlayerName } from '@/lib/utils/player'
 
 const LiveTournamentStats: React.FC<LiveEventStats> = ({
   course_name,
@@ -48,7 +49,7 @@ const LiveTournamentStats: React.FC<LiveEventStats> = ({
                   {player.position}
                 </td>
                 <td className="px-4 py-2 text-sm text-gray-700">
-                  {player.player_name}
+                  {formatPlayerName(player)}
                 </td>
                 <td className="px-4 py-2 text-sm text-gray-700">
                   {player.total}

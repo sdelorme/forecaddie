@@ -5,7 +5,7 @@ import {
   getTournamentType,
   getEventHref,
   isTransparent,
-} from '@/lib/utils/eventsUtil'
+} from '@/lib/utils/tour-events'
 
 export default function EventsUI({ events }: { events: TourEvent[] }) {
   const currentDate = moment()

@@ -1,6 +1,6 @@
 // components/Header.tsx
 
-import Navbar from './Navbar'
+import Navbar from './navbar'
 
 const Header: React.FC = () => {
   return (
