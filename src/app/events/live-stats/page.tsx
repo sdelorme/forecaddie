@@ -1,4 +1,4 @@
-import { LiveEventStats } from '../types'
+import { LiveEventStats } from '../../../lib/types'
 import LiveTournamentStats from './FetchLiveEventStats'
 
 const LIVE_EVENT_URL = `https://feeds.datagolf.com/preds/live-tournament-stats?key=${process.env.DATA_GOLF_API_KEY}`

@@ -1,5 +1,5 @@
 import Link from 'next/link'
-import { LiveEventStats } from '../types'
+import { LiveEventStats } from '../../../lib/types'
 
 const LiveTournamentStats: React.FC<LiveEventStats> = ({
   course_name,
