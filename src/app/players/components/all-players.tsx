@@ -1,5 +1,5 @@
-import { Player } from '@/lib/types'
-import { formatPlayerName } from '@/lib/utils/player'
+import { Player } from '@/types/player'
+import { formatPlayerName } from '@/utils/player'
 import Link from 'next/link'
 
 interface AllPlayerProps {

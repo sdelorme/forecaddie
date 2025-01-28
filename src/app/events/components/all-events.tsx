@@ -1,11 +1,11 @@
 import Link from 'next/link'
 import moment from 'moment'
-import { TourEvent } from '@/lib/types'
+import { TourEvent } from '@/types/schedule'
 import {
   getTournamentType,
   getEventHref,
   isTransparent,
-} from '@/lib/utils/tour-events'
+} from '@/utils/tour-events'
 
 export default function EventsUI({ events }: { events: TourEvent[] }) {
   const currentDate = moment()

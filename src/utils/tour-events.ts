@@ -1,5 +1,5 @@
+import { TourEvent } from '@/types/schedule'
 import moment from 'moment'
-import { TourEvent, TourSchedule } from '@/lib/types'
 
 export function getTournamentType(
   event: TourEvent,

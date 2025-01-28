@@ -1,5 +1,5 @@
 import { NextResponse } from 'next/server'
-import { LiveEventStats } from '@/lib/types'
+import { LiveEventStats } from '@/types/live-events'
 
 const LIVE_EVENT_URL = `https://feeds.datagolf.com/preds/live-tournament-stats?key=${process.env.DATA_GOLF_API_KEY}`
 

@@ -1,6 +1,6 @@
 import Link from 'next/link'
 import FetchPlayers from './components/all-players'
-import { Player } from '@/lib/types'
+import { Player } from '@/types/live-events'
 
 export default async function PlayersPage() {
   const response = await fetch(

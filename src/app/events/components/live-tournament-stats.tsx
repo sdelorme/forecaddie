@@ -1,6 +1,6 @@
 import Link from 'next/link'
-import { LiveEventStats } from '@/lib/types'
-import { formatPlayerName } from '@/lib/utils/player'
+import { LiveEventStats } from '@/types/live-events'
+import { formatPlayerName } from '@/utils/player'
 
 const LiveTournamentStats: React.FC<LiveEventStats> = ({
   course_name,

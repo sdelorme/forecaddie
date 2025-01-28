@@ -1,20 +1,3 @@
-export interface TourEvent {
-  course: string
-  course_key: string
-  event_id: number
-  event_name: string
-  latitude: number
-  location: string
-  longitude: number
-  start_date: string
-}
-
-export interface TourSchedule {
-  tour: string
-  current_season: number
-  schedule: TourEvent[]
-}
-
 export interface LiveEventPlayerStats {
   dg_id: number
   player_name: string
@@ -37,13 +20,3 @@ export interface LiveEventStats {
   stat_display: string
   stat_round: string
 }
-
-export type Player = {
-  amateur: number
-  country: string
-  country_code: string
-  dg_id: number
-  player_name: string
-}
-
-export type PlayerList = Player[]

@@ -1,6 +1,6 @@
 import { NextResponse } from 'next/server'
 import moment from 'moment'
-import { TourSchedule } from '@/lib/types'
+import { TourSchedule } from '@/types/schedule'
 
 const SCHEDULE_URL = `https://feeds.datagolf.com/get-schedule?tour=pga&file_format=json&key=${process.env.DATA_GOLF_API_KEY}`
 
