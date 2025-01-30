@@ -1,5 +1,5 @@
+import { Player } from '@/types/player'
 import { NextResponse } from 'next/server'
-import { Player } from '@/types/live-events'
 
 const PLAYERS_URL = `https://feeds.datagolf.com/get-player-list?file_format=json&key=${process.env.DATA_GOLF_API_KEY}`
 

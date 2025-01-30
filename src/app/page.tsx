@@ -1,5 +1,3 @@
-// pages/index.tsx
-
 import Header from '@/components/header'
 import ImageGrid from '../components/image-grid'
 import HeroSection from '../components/landing-hero'
