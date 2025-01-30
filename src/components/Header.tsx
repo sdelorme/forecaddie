@@ -1,4 +1,5 @@
 import Navbar from './navbar'
+import Image from 'next/image'
 
 const Header: React.FC = () => {
   return (
@@ -22,10 +23,11 @@ const Header: React.FC = () => {
 
             {/* Player Image */}
             <div className="w-12 h-12 rounded-full overflow-hidden border border-gray-400 mr-1">
-              <img
-                src={`https://source.unsplash.com/100x100/?golfer&sig=${i}`} // Replace with real golfer images
-                alt="Player"
-                className="w-full h-full object-cover"
+              <Image
+                src="/homa-no-bg.png"
+                width={100} //TODO: these are arbitrary yet required right now. since class controls size within the circle.
+                height={100}
+                alt="Homa"
               />
             </div>
 

@@ -22,8 +22,8 @@ const Steps: React.FC = () => {
           <React.Fragment key={idx}>
             {/* Step Circle and Text */}
             <div className="flex flex-col items-center text-center">
-              <div className="w-28 h-28 md:w-40 md:h-40 bg-white text-black rounded-full flex items-center justify-center font-bold shadow-lg">
-                <p className="text-xs md:text-sm lg:text-base px-4 leading-tight">
+              <div className="w-36 h-36 md:w-40 md:h-40 bg-white text-black rounded-full flex items-center justify-center font-bold shadow-lg">
+                <p className="text-s md:text-md lg:text-base px-4 leading-tight">
                   {step.text}
                 </p>
               </div>
