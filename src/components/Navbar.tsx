@@ -8,7 +8,7 @@ const Navbar = () => {
   const [menuOpen, setMenuOpen] = useState(false)
 
   return (
-    <nav className="bg-green-700">
+    <nav className="bg-primary">
       <div className="container mx-auto flex items-center justify-between px-4 py-3">
         {/* Left Section: Logo */}
         <div className="flex items-center">
@@ -47,13 +47,13 @@ const Navbar = () => {
 
         {/* Navigation Links for Desktop */}
         <div className="hidden sm:flex space-x-6">
-          <Link href="/" className="text-yellow-400 hover:underline">
+          <Link href="/" className="text-secondary hover:underline">
             Home
           </Link>
-          <Link href="/odds" className="text-yellow-400 hover:underline">
+          <Link href="/odds" className="text-secondary hover:underline">
             Odds
           </Link>
-          <Link href="/events" className="text-yellow-400 hover:underline">
+          <Link href="/events" className="text-secondary hover:underline">
             PGA Schedule
           </Link>
           <Link href="/login" className="text-white hover:underline">
@@ -67,20 +67,20 @@ const Navbar = () => {
 
       {/* Mobile Menu */}
       {menuOpen && (
-        <div className="sm:hidden bg-green-600 text-center">
+        <div className="sm:hidden bg-primary text-center">
           <ul className="flex flex-col space-y-4 py-4">
             <li>
-              <Link href="/" className="text-yellow-400 hover:underline">
+              <Link href="/" className="text-secondary hover:underline">
                 Home
               </Link>
             </li>
             <li>
-              <Link href="/odds" className="text-yellow-400 hover:underline">
+              <Link href="/odds" className="text-secondary hover:underline">
                 Odds
               </Link>
             </li>
             <li>
-              <Link href="/events" className="text-yellow-400 hover:underline">
+              <Link href="/events" className="text-secondary hover:underline">
                 PGA Schedule
               </Link>
             </li>

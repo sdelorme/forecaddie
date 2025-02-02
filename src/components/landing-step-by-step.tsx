@@ -1,3 +1,5 @@
+'use server'
+
 import React from 'react'
 
 const Steps: React.FC = () => {
@@ -11,7 +13,7 @@ const Steps: React.FC = () => {
     <section className="bg-black text-white py-8">
       {/* Login/Sign Up Button */}
       <div className="flex justify-center items-center mb-8">
-        <button className="bg-yellow-300 hover:bg-yellow-600 text-green-900 font-bold py-3 px-8 text-lg md:text-3xl rounded-xl shadow-lg">
+        <button className="bg-secondary hover:bg-primary text-primary hover:text-secondary font-bold py-3 px-8 text-lg md:text-3xl rounded-xl shadow-lg">
           Login or Sign up
         </button>
       </div>

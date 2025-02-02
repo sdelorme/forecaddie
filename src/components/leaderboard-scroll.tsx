@@ -3,43 +3,59 @@ import { Star, Flag } from 'lucide-react'
 
 export default function LeaderboardScroll() {
   return (
-    <div className="w-full bg-white">
-      <div className="flex overflow-x-auto snap-x snap-mandatory gap-4 p-4 scrollbar-hide">
-        {Array.from({ length: 10 }).map((_, i) => (
-          <div
-            key={i}
-            className="flex-none snap-center w-[240px] p-4 border rounded-lg"
-          >
-            <div className="flex items-center gap-4">
-              <div className="relative">
-                <div className="absolute -top-1 -left-1 bg-white text-xs font-semibold px-1.5 py-0.5 rounded-sm z-10">
-                  T1
-                </div>
-                <div className="relative w-12 h-12 rounded-full overflow-hidden">
-                  <Image
-                    src={'/placeholder.svg'}
-                    alt={'hi'}
-                    fill
-                    className="object-cover"
-                    sizes="48px"
-                  />
+    <div className="flex overflow-x-auto snap-x snap-mandatory gap-2 sm:gap-6 p-2 sm:p-6 scrollbar-hide bg-primary">
+      {Array.from({ length: 10 }).map((_, i) => (
+        <div
+          key={i}
+          className="flex-none snap-center bg-white text-black sm:p-6 rounded-xl shadow-sm min-w-[64px] sm:min-w-[320px] border border-gray-100"
+        >
+          {/* Mobile Layout */}
+          <div className="block sm:hidden relative">
+            <div className="w-16 h-16 rounded-full overflow-hidden relative">
+              <Image
+                src="/homa-no-bg.png"
+                alt="Player"
+                fill
+                className="object-cover"
+                sizes="64px"
+              />
+            </div>
+            <div className="absolute -top-1 -right-1 bg-red-600 text-white text-xs font-semibold px-1.5 py-0.5 rounded-full">
+              -11
+            </div>
+            <div className="text-center mt-1">
+              <p className="text-[10px] font-semibold text-gray-600">{i + 1}. HOMA</p>
+            </div>
+          </div>
+
+          {/* Desktop Layout */}
+          <div className="hidden sm:flex items-start">
+            <span className="text-gray-600 font-semibold text-base mr-6">T{i + 1}</span>
+            <div className="w-16 h-16 rounded-full overflow-hidden relative mr-6">
+              <Image
+                src="/homa-no-bg.png"
+                alt="Player"
+                fill
+                className="object-cover"
+                sizes="64px"
+              />
+            </div>
+            <div className="flex-1">
+              <div className="flex items-start justify-between">
+                <span className="font-bold text-xl">HOMA</span>
+                <div className="flex flex-col space-y-3">
+                  <Star className="w-5 h-5 text-gray-300 stroke-[1.5]" />
+                  <Flag className="w-5 h-5 text-gray-300 stroke-[1.5]" />
                 </div>
               </div>
-              <div className="flex-1">
-                <div className="flex items-center justify-between">
-                  <span className="font-bold text-sm">Homa</span>
-                  <Star className="w-4 h-4 text-gray-400" />
-                </div>
-                <div className="flex items-center gap-1 mt-1">
-                  <span className="text-red-600 font-semibold">-15</span>
-                  <span className="text-xs text-gray-500">Thru F</span>
-                  <Flag className="w-3 h-3 text-gray-400 ml-auto" />
-                </div>
+              <div className="flex items-center gap-3 mt-2">
+                <span className="text-primary font-semibold text-lg">-20</span>
+                <span className="text-gray-400 text-sm">Thru F</span>
               </div>
             </div>
           </div>
-        ))}
-      </div>
+        </div>
+      ))}
     </div>
   )
 }

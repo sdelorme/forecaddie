@@ -1,3 +1,5 @@
+'use server'
+
 import Image from 'next/image'
 
 const ImageGrid: React.FC = () => {
@@ -5,11 +7,11 @@ const ImageGrid: React.FC = () => {
     '/Bones.png',
     '/Gretzkey.png',
     '/JT.png',
-    '/Tiger.png', // Replace these paths with your actual image paths in the public/ folder
+    '/Tiger.png',
   ]
 
   return (
-    <section className="bg-green-700 text-white py-4">
+    <section className="bg-primary text-white py-4">
       <div className="container mx-auto px-4">
         <p className="text-center text-xl pb-2">
           Smarter Bets. OAD. DFS. Outright.
