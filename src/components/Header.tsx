@@ -1,9 +1,14 @@
 'use server'
 
+import { LeaderboardScroll } from './leaderboard-scroll'
 import Navbar from './navbar'
-import LeaderboardScroll from './leaderboard-scroll'
+import { LeaderboardPlayer } from '@/types/leaderboard'
 
-const Header: React.FC = () => {
+type HeaderProps = {
+  leaderboardData: LeaderboardPlayer[]
+}
+
+const Header = ({ leaderboardData }: HeaderProps) => {
   return (
     <header className="bg-primary text-white rounded-t-lg">
       {/* Tournament Info */}
@@ -11,7 +16,7 @@ const Header: React.FC = () => {
         <span>Pebble Beach Pro-Am • Round 4</span> |{' '}
         <span>Thursday, February 1, 2024</span>
       </div>
-      <LeaderboardScroll />
+      <LeaderboardScroll players={leaderboardData} />
       {/* Navbar */}
       <Navbar />
     </header>
