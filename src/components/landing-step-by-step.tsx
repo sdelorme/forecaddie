@@ -11,10 +11,10 @@ const Steps: React.FC = () => {
 
   return (
     <section className="bg-black text-white py-8">
-      {/* Login/Sign Up Button */}
+      
       <div className="flex justify-center items-center mb-8">
         <button className="bg-secondary hover:bg-primary text-primary hover:text-secondary font-bold py-3 px-8 text-lg md:text-3xl rounded-xl shadow-lg">
-          Login or Sign up
+          Learn More
         </button>
       </div>
 

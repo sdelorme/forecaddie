@@ -1,14 +1,30 @@
+'use client'
+
 import Image from 'next/image'
 import { Star, Flag } from 'lucide-react'
 import { LeaderboardPlayer } from '@/types/leaderboard'
+import { useState } from 'react'
 
 type PlayerCardProps = {
   player: LeaderboardPlayer
 }
 
 export function PlayerCard({ player }: PlayerCardProps) {
+  const [isFavorite, setIsFavorite] = useState(player.isFavorite ?? false)
+  const [isFlagged, setIsFlagged] = useState(player.isFlagged ?? false)
+
+  const handleToggleFavorite = (e: React.MouseEvent) => {
+    e.stopPropagation()
+    setIsFavorite(!isFavorite)
+  }
+
+  const handleToggleFlag = (e: React.MouseEvent) => {
+    e.stopPropagation()
+    setIsFlagged(!isFlagged)
+  }
+
   return (
-    <div className="flex-none snap-center bg-white text-black sm:p-3 rounded-sm shadow-sm min-w-[64px] sm:min-w-[250px] border border-gray-100">
+    <div className="flex-none snap-center bg-white text-black p-1 sm:p-2 rounded-sm shadow-sm min-w-[56px] sm:min-w-[180px] border border-gray-100">
       {/* Mobile Layout */}
       <div className="block sm:hidden relative">
         <div className="w-16 h-16 rounded-full overflow-hidden relative">
@@ -31,30 +47,46 @@ export function PlayerCard({ player }: PlayerCardProps) {
       </div>
 
       {/* Desktop Layout */}
-      <div className="hidden sm:flex items-start">
-        <span className="text-gray-600 font-semibold text-base">
+      <div className="hidden sm:flex items-start gap-2">
+        <span className="text-gray-600 font-semibold text-sm">
           T{player.position}
         </span>
-        <div className="w-16 h-16 rounded-full overflow-hidden relative mr-6">
+        <div className="w-10 h-10 rounded-full overflow-hidden relative">
           <Image
             src={player.imageUrl}
             alt={player.player_name}
             fill
             className="object-cover"
-            sizes="64px"
+            sizes="40px"
           />
         </div>
         <div className="flex-1">
-          <div className="flex items-start justify-between">
-            <span className="font-bold text-xl pr-3">{player.player_name}</span>
-            <div className="flex flex-col space-y-1">
-              <Star className={`w-5 h-5 ${player.isFavorite ? 'text-yellow-400' : 'text-gray-300'} stroke-[1.5]`} />
-              <Flag className={`w-5 h-5 ${player.isFlagged ? 'text-red-400' : 'text-gray-300'} stroke-[1.5]`} />
+          <div className="flex items-start justify-between gap-1">
+            <span className="font-bold text-sm">{player.player_name}</span>
+            <div className="flex flex-col gap-0.5">
+              <button
+                onClick={handleToggleFavorite}
+                className="hover:scale-110 transition-transform"
+                aria-label={isFavorite ? "Remove from favorites" : "Add to favorites"}
+              >
+                <Star 
+                  className={`w-3.5 h-3.5 ${isFavorite ? 'text-yellow-400 fill-yellow-400' : 'text-gray-300'} stroke-[1.5]`}
+                />
+              </button>
+              <button
+                onClick={handleToggleFlag}
+                className="hover:scale-110 transition-transform"
+                aria-label={isFlagged ? "Remove flag" : "Add flag"}
+              >
+                <Flag 
+                  className={`w-3.5 h-3.5 ${isFlagged ? 'text-red-400 fill-red-400' : 'text-gray-300'} stroke-[1.5]`}
+                />
+              </button>
             </div>
           </div>
           <div className="flex items-center gap-1">
-            <span className="text-primary font-semibold text-2xl">{player.score}</span>
-            <span className="text-gray-400 text-xs">{player.status}</span>
+            <span className="text-primary font-semibold text-base">{player.score}</span>
+            <span className="text-gray-400 text-[10px]">{player.status}</span>
           </div>
         </div>
       </div>
