@@ -2,6 +2,13 @@
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
+
+@layer utilities {
+  .header-scrolled header > div {
+    transform: translateY(-72px);
+  }
+}
+
 /* base styles */
 /* base styles */
 body {

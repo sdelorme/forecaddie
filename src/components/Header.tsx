@@ -1,26 +1,14 @@
-'use server'
-
+import { LeaderboardPlayer } from '@/types/leaderboard'
 import { LeaderboardScroll } from './leaderboard-scroll'
 import Navbar from './navbar'
-import { LeaderboardPlayer } from '@/types/leaderboard'
 
-type HeaderProps = {
-  leaderboardData: LeaderboardPlayer[]
-}
-
-const Header = ({ leaderboardData }: HeaderProps) => {
+export default function Header({ leaderboardData }: { leaderboardData: LeaderboardPlayer[] }) {
   return (
-    <header className="bg-primary text-white rounded-t-lg">
-      {/* Tournament Info */}
-      <div className="p-2 text-center text-xs">
-        <span>Pebble Beach Pro-Am • Round 4</span> |{' '}
-        <span>Thursday, February 1, 2024</span>
+    <header className="fixed top-0 w-full z-50 transition-transform duration-300">
+      <div className="header-scrolled:-translate-y-[72px]">
+        <LeaderboardScroll players={leaderboardData} />
+        <Navbar />
       </div>
-      <LeaderboardScroll players={leaderboardData} />
-      {/* Navbar */}
-      <Navbar />
     </header>
   )
 }
-
-export default Header
