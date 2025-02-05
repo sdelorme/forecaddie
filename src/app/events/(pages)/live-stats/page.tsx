@@ -1,4 +1,5 @@
-import LiveTournamentStats from '../components/live-tournament-stats'
+import LiveTournamentStats from "../../(components)/live-tournament-stats"
+
 
 const LiveEventPage = async () => {
   const response = await fetch(

@@ -1,20 +1,24 @@
 import { TourEvent } from '@/types/schedule'
-import moment from 'moment'
+
+function isBetweenDates(date: Date, start: Date, end: Date): boolean {
+  return date >= start && date <= end
+}
 
 /**
  * Determine if an event is 'live', 'historical', or 'future'.
  */
 export function getTournamentType(
   event: TourEvent,
-  currentDate: moment.Moment
+  currentDate: Date
 ): 'live' | 'historical' | 'future' {
-  const startDate = moment.utc(event.start_date, 'YYYY-MM-DD')
-  const endDate = startDate.clone().add(5, 'days')
+  const startDate = new Date(event.start_date)
+  const endDate = new Date(startDate)
+  endDate.setDate(endDate.getDate() + 4) // Tournament typically lasts 4 days
 
-  if (currentDate.isBetween(startDate, endDate, 'day', '[]')) {
+  if (isBetweenDates(currentDate, startDate, endDate)) {
     return 'live'
   }
-  if (currentDate.isAfter(endDate)) {
+  if (currentDate > endDate) {
     return 'historical'
   }
   return 'future'
@@ -41,10 +45,10 @@ export function getEventHref(event: TourEvent, tournamentType: string): string {
  */
 export function isTransparent(
   startDate: string,
-  currentDate: moment.Moment
+  currentDate: Date
 ): boolean {
-  const eventDate = moment.utc(startDate, 'YYYY-MM-DD')
-  return currentDate.isAfter(eventDate.add(5, 'days'))
+  const eventDate = new Date(startDate)
+  return currentDate > new Date(eventDate.setDate(eventDate.getDate() + 5))
 }
 
 /**
@@ -52,7 +56,7 @@ export function isTransparent(
  */
 export function getCurrentEvent(
   events: TourEvent[],
-  currentDate: moment.Moment
+  currentDate: Date
 ): TourEvent | null {
   if (!events || events.length === 0) return null
 
@@ -68,9 +72,9 @@ export function getCurrentEvent(
   )
   if (futureEvents.length > 0) {
     return futureEvents.reduce((closest, event) => {
-      const eventDate = moment.utc(event.start_date, 'YYYY-MM-DD')
-      const closestDate = moment.utc(closest.start_date, 'YYYY-MM-DD')
-      return eventDate.isBefore(closestDate) ? event : closest
+      const eventDate = new Date(event.start_date)
+      const closestDate = new Date(closest.start_date)
+      return eventDate < closestDate ? event : closest
     })
   }
 
@@ -80,9 +84,9 @@ export function getCurrentEvent(
   )
   if (historicalEvents.length > 0) {
     return historicalEvents.reduce((latest, event) => {
-      const eventDate = moment.utc(event.start_date, 'YYYY-MM-DD')
-      const latestDate = moment.utc(latest.start_date, 'YYYY-MM-DD')
-      return eventDate.isAfter(latestDate) ? event : latest
+      const eventDate = new Date(event.start_date)
+      const latestDate = new Date(latest.start_date)
+      return eventDate > latestDate ? event : latest
     })
   }
 
