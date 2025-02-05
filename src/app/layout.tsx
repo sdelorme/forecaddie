@@ -1,8 +1,8 @@
 import type { Metadata } from 'next'
 import { Lora } from 'next/font/google'
 import './globals.css'
-import Header from '@/components/header'
-import Footer from '@/components/footer'
+import Header from '@/components/shared/header'
+import Footer from '@/components/shared/footer'
 import { MOCK_PLAYERS } from '@/lib/mock-data'
 import { ScrollWrapper } from '@/components/providers/scroll-wrapper'
 

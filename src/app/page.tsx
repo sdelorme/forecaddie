@@ -1,6 +1,6 @@
-import ImageGrid from '../components/landing-image-grid'
-import HeroSection from '../components/landing-hero'
-import Steps from '../components/landing-step-by-step'
+import ImageGrid from '../components/landing-page/landing-image-grid'
+import HeroSection from '../components/landing-page/landing-hero'
+import Steps from '../components/landing-page/landing-step-by-step'
 
 export default function Home() {
   return (

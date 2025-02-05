@@ -3,9 +3,40 @@
 import { useState } from 'react'
 import Link from 'next/link'
 import Image from 'next/image'
+import { usePathname } from 'next/navigation'
+import { cn } from '@/lib/utils'
+
+const routes = [
+  {
+    href: '/',
+    label: 'Home',
+    className: 'text-secondary'
+  },
+  {
+    href: '/odds',
+    label: 'Odds',
+    className: 'text-secondary'
+  },
+  {
+    href: '/events',
+    label: 'PGA Schedule',
+    className: 'text-secondary'
+  },
+  {
+    href: '/login',
+    label: 'Log in',
+    className: 'text-white'
+  },
+  {
+    href: '/signup',
+    label: 'Sign Up',
+    className: 'text-white'
+  }
+]
 
 const Navbar = () => {
   const [menuOpen, setMenuOpen] = useState(false)
+  const pathname = usePathname()
 
   return (
     <nav className="bg-primary">
@@ -47,21 +78,19 @@ const Navbar = () => {
 
         {/* Navigation Links for Desktop */}
         <div className="hidden sm:flex space-x-6">
-          <Link href="/" className="text-secondary hover:underline">
-            Home
-          </Link>
-          <Link href="/odds" className="text-secondary hover:underline">
-            Odds
-          </Link>
-          <Link href="/events" className="text-secondary hover:underline">
-            PGA Schedule
-          </Link>
-          <Link href="/login" className="text-white hover:underline">
-            Log in
-          </Link>
-          <Link href="/signup" className="text-white hover:underline">
-            Sign Up
-          </Link>
+          {routes.map((route) => (
+            <Link
+              key={route.href}
+              href={route.href}
+              className={cn(
+                route.className,
+                'hover:underline',
+                pathname === route.href && 'underline'
+              )}
+            >
+              {route.label}
+            </Link>
+          ))}
         </div>
       </div>
 
@@ -69,31 +98,20 @@ const Navbar = () => {
       {menuOpen && (
         <div className="sm:hidden bg-primary text-center">
           <ul className="flex flex-col space-y-4 py-4">
-            <li>
-              <Link href="/" className="text-secondary hover:underline">
-                Home
-              </Link>
-            </li>
-            <li>
-              <Link href="/odds" className="text-secondary hover:underline">
-                Odds
-              </Link>
-            </li>
-            <li>
-              <Link href="/events" className="text-secondary hover:underline">
-                PGA Schedule
-              </Link>
-            </li>
-            <li>
-              <Link href="/login" className="text-white hover:underline">
-                Log in
-              </Link>
-            </li>
-            <li>
-              <Link href="/signup" className="text-white hover:underline">
-                Sign Up
-              </Link>
-            </li>
+            {routes.map((route) => (
+              <li key={route.href}>
+                <Link
+                  href={route.href}
+                  className={cn(
+                    route.className,
+                    'hover:underline',
+                    pathname === route.href && 'underline'
+                  )}
+                >
+                  {route.label}
+                </Link>
+              </li>
+            ))}
           </ul>
         </div>
       )}
