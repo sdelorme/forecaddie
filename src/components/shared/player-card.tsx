@@ -4,6 +4,7 @@ import Image from 'next/image'
 import { Star, Flag } from 'lucide-react'
 import { LeaderboardPlayer } from '@/types/leaderboard'
 import { useState } from 'react'
+import { getPlayerImageUrl } from '@/utils/player-images'
 
 type PlayerCardProps = {
   player: LeaderboardPlayer
@@ -12,6 +13,7 @@ type PlayerCardProps = {
 export function PlayerCard({ player }: PlayerCardProps) {
   const [isFavorite, setIsFavorite] = useState(player.isFavorite ?? false)
   const [isFlagged, setIsFlagged] = useState(player.isFlagged ?? false)
+  const imageUrl = getPlayerImageUrl(player.player_name)
 
   const handleToggleFavorite = (e: React.MouseEvent) => {
     e.stopPropagation()
@@ -29,7 +31,7 @@ export function PlayerCard({ player }: PlayerCardProps) {
       <div className="block sm:hidden relative">
         <div className="w-16 h-16 rounded-full overflow-hidden relative">
           <Image
-            src={player.imageUrl}
+            src={imageUrl}
             alt={player.player_name}
             fill
             className="object-cover"
@@ -53,11 +55,12 @@ export function PlayerCard({ player }: PlayerCardProps) {
         </span>
         <div className="w-10 h-10 rounded-full overflow-hidden relative">
           <Image
-            src={player.imageUrl}
+            src={imageUrl}
             alt={player.player_name}
             fill
             className="object-cover"
             sizes="40px"
+            priority={player.position <= 10} // Prioritize loading for top players
           />
         </div>
         <div className="flex-1">
