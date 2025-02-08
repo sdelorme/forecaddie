@@ -3,8 +3,8 @@ import { Lora } from 'next/font/google'
 import './globals.css'
 import Header from '@/components/shared/header'
 import Footer from '@/components/shared/footer'
-import { MOCK_PLAYERS } from '@/lib/mock-data'
 import { ScrollWrapper } from '@/components/providers/scroll-wrapper'
+import { getLiveLeaderboard } from '@/lib/data-fetching'
 
 const lora = Lora({ subsets: ['latin'] })
 
@@ -14,16 +14,18 @@ export const metadata: Metadata = {
   description: 'Make smarter golf betting decisions',
 }
 
-export default function RootLayout({
+export default async function RootLayout({
   children,
 }: {
   children: React.ReactNode
 }) {
+  const { players, event } = await getLiveLeaderboard()
+
   return (
     <html lang="en" className="h-full">
       <body className={`${lora.className} bg-black min-h-full flex flex-col`}>
         <ScrollWrapper>
-          <Header leaderboardData={MOCK_PLAYERS} />
+          <Header leaderboardData={players} eventData={event} />
         </ScrollWrapper>
         <main className="flex-1 mt-[144px]">
           {children}
