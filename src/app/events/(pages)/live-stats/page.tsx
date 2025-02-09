@@ -1,5 +1,5 @@
 import { Suspense } from 'react'
-import { getLiveLeaderboard } from '@/lib/data-fetching'
+import { getLiveLeaderboard } from '@/data/data-fetching'
 import { LeaderboardPlayer } from '@/types/leaderboard'
 
 export default async function LiveStatsPage() {
@@ -10,35 +10,43 @@ export default async function LiveStatsPage() {
       <div className="mb-8">
         <h1 className="text-3xl font-bold text-white mb-2">{event.name}</h1>
         <p className="text-gray-400">
-          {event.course} • Last updated: {new Date(event.lastUpdated).toLocaleTimeString()}
+          {event.course} • Last updated:{' '}
+          {new Date(event.lastUpdated).toLocaleTimeString()}
         </p>
       </div>
 
-      <Suspense fallback={
-        <div className="grid gap-4 animate-pulse">
-          {[...Array(10)].map((_, i) => (
-            <div 
-              key={i}
-              className="bg-gray-800/50 h-24 rounded-lg"
-            />
-          ))}
-        </div>
-      }>
+      <Suspense
+        fallback={
+          <div className="grid gap-4 animate-pulse">
+            {[...Array(10)].map((_, i) => (
+              <div key={i} className="bg-gray-800/50 h-24 rounded-lg" />
+            ))}
+          </div>
+        }
+      >
         <div className="grid gap-4">
           {players.map((player: LeaderboardPlayer) => (
-            <div 
+            <div
               key={player.dg_id}
               className="bg-gray-900 p-4 rounded-lg flex justify-between items-center"
             >
               <div>
                 <div className="flex items-center gap-4">
                   <span className="text-gray-400 w-8">{player.position}</span>
-                  <span className="text-white font-semibold">{player.player_name}</span>
+                  <span className="text-white font-semibold">
+                    {player.player_name}
+                  </span>
                 </div>
-                <div className="text-gray-400 text-sm ml-12">{player.status}</div>
+                <div className="text-gray-400 text-sm ml-12">
+                  {player.status}
+                </div>
               </div>
               <div className="text-xl font-mono">
-                <span className={player.score <= 0 ? 'text-green-500' : 'text-red-500'}>
+                <span
+                  className={
+                    player.score <= 0 ? 'text-green-500' : 'text-red-500'
+                  }
+                >
                   {player.score > 0 ? `+${player.score}` : player.score}
                 </span>
               </div>

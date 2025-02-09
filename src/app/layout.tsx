@@ -4,14 +4,17 @@ import './globals.css'
 import Header from '@/components/shared/header'
 import Footer from '@/components/shared/footer'
 import { ScrollWrapper } from '@/components/providers/scroll-wrapper'
-import { getLiveLeaderboard } from '@/lib/data-fetching'
+import { getLiveLeaderboard } from '@/data/data-fetching'
 
 const lora = Lora({ subsets: ['latin'] })
 
 // This needs to be moved to a separate metadata route for the client component
 export const metadata: Metadata = {
   title: 'CaddieBet',
-  description: 'Make smarter golf betting decisions',
+  description: 'Make smarter golf bets',
+  icons: {
+    icon: '/favicon.ico',
+  },
 }
 
 export default async function RootLayout({
@@ -27,9 +30,7 @@ export default async function RootLayout({
         <ScrollWrapper>
           <Header leaderboardData={players} eventData={event} />
         </ScrollWrapper>
-        <main className="flex-1 mt-[144px]">
-          {children}
-        </main>
+        <main className="flex-1 mt-[144px]">{children}</main>
         <Footer />
       </body>
     </html>

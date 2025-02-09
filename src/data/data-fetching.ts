@@ -10,17 +10,15 @@ interface LeaderboardResponse {
 }
 
 export async function getLiveLeaderboard(): Promise<LeaderboardResponse> {
-  const baseUrl =
-    process.env.NODE_ENV === 'development'
-      ? 'http://localhost:3000'
-      : process.env.NEXT_PUBLIC_BASE_URL
-
   try {
-    const response = await fetch(`${baseUrl}/api/live/live-stats`, {
-      next: {
-        revalidate: 300, // Revalidate every 5 minutes
-      },
-    })
+    const response = await fetch(
+      `${process.env.NEXT_PUBLIC_BASE_URL}/api/live/live-stats`,
+      {
+        next: {
+          revalidate: 300, // Revalidate every 5 minutes
+        },
+      }
+    )
 
     if (!response.ok) {
       console.error(
