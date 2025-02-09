@@ -1,5 +1,5 @@
 import { Player } from '@/types/player'
-import { formatPlayerName } from '@/utils/player'
+import { formatPlayerNameDesktop } from '@/lib/utils/player'
 import Link from 'next/link'
 
 interface AllPlayerProps {
@@ -10,7 +10,7 @@ export default function AllPlayers({ players }: AllPlayerProps) {
   return (
     <div className="grid grid-cols-2 gap-4 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 p-4">
       {players.map((player: Player) => {
-        const playerName = formatPlayerName(player)
+        const playerName = formatPlayerNameDesktop(player)
 
         return (
           <Link

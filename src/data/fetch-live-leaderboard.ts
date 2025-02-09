@@ -1,3 +1,4 @@
+import { formatPlayerScore } from '@/lib/utils/live-stats-helpers'
 import { LeaderboardPlayer } from '@/types/leaderboard'
 
 interface LeaderboardResponse {
@@ -38,7 +39,7 @@ export async function getLiveLeaderboard(): Promise<LeaderboardResponse> {
           dg_id: player.dg_id,
           position: player.position,
           player_name: player.player_name,
-          score: player.total,
+          score: formatPlayerScore(player.total),
           status: player.thru === 18 ? 'F' : `Thru ${player.thru}`,
           imageUrl: '/homa-no-bg.png',
           amateur: 0,

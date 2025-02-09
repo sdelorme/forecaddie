@@ -4,34 +4,34 @@ import { useState } from 'react'
 import Link from 'next/link'
 import Image from 'next/image'
 import { usePathname } from 'next/navigation'
-import { cn } from '@/lib/utils'
+import { cn } from '@/lib/utils/class-name'
 
 const routes = [
   {
     href: '/',
     label: 'Home',
-    className: 'text-secondary'
+    className: 'text-secondary',
   },
   {
     href: '/odds',
     label: 'Odds',
-    className: 'text-secondary'
+    className: 'text-secondary',
   },
   {
     href: '/events',
     label: 'PGA Schedule',
-    className: 'text-secondary'
+    className: 'text-secondary',
   },
   {
     href: '/login',
     label: 'Log in',
-    className: 'text-white'
+    className: 'text-white',
   },
   {
     href: '/signup',
     label: 'Sign Up',
-    className: 'text-white'
-  }
+    className: 'text-white',
+  },
 ]
 
 const Navbar = () => {

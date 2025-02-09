@@ -19,8 +19,12 @@ const config: Config = {
       },
     },
   },
-  plugins: [
-    require('@tailwindcss/aspect-ratio'),
+  plugins: [require('@tailwindcss/aspect-ratio')],
+  safelist: [
+    'bg-green-500',
+    'bg-gray-400',
+    'bg-red-500',
+    'bg-red-600', // Fallback
   ],
 }
 export default config

@@ -4,11 +4,10 @@ import './globals.css'
 import Header from '@/components/shared/header'
 import Footer from '@/components/shared/footer'
 import { ScrollWrapper } from '@/components/providers/scroll-wrapper'
-import { getLiveLeaderboard } from '@/data/data-fetching'
+import { getLiveLeaderboard } from '@/data/fetch-live-leaderboard'
 
 const lora = Lora({ subsets: ['latin'] })
 
-// This needs to be moved to a separate metadata route for the client component
 export const metadata: Metadata = {
   title: 'CaddieBet',
   description: 'Make smarter golf bets',

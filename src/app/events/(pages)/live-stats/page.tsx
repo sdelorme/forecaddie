@@ -1,6 +1,7 @@
 import { Suspense } from 'react'
-import { getLiveLeaderboard } from '@/data/data-fetching'
+import { getLiveLeaderboard } from '@/data/fetch-live-leaderboard'
 import { LeaderboardPlayer } from '@/types/leaderboard'
+import { getScoreStyle } from '@/lib/utils/live-stats-helpers'
 
 export default async function LiveStatsPage() {
   const { players, event } = await getLiveLeaderboard()
@@ -42,12 +43,8 @@ export default async function LiveStatsPage() {
                 </div>
               </div>
               <div className="text-xl font-mono">
-                <span
-                  className={
-                    player.score <= 0 ? 'text-green-500' : 'text-red-500'
-                  }
-                >
-                  {player.score > 0 ? `+${player.score}` : player.score}
+                <span className={getScoreStyle(player.score, 'text')}>
+                  {player.score}
                 </span>
               </div>
             </div>

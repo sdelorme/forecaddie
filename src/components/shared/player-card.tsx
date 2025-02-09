@@ -4,7 +4,9 @@ import Image from 'next/image'
 import { Star, Flag } from 'lucide-react'
 import { LeaderboardPlayer } from '@/types/leaderboard'
 import { useState } from 'react'
-import { getPlayerImageUrl } from '@/utils/player-images'
+import { getPlayerImageUrl } from '@/lib/utils/player-images'
+import { getScoreStyle } from '@/lib/utils/live-stats-helpers'
+import { formatPlayerNameMobile } from '@/lib/utils/player'
 
 type PlayerCardProps = {
   player: LeaderboardPlayer
@@ -25,6 +27,8 @@ export function PlayerCard({ player }: PlayerCardProps) {
     setIsFlagged(!isFlagged)
   }
 
+  const mobileFormattedPlayerName = formatPlayerNameMobile(player)
+
   return (
     <div className="flex-none snap-center bg-white text-black p-1 sm:p-2 rounded-sm shadow-sm min-w-[56px] sm:min-w-[180px] border border-gray-100">
       {/* Mobile Layout */}
@@ -38,12 +42,14 @@ export function PlayerCard({ player }: PlayerCardProps) {
             sizes="64px"
           />
         </div>
+
+        {/* Score Bubble */}
         <div className="absolute -top-1 -right-1 bg-red-600 text-white text-xs font-semibold px-1.5 py-0.5 rounded-full">
           {player.score}
         </div>
         <div className="text-center mt-1">
           <p className="text-[10px] font-semibold text-gray-600">
-            {player.position}. {player.player_name}
+            {player.position}. {mobileFormattedPlayerName}
           </p>
         </div>
       </div>
@@ -69,29 +75,44 @@ export function PlayerCard({ player }: PlayerCardProps) {
               <button
                 onClick={handleToggleFavorite}
                 className="hover:scale-110 transition-transform"
-                aria-label={isFavorite ? "Remove from favorites" : "Add to favorites"}
+                aria-label={
+                  isFavorite ? 'Remove from favorites' : 'Add to favorites'
+                }
               >
-                <Star 
-                  className={`w-3.5 h-3.5 ${isFavorite ? 'text-yellow-400 fill-yellow-400' : 'text-gray-300'} stroke-[1.5]`}
+                <Star
+                  className={`w-3.5 h-3.5 ${
+                    isFavorite
+                      ? 'text-yellow-400 fill-yellow-400'
+                      : 'text-gray-300'
+                  } stroke-[1.5]`}
                 />
               </button>
               <button
                 onClick={handleToggleFlag}
                 className="hover:scale-110 transition-transform"
-                aria-label={isFlagged ? "Remove flag" : "Add flag"}
+                aria-label={isFlagged ? 'Remove flag' : 'Add flag'}
               >
-                <Flag 
-                  className={`w-3.5 h-3.5 ${isFlagged ? 'text-red-400 fill-red-400' : 'text-gray-300'} stroke-[1.5]`}
+                <Flag
+                  className={`w-3.5 h-3.5 ${
+                    isFlagged ? 'text-red-400 fill-red-400' : 'text-gray-300'
+                  } stroke-[1.5]`}
                 />
               </button>
             </div>
           </div>
           <div className="flex items-center gap-1">
-            <span className="text-primary font-semibold text-base">{player.score}</span>
+            <span
+              className={`font-semibold text-base ${getScoreStyle(
+                player.score,
+                'text'
+              )}`}
+            >
+              {player.score}
+            </span>
             <span className="text-gray-400 text-[10px]">{player.status}</span>
           </div>
         </div>
       </div>
     </div>
   )
-} 
+}

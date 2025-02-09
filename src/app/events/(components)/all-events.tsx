@@ -3,10 +3,7 @@
 import Link from 'next/link'
 import { useMemo } from 'react'
 import { TourEvent } from '@/types/schedule'
-import {
-  getTournamentType,
-  getEventHref
-} from '@/utils/tour-events'
+import { getTournamentType, getEventHref } from '@/lib/utils/tour-events'
 
 function isEventCompleted(startDate: string): boolean {
   // Assume event is completed if it started more than 4 days ago
@@ -22,10 +19,10 @@ export default function EventsUI({ events }: { events: TourEvent[] }) {
     return [...events].sort((a, b) => {
       const aCompleted = isEventCompleted(a.start_date)
       const bCompleted = isEventCompleted(b.start_date)
-      
+
       if (aCompleted && !bCompleted) return 1
       if (!aCompleted && bCompleted) return -1
-      
+
       // If both are in the same completion state, sort by date
       return new Date(a.start_date).getTime() - new Date(b.start_date).getTime()
     })
@@ -44,9 +41,10 @@ export default function EventsUI({ events }: { events: TourEvent[] }) {
               className={`
                 cursor-pointer p-4 rounded-lg shadow-lg 
                 transition-all duration-300 hover:scale-102
-                ${isComplete 
-                  ? 'bg-gray-800/50 text-gray-400' 
-                  : 'bg-gray-900 text-white hover:bg-gray-800'
+                ${
+                  isComplete
+                    ? 'bg-gray-800/50 text-gray-400'
+                    : 'bg-gray-900 text-white hover:bg-gray-800'
                 }
               `}
             >
