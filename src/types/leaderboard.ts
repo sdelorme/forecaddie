@@ -1,7 +1,7 @@
 import { Player } from './player'
 
 export type LeaderboardPlayer = Player & {
-  position: number
+  position: string
   score: number
   imageUrl: string
   status: string

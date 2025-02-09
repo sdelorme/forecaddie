@@ -37,7 +37,7 @@ export async function getLiveLeaderboard(): Promise<LeaderboardResponse> {
     const transformedData = {
       players: data.live_stats?.map((player: any) => ({
         dg_id: player.dg_id,
-        position: parseInt(player.position) || 0,
+        position: player.position,
         player_name: player.player_name,
         score: player.total,
         status: player.thru === 18 ? 'F' : `Thru ${player.thru}`,

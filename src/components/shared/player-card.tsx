@@ -51,7 +51,7 @@ export function PlayerCard({ player }: PlayerCardProps) {
       {/* Desktop Layout */}
       <div className="hidden sm:flex items-start gap-2">
         <span className="text-gray-600 font-semibold text-sm">
-          T{player.position}
+          {player.position}
         </span>
         <div className="w-10 h-10 rounded-full overflow-hidden relative">
           <Image
@@ -60,7 +60,6 @@ export function PlayerCard({ player }: PlayerCardProps) {
             fill
             className="object-cover"
             sizes="40px"
-            priority={player.position <= 10} // Prioritize loading for top players
           />
         </div>
         <div className="flex-1">
