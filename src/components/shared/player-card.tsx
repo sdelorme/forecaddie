@@ -44,7 +44,12 @@ export function PlayerCard({ player }: PlayerCardProps) {
         </div>
 
         {/* Score Bubble */}
-        <div className="absolute -top-1 -right-1 bg-red-600 text-white text-xs font-semibold px-1.5 py-0.5 rounded-full">
+        <div
+          className={`absolute -top-1 -right-1 text-white text-xs font-semibold px-1.5 py-0.5 rounded-full ${getScoreStyle(
+            player.score,
+            'bg'
+          )}`}
+        >
           {player.score}
         </div>
         <div className="text-center mt-1">
