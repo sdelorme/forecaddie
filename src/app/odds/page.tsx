@@ -1,3 +1,3 @@
 export default function Odds() {
-  return <div>Hello World</div>
+  return <div className="text-white p-10">Hello World</div>
 }

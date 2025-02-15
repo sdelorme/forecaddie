@@ -1,8 +1,8 @@
-import { Player } from '@/types/player'
+import { LeaderboardPlayer } from '@/types/leaderboard'
 
 export function formatLeaderboardPlayerName(
-  player: Pick<Player, 'player_name'>
+  player: Pick<LeaderboardPlayer, 'playerName'>
 ) {
-  const [lastName, firstName] = player.player_name.split(', ')
+  const [lastName, firstName] = player.playerName.split(', ')
   return `${firstName[0]}. ${lastName}`
 }

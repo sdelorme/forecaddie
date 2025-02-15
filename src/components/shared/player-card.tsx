@@ -63,10 +63,19 @@ const PlayerAvatar = ({
   </div>
 )
 
-export function PlayerCard({ player }: PlayerCardProps) {
-  const [isFavorite, setIsFavorite] = useState(player.isFavorite ?? false)
-  const [isFlagged, setIsFlagged] = useState(player.isFlagged ?? false)
-  const imageUrl = getPlayerImageUrl(player.player_name) || '/placeholder.svg'
+export function PlayerCard({
+  player: {
+    playerName,
+    currentScore,
+    currentPosition,
+    thru,
+    isFavorite: initialIsFavorite,
+    isFlagged: initialIsFlagged,
+  },
+}: PlayerCardProps) {
+  const [isFavorite, setIsFavorite] = useState(initialIsFavorite ?? false)
+  const [isFlagged, setIsFlagged] = useState(initialIsFlagged ?? false)
+  const imageUrl = getPlayerImageUrl(playerName) || '/placeholder.svg'
 
   const handleToggleFavorite = (e: React.MouseEvent) => {
     e.stopPropagation()
@@ -78,32 +87,26 @@ export function PlayerCard({ player }: PlayerCardProps) {
     setIsFlagged(!isFlagged)
   }
 
-  const formattedPlayerName = formatLeaderboardPlayerName(player)
-  const scoreStyle = getScoreStyle(player.score, 'text')
+  const formattedPlayerName = formatLeaderboardPlayerName({ playerName })
+  const desktopScoreStyle = getScoreStyle(currentScore)
+  const mobileScoreStyle = getScoreStyle(currentScore, 'bg')
 
   return (
     <article className="flex-none snap-center sm:w-48 sm:bg-white sm:text-black p-1 sm:p-2 sm:rounded-sm sm:shadow-sm sm:border sm:border-gray-100">
       {/* Mobile Layout */}
       <div className="sm:hidden relative flex flex-col items-center w-20">
         <div className="relative">
-          <PlayerAvatar
-            imageUrl={imageUrl}
-            playerName={player.player_name}
-            size={48}
-          />
+          <PlayerAvatar imageUrl={imageUrl} playerName={playerName} size={48} />
           <div
-            className={`absolute -top-1 -right-1 text-white text-xs font-semibold w-6 h-6 flex items-center justify-center rounded-full shadow-md ${getScoreStyle(
-              player.score,
-              'bg'
-            )}`}
+            className={`absolute -top-1 -right-1 text-white text-xs font-semibold w-6 h-6 flex items-center justify-center rounded-full shadow-md ${mobileScoreStyle}`}
           >
-            {player.score}
+            {currentScore}
           </div>
         </div>
 
         <div className="text-center mt-1 w-20">
           <p className="text-[9px] font-semibold text-white truncate">
-            {player.position}. {formattedPlayerName}
+            {currentPosition}. {formattedPlayerName}
           </p>
         </div>
       </div>
@@ -111,13 +114,9 @@ export function PlayerCard({ player }: PlayerCardProps) {
       {/* Desktop Layout */}
       <div className="hidden sm:flex items-start gap-2">
         <span className="text-gray-600 font-semibold text-sm">
-          {player.position}
+          {currentPosition}
         </span>
-        <PlayerAvatar
-          imageUrl={imageUrl}
-          playerName={player.player_name}
-          size={48}
-        />
+        <PlayerAvatar imageUrl={imageUrl} playerName={playerName} size={48} />
 
         <div className="flex flex-col w-full overflow-hidden">
           <span className="font-bold text-sm truncate">
@@ -126,10 +125,10 @@ export function PlayerCard({ player }: PlayerCardProps) {
 
           <div className="flex items-center justify-between mt-1">
             <div className="flex items-center gap-1">
-              <span className={`font-semibold text-base ${scoreStyle}`}>
-                {player.score}
+              <span className={`font-semibold text-base ${desktopScoreStyle}`}>
+                {currentScore}
               </span>
-              <span className="text-gray-400 text-[10px]">{player.status}</span>
+              <span className="text-gray-400 text-[10px]">{thru}</span>
             </div>
 
             <div className="flex gap-2">

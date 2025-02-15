@@ -21,13 +21,13 @@ export default async function RootLayout({
 }: {
   children: React.ReactNode
 }) {
-  const { players, event } = await getLiveLeaderboard()
+  const { players, eventInfo } = await getLiveLeaderboard()
 
   return (
     <html lang="en" className="h-full">
       <body className={`${lora.className} bg-black min-h-full flex flex-col`}>
         <ScrollWrapper>
-          <Header leaderboardData={players} eventData={event} />
+          <Header leaderboardPlayers={players} eventInfo={eventInfo} />
         </ScrollWrapper>
         <main className="flex-1 mt-[144px]">{children}</main>
         <Footer />

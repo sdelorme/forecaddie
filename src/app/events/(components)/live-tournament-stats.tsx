@@ -1,77 +1,52 @@
-import Link from 'next/link'
-import { LiveEventStats } from '@/types/live-events'
-import { formatPlayerNameDesktop } from '@/lib/utils/player'
+import type { LeaderboardEvent, LeaderboardPlayer } from '@/types/leaderboard'
+import { getScoreStyle } from '@/lib/utils/live-stats-helpers'
+import { formatLeaderboardPlayerName } from '@/lib/utils/player'
 
-const LiveTournamentStats: React.FC<LiveEventStats> = ({
-  course_name,
-  event_name,
-  last_updated,
-  live_stats,
-}) => {
+interface LiveLeaderboardProps {
+  players: LeaderboardPlayer[]
+  eventInfo: LeaderboardEvent
+}
+
+export function LiveLeaderboard({
+  players,
+  eventInfo: { course, lastUpdated },
+}: LiveLeaderboardProps) {
   return (
-    <div className="bg-gray-100 min-h-screen py-6 px-4 md:px-8">
-      {/* Header */}
-      <header className="mb-6 text-center">
-        <h1 className="text-2xl font-bold text-gray-800">{event_name}</h1>
-        <h2 className="text-lg text-gray-600">{course_name}</h2>
-        <p className="text-sm text-gray-500">Last updated: {last_updated}</p>
-      </header>
-      <Link href="/">Back to home Page</Link>
-      {/* Leaderboard */}
-      <div className="bg-white shadow rounded-lg overflow-hidden">
-        <table className="min-w-full divide-y divide-gray-200">
-          <thead className="bg-gray-50">
-            <tr>
-              <th className="px-4 py-2 text-left text-sm font-medium text-gray-500">
-                Position
-              </th>
-              <th className="px-4 py-2 text-left text-sm font-medium text-gray-500">
-                Player
-              </th>
-              <th className="px-4 py-2 text-left text-sm font-medium text-gray-500">
-                Total Score
-              </th>
-              <th className="px-4 py-2 text-left text-sm font-medium text-gray-500">
-                Round Score
-              </th>
-              <th className="px-4 py-2 text-left text-sm font-medium text-gray-500">
-                SG Total
-              </th>
-              <th className="px-4 py-2 text-left text-sm font-medium text-gray-500">
-                Thru
-              </th>
-            </tr>
-          </thead>
-          <tbody className="divide-y divide-gray-200">
-            {live_stats.map((player) => (
-              <tr key={player.dg_id} className="hover:bg-gray-50">
-                <td className="px-4 py-2 text-sm text-gray-700">
-                  {player.position}
-                </td>
-                <td className="px-4 py-2 text-sm text-gray-700">
-                  {formatPlayerNameDesktop(player)}
-                </td>
-                <td className="px-4 py-2 text-sm text-gray-700">
-                  {player.total}
-                </td>
-                <td className="px-4 py-2 text-sm text-gray-700">
-                  {player.round}
-                </td>
-                <td className="px-4 py-2 text-sm text-gray-700">
-                  {player.sg_total !== null
-                    ? player.sg_total.toFixed(3)
-                    : 'N/A'}
-                </td>
-                <td className="px-4 py-2 text-sm text-gray-700">
-                  {player.thru}
-                </td>
-              </tr>
-            ))}
-          </tbody>
-        </table>
+    <div className="container mx-auto px-4 py-8">
+      {/* Event Info Section */}
+      <div className="mb-8">
+        <h1 className="text-2xl font-bold text-white mb-2">{course}</h1>
+        <p className="text-gray-400">
+          {course} • Last updated: {new Date(lastUpdated).toLocaleTimeString()}
+        </p>
+      </div>
+
+      {/* Players List */}
+      <div className="grid gap-4">
+        {players.map(
+          ({ dgId, currentPosition, playerName, currentScore, thru }) => (
+            <div
+              key={dgId}
+              className="bg-gray-900 p-4 rounded-lg flex justify-between items-center"
+            >
+              <div>
+                <div className="flex items-center gap-4">
+                  <span className="text-gray-400 w-8">{currentPosition}</span>
+                  <span className="text-white font-semibold">
+                    {formatLeaderboardPlayerName({ playerName })}
+                  </span>
+                </div>
+                <div className="text-gray-400 text-sm ml-12">{thru}</div>
+              </div>
+              <div className="text-xl font-mono">
+                <span className={getScoreStyle(currentScore, 'text')}>
+                  {currentScore}
+                </span>
+              </div>
+            </div>
+          )
+        )}
       </div>
     </div>
   )
 }
-
-export default LiveTournamentStats

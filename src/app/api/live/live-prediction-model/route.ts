@@ -1,9 +1,9 @@
-import { LiveEventStatsResponse } from '@/types/live-events'
+import { LiveModelPlayerResponse } from '@/types/live-events'
 import { NextResponse } from 'next/server'
 
-const LIVE_EVENT_URL = `https://feeds.datagolf.com/preds/live-tournament-stats?key=${process.env.DATA_GOLF_API_KEY}`
+const LIVE_EVENT_URL = `https://feeds.datagolf.com/preds/in-play?key=${process.env.DATA_GOLF_API_KEY}`
 
-async function fetchLiveTournamentStats(): Promise<LiveEventStatsResponse> {
+async function fetchLivePredictionModel(): Promise<LiveModelPlayerResponse> {
   const response = await fetch(LIVE_EVENT_URL)
 
   if (!response.ok) {
@@ -22,7 +22,7 @@ export async function GET() {
       throw new Error('API key not configured')
     }
 
-    const liveStats = await fetchLiveTournamentStats()
+    const liveStats = await fetchLivePredictionModel()
     return NextResponse.json(liveStats)
   } catch (error) {
     console.error('Live stats error:', error)
