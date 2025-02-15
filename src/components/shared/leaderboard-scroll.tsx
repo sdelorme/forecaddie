@@ -1,4 +1,4 @@
-import { LeaderboardPlayer } from '@/types/leaderboard'
+import type { LeaderboardPlayer } from '@/types/leaderboard'
 import { PlayerCard } from './player-card'
 
 type LeaderboardScrollProps = {
@@ -30,14 +30,9 @@ export function LeaderboardScroll({
     <div className="flex flex-col border-b-[1px] bg-primary">
       {event && (
         <div className="px-2 py-1 text-[10px]">
-          <div className="flex items-center gap-2 text-gray-400">
-            <span className="text-white">{event.name}</span>
-            <span>•</span>
-            <span>{event.course}</span>
-            <span>•</span>
-            <span>
-              Updated: {new Date(event.lastUpdated).toLocaleTimeString()}
-            </span>
+          <div className="flex flex-wrap items-center gap-x-2 gap-y-1 text-gray-400">
+            <span className="text-white whitespace-nowrap">{event.name}</span>
+            <span className="whitespace-nowrap">{event.course}</span>
           </div>
         </div>
       )}
