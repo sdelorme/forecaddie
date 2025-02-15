@@ -1,9 +1,9 @@
 'use client'
 
+import { useState } from 'react'
 import Image from 'next/image'
 import { Star, Flag, type LucideIcon } from 'lucide-react'
 import type { LeaderboardPlayer } from '@/types/leaderboard'
-import { useState } from 'react'
 import { getPlayerImageUrl } from '@/lib/utils/player-images'
 import { getScoreStyle } from '@/lib/utils/live-stats-helpers'
 import { formatLeaderboardPlayerName } from '@/lib/utils/player'
@@ -42,7 +42,7 @@ const IconButton = ({
   </button>
 )
 
-const PlayerImage = ({
+const PlayerAvatar = ({
   imageUrl,
   playerName,
   size,
@@ -51,13 +51,12 @@ const PlayerImage = ({
   playerName: string
   size: number
 }) => (
-  <div
-    className={`flex-shrink-0 w-${size} h-${size} rounded-full overflow-hidden relative`}
-  >
+  <div className={`flex-shrink-0 rounded-full overflow-hidden`}>
     <Image
       src={imageUrl || '/placeholder.svg'}
       alt={playerName}
-      fill
+      width={size}
+      height={size}
       className="object-cover"
       sizes={`${size * 4}px`}
     />
@@ -87,10 +86,10 @@ export function PlayerCard({ player }: PlayerCardProps) {
       {/* Mobile Layout */}
       <div className="sm:hidden relative flex flex-col items-center w-20">
         <div className="relative">
-          <PlayerImage
+          <PlayerAvatar
             imageUrl={imageUrl}
             playerName={player.player_name}
-            size={16}
+            size={48}
           />
           <div
             className={`absolute -top-1 -right-1 text-white text-xs font-semibold w-6 h-6 flex items-center justify-center rounded-full shadow-md ${getScoreStyle(
@@ -114,10 +113,10 @@ export function PlayerCard({ player }: PlayerCardProps) {
         <span className="text-gray-600 font-semibold text-sm">
           {player.position}
         </span>
-        <PlayerImage
+        <PlayerAvatar
           imageUrl={imageUrl}
           playerName={player.player_name}
-          size={10}
+          size={48}
         />
 
         <div className="flex flex-col w-full overflow-hidden">
