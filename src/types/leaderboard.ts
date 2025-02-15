@@ -8,7 +8,7 @@ export type LeaderboardPlayer = {
   r4: number | null
   playerName: string
   round: number
-  thru: number
+  thru: string
   today: number
   top10Odds: number
   top20Odds: number

@@ -7,15 +7,13 @@ interface LiveLeaderboardProps {
   eventInfo: LeaderboardEvent
 }
 
-export function LiveLeaderboard({
-  players,
-  eventInfo: { course, lastUpdated },
-}: LiveLeaderboardProps) {
+export function LiveLeaderboard({ players, eventInfo }: LiveLeaderboardProps) {
+  const { eventName, course, lastUpdated } = eventInfo
   return (
     <div className="container mx-auto px-4 py-8">
       {/* Event Info Section */}
       <div className="mb-8">
-        <h1 className="text-2xl font-bold text-white mb-2">{course}</h1>
+        <h1 className="text-2xl font-bold text-white mb-2">{eventName}</h1>
         <p className="text-gray-400">
           {course} • Last updated: {new Date(lastUpdated).toLocaleTimeString()}
         </p>

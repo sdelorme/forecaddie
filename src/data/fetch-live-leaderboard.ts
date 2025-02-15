@@ -1,4 +1,7 @@
-import { formatPlayerScore } from '@/lib/utils/live-stats-helpers'
+import {
+  formatPlayerScore,
+  formatPlayerThru,
+} from '@/lib/utils/live-stats-helpers'
 import type {
   Leaderboard,
   LeaderboardPlayer,
@@ -42,7 +45,7 @@ export async function getLiveLeaderboard(): Promise<Leaderboard> {
         r4: player.R4,
         playerName: player.player_name,
         round: player.round,
-        thru: player.thru,
+        thru: formatPlayerThru(player.thru),
         today: player.today,
         top10Odds: player.top_10,
         top20Odds: player.top_20,

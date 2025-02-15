@@ -1,6 +1,6 @@
 ## Backlog
 
-- [ ] Make the leaderboard dynamic with the live stats
+- [ ] Fix the order of the leaderboard -- currently using the prediction model
 - [ ] Add odds page (source separate api? check DataGolf?)
 - [ ] Entry point to players page
 - [ ] Add a database for user data

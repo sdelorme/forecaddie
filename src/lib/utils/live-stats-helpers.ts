@@ -15,3 +15,7 @@ export const getScoreStyle = (
     return type === 'text' ? 'text-green-500' : 'bg-red-500' // Negative scores
   return type === 'text' ? 'text-red-500' : 'bg-green-500' // Positive scores and '-'
 }
+
+export const formatPlayerThru = (thru: number): string => {
+  return thru === 0 ? '-' : thru.toString()
+}
