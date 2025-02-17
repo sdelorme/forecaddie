@@ -14,8 +14,9 @@ export function getTournamentType(
   const startDate = new Date(event.start_date)
   const endDate = new Date(startDate)
   endDate.setDate(endDate.getDate() + 4) // Tournament typically lasts 4 days
+  endDate.setHours(23, 59, 59, 999) // Set to end of the day
 
-  if (isBetweenDates(currentDate, startDate, endDate)) {
+  if (currentDate >= startDate && currentDate <= endDate) {
     return 'live'
   }
   if (currentDate > endDate) {
@@ -43,10 +44,7 @@ export function getEventHref(event: TourEvent, tournamentType: string): string {
 /**
  * Determine if an event should be transparent (inactive due to being in the past).
  */
-export function isTransparent(
-  startDate: string,
-  currentDate: Date
-): boolean {
+export function isTransparent(startDate: string, currentDate: Date): boolean {
   const eventDate = new Date(startDate)
   return currentDate > new Date(eventDate.setDate(eventDate.getDate() + 5))
 }
@@ -91,4 +89,50 @@ export function getCurrentEvent(
   }
 
   return null
+}
+
+export function processEvents(events: TourEvent[]) {
+  const now = new Date()
+  return events
+    .map((event) => ({
+      ...event,
+      tournamentType: getTournamentType(event, now),
+      href: getEventHref(event, getTournamentType(event, now)),
+      isComplete: isEventCompleted(event.start_date, now),
+    }))
+    .sort(sortEvents)
+}
+
+function isEventCompleted(startDate: string, now: Date): boolean {
+  return now > getEventEndDate(startDate)
+}
+
+function getEventEndDate(startDate: string): Date {
+  const eventDate = new Date(startDate)
+  const endDate = new Date(eventDate)
+  endDate.setDate(eventDate.getDate() + 4)
+  endDate.setHours(23, 59, 59, 999)
+  return endDate
+}
+
+function sortEvents(a: TourEvent, b: TourEvent) {
+  const now = new Date()
+  const aEndDate = getEventEndDate(a.start_date)
+  const bEndDate = getEventEndDate(b.start_date)
+  const aStartDate = new Date(a.start_date)
+  const bStartDate = new Date(b.start_date)
+
+  const aIsCurrent = aStartDate <= now && now <= aEndDate
+  const bIsCurrent = bStartDate <= now && now <= bEndDate
+
+  if (aIsCurrent && !bIsCurrent) return -1
+  if (!aIsCurrent && bIsCurrent) return 1
+
+  const aIsUpcoming = aStartDate > now
+  const bIsUpcoming = bStartDate > now
+
+  if (aIsUpcoming && !bIsUpcoming) return -1
+  if (!aIsUpcoming && bIsUpcoming) return 1
+
+  return aStartDate.getTime() - bStartDate.getTime()
 }
