@@ -1,4 +1,5 @@
 import {
+  compareScores,
   formatPlayerScore,
   formatPlayerThru,
 } from '@/lib/utils/live-stats-helpers'
@@ -11,7 +12,7 @@ import type {
   LiveModelPlayer,
   LiveModelPlayerResponse,
 } from '@/types/live-events'
-import type { LiveEventStatsResponse } from '@/types/live-events' // Make sure to create this type
+import type { LiveEventStatsResponse } from '@/types/live-events'
 
 export async function getLiveLeaderboard(): Promise<Leaderboard> {
   try {
@@ -19,7 +20,7 @@ export async function getLiveLeaderboard(): Promise<Leaderboard> {
       fetch(
         `${process.env.NEXT_PUBLIC_BASE_URL}/api/live/live-prediction-model`,
         {
-          next: { revalidate: 330 }, // Revalidate every 5 1/2 minutes
+          next: { revalidate: 330 },
         }
       ),
       fetch(`${process.env.NEXT_PUBLIC_BASE_URL}/api/live/live-stats`, {
@@ -34,8 +35,14 @@ export async function getLiveLeaderboard(): Promise<Leaderboard> {
     const liveModel: LiveModelPlayerResponse = await playersResponse.json()
     const liveEventStats: LiveEventStatsResponse = await eventResponse.json()
 
-    const leaderboardPlayers: LeaderboardPlayer[] = liveModel.data.map(
-      (player: LiveModelPlayer) => ({
+    const leaderboardPlayers: LeaderboardPlayer[] = liveModel.data
+      .sort((a: LiveModelPlayer, b: LiveModelPlayer) => {
+        return (
+          compareScores(a.current_score, b.current_score) ||
+          a.player_name.localeCompare(b.player_name)
+        )
+      })
+      .map((player: LiveModelPlayer) => ({
         dgId: player.dg_id,
         currentPosition: player.current_pos,
         currentScore: formatPlayerScore(player.current_score),
@@ -53,8 +60,7 @@ export async function getLiveLeaderboard(): Promise<Leaderboard> {
         winOdds: player.win,
         isFavorite: false,
         isFlagged: false,
-      })
-    )
+      }))
 
     const leaderboardEvent: LeaderboardEvent = {
       eventName: liveEventStats.event_name,

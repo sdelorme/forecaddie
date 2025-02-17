@@ -19,3 +19,10 @@ export const getScoreStyle = (
 export const formatPlayerThru = (thru: number): string => {
   return thru === 0 ? '-' : thru.toString()
 }
+
+export const compareScores = (a: number | null, b: number | null): number => {
+  if (a === null && b === null) return 0
+  if (a === null) return 1
+  if (b === null) return -1
+  return a - b
+}
