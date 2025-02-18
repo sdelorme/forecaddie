@@ -23,6 +23,11 @@ const routes = [
     className: 'text-secondary',
   },
   {
+    href: '/players',
+    label: 'Players',
+    className: 'text-secondary',
+  },
+  {
     href: '/login',
     label: 'Log in',
     className: 'text-white',
