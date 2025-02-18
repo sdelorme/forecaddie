@@ -1,30 +1,82 @@
-import { Player } from '@/types/player'
-import { formatPlayerNameDesktop } from '@/lib/utils/player'
-import Link from 'next/link'
+'use client'
 
-interface AllPlayerProps {
+import type { Player } from '@/types/player'
+import Link from 'next/link'
+import Image from 'next/image'
+
+import { useSearchParams } from 'next/navigation'
+import {
+  formatPlayerListName,
+  getFirstLetterOfLastName,
+} from '@/lib/utils/player'
+
+interface PlayerListUIProps {
   players: Player[]
 }
 
-export default function AllPlayers({ players }: AllPlayerProps) {
+export function PlayerListUI({ players }: PlayerListUIProps) {
+  const searchParams = useSearchParams()
+  const filter = searchParams.get('filter') || 'all'
+
+  const filteredPlayers = players.filter((player) => {
+    if (filter === 'all') return true
+    if (filter === 'pro') return player.amateur === 0
+    if (filter === 'amateur') return player.amateur === 1
+    return true
+  })
+
+  if (filteredPlayers.length === 0) {
+    return <p className="text-center text-gray-400 mt-8">No players found.</p>
+  }
+
+  let currentLetter = ''
+
   return (
-    <div className="grid grid-cols-2 gap-4 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 p-4">
-      {players.map((player: Player) => {
-        const playerName = formatPlayerNameDesktop(player)
+    <div className="w-full max-w-4xl mx-auto">
+      {filteredPlayers.map((player) => {
+        const fullName = formatPlayerListName(player)
+        const firstLetterOfLastName = getFirstLetterOfLastName(
+          player.player_name
+        )
+
+        const showLetterHeader = firstLetterOfLastName !== currentLetter
+        if (showLetterHeader) {
+          currentLetter = firstLetterOfLastName
+        }
 
         return (
-          <Link
-            key={player.dg_id}
-            href={{
-              pathname: `/players/${player.dg_id}`,
-            }}
-            className="block p-4 bg-white rounded-lg shadow hover:shadow-lg transition-shadow duration-200 ease-in-out"
-          >
-            <h2 className="text-lg font-semibold text-gray-800">
-              {playerName}
-            </h2>
-            <p className="text-sm text-gray-600">{player.country}</p>
-          </Link>
+          <div key={player.dg_id}>
+            {showLetterHeader && (
+              <h2 className="text-4xl font-bold text-secondary mb-4 px-4 mt-8">
+                {currentLetter}
+              </h2>
+            )}
+            <div className="bg-gray-800 rounded-lg shadow mb-4">
+              <Link
+                href={`/players/${player.dg_id}`}
+                className="flex items-center p-4 hover:bg-gray-700 transition-colors"
+              >
+                <div className="relative w-16 h-16 rounded-full overflow-hidden bg-transparent-700 mr-4">
+                  <Image
+                    src="/homa-no-bg.png"
+                    alt=""
+                    fill
+                    className="object-cover"
+                    sizes="64px"
+                  />
+                </div>
+                <div>
+                  <h3 className="text-xl font-semibold text-white">
+                    {fullName}
+                  </h3>
+                  <p className="text-xs text-gray-400 mt-1 flex items-center gap-1">
+                    {player.country} |{' '}
+                    {player.amateur ? 'Amateur' : 'Professional'}
+                  </p>
+                </div>
+              </Link>
+            </div>
+          </div>
         )
       })}
     </div>
