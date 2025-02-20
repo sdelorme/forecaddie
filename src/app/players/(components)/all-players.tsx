@@ -1,10 +1,8 @@
 'use client'
 
 import type { Player } from '@/types/player'
-import Link from 'next/link'
 import Image from 'next/image'
-
-import { useSearchParams } from 'next/navigation'
+import { useSearchParams, useRouter } from 'next/navigation'
 import {
   formatPlayerListName,
   getFirstLetterOfLastName,
@@ -16,6 +14,7 @@ interface PlayerListUIProps {
 
 export function PlayerListUI({ players }: PlayerListUIProps) {
   const searchParams = useSearchParams()
+  const router = useRouter()
   const filter = searchParams.get('filter') || 'all'
 
   const filteredPlayers = players.filter((player) => {
@@ -31,8 +30,12 @@ export function PlayerListUI({ players }: PlayerListUIProps) {
 
   let currentLetter = ''
 
+  const handlePlayerClick = (playerId: number) => {
+    router.push(`/players?player=${playerId}`, { scroll: false })
+  }
+
   return (
-    <div className="w-full max-w-4xl mx-auto">
+    <div className="flex flex-col gap-1">
       {filteredPlayers.map((player) => {
         const fullName = formatPlayerListName(player)
         const firstLetterOfLastName = getFirstLetterOfLastName(
@@ -45,18 +48,18 @@ export function PlayerListUI({ players }: PlayerListUIProps) {
         }
 
         return (
-          <div key={player.dg_id}>
+          <div key={player.dg_id} className="w-full">
             {showLetterHeader && (
-              <h2 className="text-4xl font-bold text-secondary mb-4 px-4 mt-8">
+              <h2 className="text-4xl font-bold text-secondary mb-4 px-4">
                 {currentLetter}
               </h2>
             )}
-            <div className="bg-gray-800 rounded-lg shadow mb-4">
-              <Link
-                href={`/players/${player.dg_id}`}
-                className="flex items-center p-4 hover:bg-gray-700 transition-colors"
+            <div className="w-full bg-gray-800">
+              <button
+                onClick={() => handlePlayerClick(player.dg_id)}
+                className="w-full text-left flex items-center p-4 hover:bg-gray-700 transition-colors"
               >
-                <div className="relative w-16 h-16 rounded-full overflow-hidden bg-transparent-700 mr-4">
+                <div className="relative w-16 h-16 rounded-full overflow-hidden bg-transparent-700 mr-4 flex-shrink-0">
                   <Image
                     src="/homa-no-bg.png"
                     alt=""
@@ -65,8 +68,8 @@ export function PlayerListUI({ players }: PlayerListUIProps) {
                     sizes="64px"
                   />
                 </div>
-                <div>
-                  <h3 className="text-xl font-semibold text-white">
+                <div className="flex-1 min-w-0">
+                  <h3 className="text-xl font-semibold text-white truncate">
                     {fullName}
                   </h3>
                   <p className="text-xs text-gray-400 mt-1 flex items-center gap-1">
@@ -74,7 +77,7 @@ export function PlayerListUI({ players }: PlayerListUIProps) {
                     {player.amateur ? 'Amateur' : 'Professional'}
                   </p>
                 </div>
-              </Link>
+              </button>
             </div>
           </div>
         )
