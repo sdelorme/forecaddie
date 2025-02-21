@@ -1,4 +1,3 @@
-// EventsUI.tsx (Dumb Component)
 import Link from 'next/link'
 
 type ProcessedEvent = {

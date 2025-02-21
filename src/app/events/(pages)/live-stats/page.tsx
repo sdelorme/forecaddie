@@ -1,6 +1,6 @@
 import { Suspense } from 'react'
 import { getLiveLeaderboard } from '@/data/fetch-live-leaderboard'
-import LiveLeaderboard2 from '../../(components)/live-leaderboard'
+import LiveLeaderboard from '../../(components)/live-leaderboard'
 
 export default async function LiveStatsPage() {
   // TODO: Calling this here and in leaderboard. SHould share state
@@ -20,7 +20,7 @@ export default async function LiveStatsPage() {
     >
       {/* <LiveLeaderboard players={players} eventInfo={eventInfo} /> */}
       <div className="mt-12">
-        <LiveLeaderboard2 />
+        <LiveLeaderboard />
       </div>
     </Suspense>
   )

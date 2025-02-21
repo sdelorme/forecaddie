@@ -2,7 +2,7 @@
 
 - [ ] Dynamic live stats page using live model endpoint
 - [ ] Add odds page (source separate api? check DataGolf?)
-- [ ] Entry point to players page
+- [ ] Close navbar in mobile vw when nav item selected
 - [ ] Add a database for user data
 - [ ] Add user authentication
 - [ ] Authenticated landing page = dashboard

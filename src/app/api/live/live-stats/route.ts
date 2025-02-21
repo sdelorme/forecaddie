@@ -1,5 +1,6 @@
 import { LiveEventStatsResponse } from '@/types/live-events'
 import { NextResponse } from 'next/server'
+import { toCamelCase } from '@/lib/utils/case-conversion'
 
 const LIVE_EVENT_URL = `https://feeds.datagolf.com/preds/live-tournament-stats?key=${process.env.DATA_GOLF_API_KEY}`
 
@@ -23,7 +24,8 @@ export async function GET() {
     }
 
     const liveStats = await fetchLiveTournamentStats()
-    return NextResponse.json(liveStats)
+    const camelCaseStats = toCamelCase(liveStats)
+    return NextResponse.json(camelCaseStats)
   } catch (error) {
     console.error('Live stats error:', error)
 
