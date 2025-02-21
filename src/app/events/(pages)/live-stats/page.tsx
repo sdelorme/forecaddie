@@ -1,6 +1,7 @@
 import { Suspense } from 'react'
 import { getLiveLeaderboard } from '@/data/fetch-live-leaderboard'
 import LiveLeaderboard from '../../(components)/live-leaderboard'
+import { LiveStatsProvider } from '@/components/providers/live-stats-provider'
 
 export default async function LiveStatsPage() {
   // TODO: Calling this here and in leaderboard. SHould share state
@@ -19,9 +20,12 @@ export default async function LiveStatsPage() {
       }
     >
       {/* <LiveLeaderboard players={players} eventInfo={eventInfo} /> */}
-      <div className="mt-12">
-        <LiveLeaderboard />
-      </div>
+      <LiveStatsProvider>
+        <div className="mt-12">
+          <LiveLeaderboard />
+          {/* <LiveStats /> Uncomment and adjust path when LiveStats component is available */}
+        </div>
+      </LiveStatsProvider>
     </Suspense>
   )
 }

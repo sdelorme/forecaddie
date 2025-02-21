@@ -1,3 +1,5 @@
+'use client'
+
 import {
   Table,
   TableCaption,
@@ -7,11 +9,17 @@ import {
   TableBody,
   TableCell,
 } from '@/components/ui/table'
+import { useLiveStats } from '@/components/providers/live-stats-provider'
 
 export default function LeaderboardTable() {
+  const { players, eventInfo, loading, error } = useLiveStats()
+
+  if (loading) return <div>Golf is the best...</div>
+  if (error) return <div>Error: {error}</div>
+
   return (
     <Table>
-      <TableCaption>HARCODE ROUND HERE</TableCaption>
+      <TableCaption>Current Round: {eventInfo.currentRound}</TableCaption>
       <TableHeader>
         <TableRow>
           <TableHead className="w-[25px]">POS</TableHead>
@@ -26,12 +34,19 @@ export default function LeaderboardTable() {
         </TableRow>
       </TableHeader>
       <TableBody>
-        <TableRow>
-          <TableCell>CUT</TableCell>
-          <TableCell>Scottie Scheffler</TableCell>
-          <TableCell>-8</TableCell>
-          <TableCell>3</TableCell>
-        </TableRow>
+        {players.map((player) => (
+          <TableRow key={player.dgId}>
+            <TableCell>{player.currentPosition}</TableCell>
+            <TableCell>{player.playerName}</TableCell>
+            <TableCell>{player.currentScore}</TableCell>
+            <TableCell>{player.thru}</TableCell>
+            <TableCell>{player.r1}</TableCell>
+            <TableCell>{player.r2}</TableCell>
+            <TableCell>{player.r3}</TableCell>
+            <TableCell>{player.r4}</TableCell>
+            <TableCell>{player.winOdds}%</TableCell>
+          </TableRow>
+        ))}
       </TableBody>
     </Table>
   )

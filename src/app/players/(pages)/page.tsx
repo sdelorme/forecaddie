@@ -19,26 +19,22 @@ export default async function PlayersPage() {
     <main className="min-h-screen flex flex-col">
       <div className="px-4 py-8">
         <h1 className="text-2xl font-bold text-white mb-8">PGA Tour Players</h1>
-        <PlayerFilter />
+        <Suspense fallback={<div>Loading player filter...</div>}>
+          <PlayerFilter />
+        </Suspense>
       </div>
 
       <div className="flex-1 flex flex-col lg:flex-row">
         <div className="w-full">
-          <Suspense
-            fallback={
-              <div className="grid gap-4 animate-pulse px-4">
-                {[...Array(6)].map((_, i) => (
-                  <div key={i} className="bg-gray-800/50 h-32 rounded-lg" />
-                ))}
-              </div>
-            }
-          >
+          <Suspense fallback={<div>Loading...</div>}>
             <PlayerListUI players={players} />
           </Suspense>
         </div>
         <div className="w-full lg:w-1/2 p-4">
           <div className="lg:sticky lg:top-8">
-            <PlayerDetails />
+            <Suspense fallback={<div>Loading player details...</div>}>
+              <PlayerDetails />
+            </Suspense>
           </div>
         </div>
       </div>

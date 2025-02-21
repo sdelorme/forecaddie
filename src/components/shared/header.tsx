@@ -1,13 +1,12 @@
-import { LeaderboardEvent, LeaderboardPlayer } from '@/types/leaderboard'
+'use client'
+
 import { LeaderboardScroll } from './leaderboard-scroll'
 import Navbar from './navbar'
+import { useLiveStats } from '@/components/providers/live-stats-provider'
 
-type HeaderProps = {
-  leaderboardPlayers: LeaderboardPlayer[]
-  eventInfo?: LeaderboardEvent
-}
+export default function Header() {
+  const { players: leaderboardPlayers, eventInfo } = useLiveStats()
 
-export default function Header({ leaderboardPlayers, eventInfo }: HeaderProps) {
   return (
     <header className="fixed top-0 w-full z-50 transition-transform duration-300">
       <div className="header-scrolled:-translate-y-[72px]">

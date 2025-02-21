@@ -35,9 +35,9 @@ export function LeaderboardScroll({
         </div>
       )}
       <div className="flex overflow-x-auto snap-x snap-mandatory gap-1 sm:gap-1 p-1 sm:p-1 scrollbar-hide">
-        {leaderboardPlayers.map((player) => (
-          <PlayerCard key={player.dgId} player={player} />
-        ))}
+        {leaderboardPlayers.map((player) => {
+          return <PlayerCard key={player.dgId} player={player} />
+        })}
       </div>
     </div>
   )

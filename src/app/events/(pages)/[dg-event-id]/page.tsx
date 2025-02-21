@@ -1,9 +1,9 @@
 import { notFound } from 'next/navigation'
 
-interface Props {
-  params: {
+type HistoricalEventStatsProps = {
+  params: Promise<{
     'event-id': string
-  }
+  }>
 }
 
 // Validate that the event ID is numeric
@@ -11,8 +11,14 @@ function isValidEventId(id: string): boolean {
   return /^\d+$/.test(id)
 }
 
-export default function HistoricalEventStats({ params }: Props) {
-  if (!isValidEventId(params['event-id'])) {
+// HistoricalEventStats component
+// Displays historical event statistics based on the event ID
+export default async function HistoricalEventStats({
+  params,
+}: HistoricalEventStatsProps) {
+  const resolvedParams = await params
+
+  if (!isValidEventId(resolvedParams['event-id'])) {
     notFound()
   }
 
@@ -21,7 +27,7 @@ export default function HistoricalEventStats({ params }: Props) {
       <h1 className="text-2xl font-bold text-white mb-4">
         Historical Event Stats
       </h1>
-      {/* Event content here */}
+      {/* Event content whenever I decide what that is */}
     </div>
   )
 }

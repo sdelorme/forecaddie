@@ -22,6 +22,7 @@ export interface LeaderboardEvent {
   eventName: string
   course: string
   lastUpdated: string
+  currentRound: number | null
 }
 
 export type Leaderboard = {

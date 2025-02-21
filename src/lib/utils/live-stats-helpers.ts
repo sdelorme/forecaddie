@@ -26,3 +26,7 @@ export const compareScores = (a: number | null, b: number | null): number => {
   if (b === null) return -1
   return a - b
 }
+
+export const decimalToPercent = (value: number): number => {
+  return parseFloat((value * 100).toFixed(2))
+}

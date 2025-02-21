@@ -1,5 +1,6 @@
 import {
   compareScores,
+  decimalToPercent,
   formatPlayerScore,
   formatPlayerThru,
 } from '@/lib/utils/live-stats-helpers'
@@ -35,37 +36,40 @@ export async function getLiveLeaderboard(): Promise<Leaderboard> {
     const liveModel: LiveModelPlayerResponse = await playersResponse.json()
     const liveEventStats: LiveEventStatsResponse = await eventResponse.json()
 
-    const leaderboardPlayers: LeaderboardPlayer[] = liveModel.data
+    const { data, info } = liveModel
+
+    const leaderboardPlayers: LeaderboardPlayer[] = data
       .sort((a: LiveModelPlayer, b: LiveModelPlayer) => {
         return (
-          compareScores(a.current_score, b.current_score) ||
-          a.player_name.localeCompare(b.player_name)
+          compareScores(a.currentScore, b.currentScore) ||
+          a.playerName.localeCompare(b.playerName)
         )
       })
       .map((player: LiveModelPlayer) => ({
-        dgId: player.dg_id,
-        currentPosition: player.current_pos,
-        currentScore: formatPlayerScore(player.current_score),
+        dgId: player.dgId,
+        currentPosition: player.currentPos,
+        currentScore: formatPlayerScore(player.currentScore),
         r1: player.R1,
         r2: player.R2,
         r3: player.R3,
         r4: player.R4,
-        playerName: player.player_name,
+        playerName: player.playerName,
         round: player.round,
         thru: formatPlayerThru(player.thru),
         today: player.today,
-        top10Odds: player.top_10,
-        top20Odds: player.top_20,
-        top5Odds: player.top_5,
-        winOdds: player.win,
+        top10Odds: decimalToPercent(player.top10),
+        top20Odds: decimalToPercent(player.top20),
+        top5Odds: decimalToPercent(player.top5),
+        winOdds: decimalToPercent(player.win),
         isFavorite: false,
         isFlagged: false,
       }))
 
     const leaderboardEvent: LeaderboardEvent = {
-      eventName: liveEventStats.event_name,
-      course: liveEventStats.course_name,
-      lastUpdated: liveEventStats.last_updated,
+      eventName: liveEventStats.eventName,
+      course: liveEventStats.courseName,
+      lastUpdated: liveEventStats.lastUpdated,
+      currentRound: info.currentRound,
     }
 
     return {
@@ -80,6 +84,7 @@ export async function getLiveLeaderboard(): Promise<Leaderboard> {
         eventName: 'No Active Tournament',
         course: 'N/A',
         lastUpdated: new Date().toISOString(),
+        currentRound: null,
       },
     }
   }

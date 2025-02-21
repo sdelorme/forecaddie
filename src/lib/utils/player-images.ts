@@ -18,7 +18,7 @@ export function getPlayerImageUrl(playerName: string): string {
 // Preload all player images for better performance
 export function preloadPlayerImages(): void {
   if (typeof window !== 'undefined') {
-    Object.values(PLAYER_IMAGES).forEach(url => {
+    Object.values(PLAYER_IMAGES).forEach((url) => {
       const img = new Image()
       img.src = url
     })
@@ -27,5 +27,5 @@ export function preloadPlayerImages(): void {
 
 // Check if we need to fetch/update player images
 export function getMissingPlayerImages(playerNames: string[]): string[] {
-  return playerNames.filter(name => !PLAYER_IMAGES[normalizePlayerName(name)])
-} 
+  return playerNames.filter((name) => !PLAYER_IMAGES[normalizePlayerName(name)])
+}
