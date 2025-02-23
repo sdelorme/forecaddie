@@ -19,6 +19,7 @@
 # misc
 .DS_Store
 *.pem
+.vscode/
 
 # debug
 npm-debug.log*
@@ -38,3 +39,10 @@ next-env.d.ts
 
 #cursor
 .cursorrules
+
+# Build and cache
+.cache/
+dist/
+.temp/
+.eslintcache
+.stylelintcache

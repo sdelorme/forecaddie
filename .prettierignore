@@ -1,0 +1,9 @@
+node_modules
+.next
+build
+dist
+.husky
+.cursorrules
+.cursorignore
+.gitignore
+.prettierrc
