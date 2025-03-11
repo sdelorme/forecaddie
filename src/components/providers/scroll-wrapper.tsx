@@ -21,9 +21,5 @@ export function ScrollWrapper({ children }: { children: React.ReactNode }) {
     return <>{children}</>
   }
 
-  return (
-    <div className={isScrolled ? 'header-scrolled' : ''}>
-      {children}
-    </div>
-  )
-} 
+  return <div className={isScrolled ? 'header-scrolled' : ''}>{children}</div>
+}

@@ -1,19 +1,11 @@
 import { Suspense } from 'react'
-import type { Player } from '@/types/player'
+import { getPlayerList } from '@/lib/api/datagolf'
 import { PlayerListUI } from '../(components)/all-players'
 import PlayerFilter from '../(components)/player-filter'
 import PlayerDetails from '../(components)/player-details'
 
-async function getPlayers(): Promise<Player[]> {
-  const res = await fetch(`${process.env.NEXT_PUBLIC_BASE_URL}/players/list`, {
-    next: { revalidate: 14400 }, // 4 hours
-  })
-  const data = await res.json()
-  return data.players
-}
-
 export default async function PlayersPage() {
-  const players = await getPlayers()
+  const players = await getPlayerList()
 
   return (
     <main className="min-h-screen flex flex-col">

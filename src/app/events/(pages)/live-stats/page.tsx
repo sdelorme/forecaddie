@@ -1,5 +1,5 @@
 import { Suspense } from 'react'
-import { getLiveLeaderboard } from '@/data/fetch-live-leaderboard'
+import { getLiveLeaderboard } from '@/lib/data/fetch-live-leaderboard'
 import LiveLeaderboard from '../../(components)/live-leaderboard'
 import { LiveStatsProvider } from '@/components/providers/live-stats-provider'
 

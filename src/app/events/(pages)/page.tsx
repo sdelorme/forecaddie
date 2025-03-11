@@ -1,30 +1,10 @@
 import Link from 'next/link'
 import { Suspense } from 'react'
-import { TourEvent } from '@/types/schedule'
+import { getSchedule } from '@/lib/api/datagolf'
 import EventsUI from '../(components)/all-events'
-import { processEvents } from '@/lib/utils/tour-events'
-
-async function getEvents(): Promise<TourEvent[]> {
-  const response = await fetch(
-    `${process.env.NEXT_PUBLIC_BASE_URL}/events/schedule`,
-    {
-      next: {
-        revalidate: 14400, // Revalidate every 4 hours
-      },
-    }
-  )
-
-  if (!response.ok) {
-    throw new Error('Failed to fetch events')
-  }
-
-  const { events } = await response.json()
-  return events
-}
 
 export default async function EventsPage() {
-  const events = await getEvents()
-  const processedEvents = processEvents(events)
+  const events = await getSchedule()
 
   return (
     <main className="container mx-auto px-4 py-8">
@@ -44,7 +24,7 @@ export default async function EventsPage() {
           </div>
         }
       >
-        <EventsUI events={processedEvents} />
+        <EventsUI events={events} />
       </Suspense>
     </main>
   )
