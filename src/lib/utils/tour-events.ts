@@ -1,22 +1,49 @@
 import { TourEvent, ProcessedTourEvent } from '@/types/schedule'
-import {
-  getTournamentStartDate,
-  getTournamentEndDate,
-  isTournamentInProgress,
-  isTournamentComplete
-} from './tournament-time'
+import { getTournamentStartDate } from './tournament-time'
 
-export function getTournamentType(event: TourEvent, currentDate: Date): 'live' | 'historical' | 'future' {
+/**
+ * Determines if a tournament is in the future based on its start date
+ */
+function isFutureTournament(event: TourEvent, currentDate: Date): boolean {
   const startDate = getTournamentStartDate(event.startDate)
-  const endDate = getTournamentEndDate(event.startDate)
+  // Compare dates only, not times
+  const currentDay = new Date(currentDate.getFullYear(), currentDate.getMonth(), currentDate.getDate())
+  const startDay = new Date(startDate.getFullYear(), startDate.getMonth(), startDate.getDate())
+  return currentDay < startDay
+}
 
-  if (isTournamentInProgress(event.startDate, currentDate)) {
+/**
+ * Gets the most recent tournament from a list of events
+ * This is the tournament with the latest start date that isn't in the future
+ */
+function getMostRecentTournament(events: TourEvent[], currentDate: Date): TourEvent | null {
+  const pastAndCurrentEvents = events.filter((event) => !isFutureTournament(event, currentDate))
+  if (!pastAndCurrentEvents.length) return null
+
+  // Sort by start date ascending and take the last one (most recent non-future)
+  return pastAndCurrentEvents.sort((a, b) => {
+    const aDate = getTournamentStartDate(a.startDate)
+    const bDate = getTournamentStartDate(b.startDate)
+    return aDate.getTime() - bDate.getTime()
+  })[pastAndCurrentEvents.length - 1]
+}
+
+export function getTournamentType(
+  event: TourEvent,
+  currentDate: Date,
+  mostRecentEvent: TourEvent | null
+): 'live' | 'historical' | 'future' {
+  // Always check for future tournaments first
+  if (isFutureTournament(event, currentDate)) {
+    return 'future'
+  }
+
+  // Only past/current tournaments can be live
+  if (mostRecentEvent && event.eventId === mostRecentEvent.eventId) {
     return 'live'
   }
-  if (isTournamentComplete(event.startDate, currentDate)) {
-    return 'historical'
-  }
-  return 'future'
+
+  return 'historical'
 }
 
 export function getEventHref(event: TourEvent, tournamentType: 'live' | 'historical' | 'future'): string {
@@ -32,17 +59,31 @@ export function getEventHref(event: TourEvent, tournamentType: 'live' | 'histori
   }
 }
 
+/**
+ * Determines if a tournament should be displayed with transparency
+ * Only historical tournaments are transparent
+ */
 export function isTransparent(startDate: string, currentDate: Date): boolean {
-  return isTournamentComplete(startDate, currentDate)
+  // A tournament is transparent (historical) if it's not in the future and not the most recent
+  const event = { startDate } // We only need startDate for isFutureTournament
+  return !isFutureTournament(event as TourEvent, currentDate)
 }
 
+/**
+ * Gets the current event to display based on the following priority:
+ * 1. Most recent non-future tournament (live)
+ * 2. Next upcoming tournament (future)
+ * 3. Most recent historical tournament
+ */
 export function getCurrentEvent(events: TourEvent[], currentDate: Date): TourEvent | null {
   if (!events?.length) return null
 
-  const liveEvent = events.find((event) => getTournamentType(event, currentDate) === 'live')
-  if (liveEvent) return liveEvent
+  // First try to get the most recent non-future tournament
+  const mostRecent = getMostRecentTournament(events, currentDate)
+  if (mostRecent) return mostRecent
 
-  const futureEvents = events.filter((event) => getTournamentType(event, currentDate) === 'future')
+  // If no past/current tournaments, get the next future tournament
+  const futureEvents = events.filter((event) => isFutureTournament(event, currentDate))
   if (futureEvents.length > 0) {
     return futureEvents.reduce((closest, event) => {
       const eventDate = getTournamentStartDate(event.startDate)
@@ -51,43 +92,35 @@ export function getCurrentEvent(events: TourEvent[], currentDate: Date): TourEve
     })
   }
 
-  const historicalEvents = events.filter((event) => getTournamentType(event, currentDate) === 'historical')
-  if (historicalEvents.length > 0) {
-    return historicalEvents.reduce((latest, event) => {
-      const eventDate = getTournamentStartDate(event.startDate)
-      const latestDate = getTournamentStartDate(latest.startDate)
-      return eventDate > latestDate ? event : latest
-    })
-  }
-
   return null
 }
 
 export function processEvents(events: TourEvent[]): ProcessedTourEvent[] {
   const now = new Date()
+  const mostRecentEvent = getMostRecentTournament(events, now)
+
   return events
     .map((event) => {
-      const type = getTournamentType(event, now)
+      const type = getTournamentType(event, now, mostRecentEvent)
       return {
         ...event,
         tournamentType: type,
         href: getEventHref(event, type),
-        isComplete: isTournamentComplete(event.startDate, now)
+        isComplete: type === 'historical'
       }
     })
-    .sort(sortEvents)
+    .sort((a, b) => sortEvents(a, b, now, mostRecentEvent))
 }
 
-function sortEvents(a: TourEvent, b: TourEvent): number {
-  const now = new Date()
-  const aType = getTournamentType(a, now)
-  const bType = getTournamentType(b, now)
+function sortEvents(a: TourEvent, b: TourEvent, currentDate: Date, mostRecentEvent: TourEvent | null): number {
+  const aType = getTournamentType(a, currentDate, mostRecentEvent)
+  const bType = getTournamentType(b, currentDate, mostRecentEvent)
 
-  // Live events should appear first
-  if (aType === 'live' && bType !== 'live') return -1
-  if (bType === 'live' && aType !== 'live') return 1
+  // Most recent (live) event first
+  if (aType === 'live') return -1
+  if (bType === 'live') return 1
 
-  // Then upcoming events
+  // Then future events
   if (aType === 'future' && bType === 'historical') return -1
   if (bType === 'future' && aType === 'historical') return 1
 

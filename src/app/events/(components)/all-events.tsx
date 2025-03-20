@@ -1,5 +1,6 @@
 import Link from 'next/link'
 import { ProcessedTourEvent } from '@/types/schedule'
+import { formatTournamentDate } from '@/lib/utils/tournament-time'
 
 export default function EventsUI({ events }: { events: ProcessedTourEvent[] }) {
   return (
@@ -25,7 +26,7 @@ export default function EventsUI({ events }: { events: ProcessedTourEvent[] }) {
               </div>
               <p className="text-sm opacity-75 mb-2 line-clamp-1">{event.location}</p>
             </div>
-            <p className="text-xs opacity-60 mt-auto">{new Date(event.startDate).toLocaleDateString()}</p>
+            <p className="text-xs opacity-60 mt-auto">{formatTournamentDate(event.startDate)}</p>
           </div>
         </Link>
       ))}
