@@ -1,14 +1,8 @@
 import { Suspense } from 'react'
-import { getLiveLeaderboard } from '@/lib/data/fetch-live-leaderboard'
 import LiveLeaderboard from '../../(components)/live-leaderboard'
 import { LiveStatsProvider } from '@/components/providers/live-stats-provider'
 
-export default async function LiveStatsPage() {
-  // TODO: Calling this here and in leaderboard. SHould share state
-  // TODO: Move over to the LiveLeaderboard2 component, set props up
-  // Liveleaderboard2 should be Left Aligned, leaving room for PLayerLiveStats component on right side.
-  const { players, eventInfo } = await getLiveLeaderboard()
-
+export default function LiveStatsPage() {
   return (
     <Suspense
       fallback={
@@ -19,11 +13,9 @@ export default async function LiveStatsPage() {
         </div>
       }
     >
-      {/* <LiveLeaderboard players={players} eventInfo={eventInfo} /> */}
       <LiveStatsProvider>
         <div className="mt-12">
           <LiveLeaderboard />
-          {/* <LiveStats /> Uncomment and adjust path when LiveStats component is available */}
         </div>
       </LiveStatsProvider>
     </Suspense>

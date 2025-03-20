@@ -1,7 +1,7 @@
 'use client'
 
-import React, { createContext, useContext, useEffect, useState } from 'react'
-import type { Leaderboard } from '@/lib/api/datagolf'
+import React, { createContext, useContext, useEffect, useState, useCallback } from 'react'
+import type { Leaderboard, LeaderboardPlayer, LeaderboardEvent } from '@/types/leaderboard'
 
 interface LiveStatsContextValue {
   players: Leaderboard['players']
@@ -17,48 +17,61 @@ interface LiveStatsProviderProps {
   initialData?: Leaderboard
 }
 
-export const LiveStatsProvider: React.FC<LiveStatsProviderProps> = ({ children, initialData }) => {
-  const [players, setPlayers] = useState<Leaderboard['players']>(initialData?.players ?? [])
-  const [eventInfo, setEventInfo] = useState<Leaderboard['eventInfo']>(
-    initialData?.eventInfo ?? {
-      eventName: '',
-      course: '',
-      lastUpdated: '',
-      currentRound: null
-    }
-  )
+const defaultEventInfo: LeaderboardEvent = {
+  eventName: '',
+  course: '',
+  lastUpdated: '',
+  currentRound: null
+}
+
+export function LiveStatsProvider({ children, initialData }: LiveStatsProviderProps) {
+  const [players, setPlayers] = useState<LeaderboardPlayer[]>(initialData?.players || [])
+  const [eventInfo, setEventInfo] = useState<LeaderboardEvent>(initialData?.eventInfo || defaultEventInfo)
   const [loading, setLoading] = useState(!initialData)
   const [error, setError] = useState<string | null>(null)
 
   useEffect(() => {
-    const fetchData = async () => {
-      try {
-        setLoading(true)
-        const response = await fetch('/api/live-stats')
-        if (!response.ok) {
-          throw new Error('Failed to fetch live stats')
-        }
-        const data = await response.json()
-        setPlayers(data.players)
-        setEventInfo(data.eventInfo)
-        setError(null)
-      } catch (err) {
-        console.error('Error fetching live stats:', err)
-        setError((err as Error).message)
-      } finally {
-        setLoading(false)
-      }
+    if (initialData) {
+      setPlayers(initialData.players)
+      setEventInfo(initialData.eventInfo)
+      setLoading(false)
     }
+  }, [initialData])
 
-    // Only poll if we don't have initial data or if we want to refresh
-    const interval = setInterval(fetchData, 5 * 60 * 1000) // 5 minutes
-
-    return () => clearInterval(interval)
+  const fetchData = useCallback(async () => {
+    try {
+      setLoading(true)
+      const response = await fetch('/api/live-stats')
+      if (!response.ok) {
+        throw new Error('Failed to fetch live stats')
+      }
+      const data = await response.json()
+      setPlayers(data.players)
+      setEventInfo(data.eventInfo)
+      setError(null)
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Failed to fetch live stats')
+    } finally {
+      setLoading(false)
+    }
   }, [])
 
-  return (
-    <LiveStatsContext.Provider value={{ players, eventInfo, loading, error }}>{children}</LiveStatsContext.Provider>
-  )
+  useEffect(() => {
+    if (!initialData) {
+      fetchData()
+    }
+    const interval = setInterval(fetchData, 5 * 60 * 1000) // Poll every 5 minutes
+    return () => clearInterval(interval)
+  }, [fetchData, initialData])
+
+  const value = {
+    players,
+    eventInfo,
+    loading,
+    error
+  }
+
+  return <LiveStatsContext.Provider value={value}>{children}</LiveStatsContext.Provider>
 }
 
 export const useLiveStats = () => {

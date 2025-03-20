@@ -9,4 +9,4 @@ export { getPlayerList } from './queries/players'
  * Types used across both server and client components
  */
 export type { Leaderboard } from '@/types/leaderboard'
-export type { LiveModelPlayerResponse, LiveEventStatsResponse } from '@/types/live-events'
+export * from './types'

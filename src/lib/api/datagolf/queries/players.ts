@@ -1,6 +1,7 @@
 import { dataGolfClient } from '../client'
 import { ENDPOINTS, CACHE_TAGS, REVALIDATE_INTERVALS } from '../config'
-import type { RawPlayer, Player } from '@/types/player'
+import type { RawPlayer } from '../types/players'
+import type { Player } from '@/types/player'
 
 function normalizePlayer(player: RawPlayer): Player {
   return {

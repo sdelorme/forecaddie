@@ -1,42 +1,36 @@
-import type { LiveModelPlayerResponse, LiveEventStatsResponse } from '@/types/live-events'
+import type { RawLiveModel, RawLiveEventStats, RawLiveModelPlayer } from '../types/live-stats'
 import type { Leaderboard } from '@/types/leaderboard'
-import { compareScores, formatPlayerScore, formatPlayerThru, decimalToPercent } from '@/lib/utils/live-stats-helpers'
 
-export function mapToLeaderboard(
-  liveModel: LiveModelPlayerResponse,
-  liveEventStats: LiveEventStatsResponse
-): Leaderboard {
-  const { data, info } = liveModel
-
-  const leaderboardPlayers = data
-    .sort((a, b) => compareScores(a.currentScore, b.currentScore))
-    .map((player) => ({
-      dgId: player.dgId,
-      currentPosition: player.currentPos,
-      currentScore: formatPlayerScore(player.currentScore),
-      r1: player.R1,
-      r2: player.R2,
-      r3: player.R3,
-      r4: player.R4,
-      playerName: player.playerName,
-      round: player.round,
-      thru: formatPlayerThru(player.thru),
-      today: player.today,
-      top10Odds: decimalToPercent(player.top10),
-      top20Odds: decimalToPercent(player.top20),
-      top5Odds: decimalToPercent(player.top5),
-      winOdds: decimalToPercent(player.win),
-      isFavorite: false,
-      isFlagged: false
-    }))
-
+function normalizeLiveModelPlayer(player: RawLiveModelPlayer) {
   return {
-    players: leaderboardPlayers,
+    dgId: player.dg_id,
+    currentPosition: player.current_pos,
+    currentScore: player.current_score?.toString() || '-',
+    r1: player.r1,
+    r2: player.r2,
+    r3: player.r3,
+    r4: player.r4,
+    playerName: player.player_name,
+    round: player.round,
+    thru: player.thru.toString(),
+    today: player.today,
+    top10Odds: player.top_10,
+    top20Odds: player.top_20,
+    top5Odds: player.top_5,
+    winOdds: player.win,
+    isFavorite: false,
+    isFlagged: false
+  }
+}
+
+export function mapToLeaderboard(liveModel: RawLiveModel, liveEventStats: RawLiveEventStats): Leaderboard {
+  return {
+    players: liveModel.data.map(normalizeLiveModelPlayer),
     eventInfo: {
-      eventName: liveEventStats.eventName,
-      course: liveEventStats.courseName,
-      lastUpdated: liveEventStats.lastUpdated,
-      currentRound: info.currentRound
+      eventName: liveModel.info.event_name,
+      course: liveEventStats.course_name,
+      lastUpdated: liveModel.info.last_update,
+      currentRound: liveModel.info.current_round
     }
   }
 }

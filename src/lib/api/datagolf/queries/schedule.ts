@@ -1,7 +1,8 @@
 import { dataGolfClient } from '../client'
 import { ENDPOINTS, CACHE_TAGS, REVALIDATE_INTERVALS } from '../config'
 import { processEvents } from '@/lib/utils/tour-events'
-import type { ProcessedTourEvent, RawTourSchedule, TourEvent, RawTourEvent } from '@/types/schedule'
+import type { RawTourSchedule, RawTourEvent } from '../types/schedule'
+import type { ProcessedTourEvent, TourEvent } from '@/types/schedule'
 
 function normalizeEvent(event: RawTourEvent): TourEvent {
   return {
