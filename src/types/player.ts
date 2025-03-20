@@ -6,7 +6,6 @@ export interface RawPlayer {
   player_name: string
 }
 
-// Normalized types
 export interface Player {
   amateur: number
   country: string
@@ -15,6 +14,5 @@ export interface Player {
   playerName: string
 }
 
-// The API returns an array directly
 export type RawPlayerListResponse = RawPlayer[]
 export type PlayerListResponse = Player[]
