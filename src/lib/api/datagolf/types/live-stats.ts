@@ -24,10 +24,10 @@ export interface RawLiveEventStats {
 }
 
 export interface RawLiveModelPlayer {
-  r1: number | null
-  r2: number | null
-  r3: number | null
-  r4: number | null
+  R1: number | null
+  R2: number | null
+  R3: number | null
+  R4: number | null
   country: string
   course: string
   current_pos: string
