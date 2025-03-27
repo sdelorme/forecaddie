@@ -1,6 +1,6 @@
 import { Suspense } from 'react'
 import { LiveStatsProvider } from '@/components/providers/live-stats-provider'
-import LeaderboardTable from '../../(components)/leaderboard-table'
+import LeaderboardContainer from '../../(containers)/leaderboard-container'
 
 export default function LiveStatsPage() {
   return (
@@ -15,7 +15,7 @@ export default function LiveStatsPage() {
     >
       <LiveStatsProvider>
         <div className="mt-12">
-          <LeaderboardTable />
+          <LeaderboardContainer />
         </div>
       </LiveStatsProvider>
     </Suspense>

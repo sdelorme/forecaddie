@@ -1,14 +1,14 @@
 'use client'
 
 import { Table, TableCaption, TableHeader, TableRow, TableHead, TableBody, TableCell } from '@/components/ui/table'
-import { useLiveStats } from '@/components/providers/live-stats-provider'
+import { LeaderboardPlayer, LeaderboardEvent } from '@/types/leaderboard'
 
-export default function LeaderboardTable() {
-  const { players, eventInfo, loading, error } = useLiveStats()
+interface LeaderboardTableProps {
+  players: LeaderboardPlayer[]
+  eventInfo: LeaderboardEvent
+}
 
-  if (loading) return <div>Golf is the best...</div>
-  if (error) return <div>Error: {error}</div>
-
+export default function LeaderboardTable({ players, eventInfo }: LeaderboardTableProps) {
   return (
     <div className="bg-gray-800 rounded-lg p-4">
       <Table className="text-white">

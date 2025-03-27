@@ -13,9 +13,7 @@ function isValidEventId(id: string): boolean {
 
 // HistoricalEventStats component
 // Displays historical event statistics based on the event ID
-export default async function HistoricalEventStats({
-  params,
-}: HistoricalEventStatsProps) {
+export default async function HistoricalEventStats({ params }: HistoricalEventStatsProps) {
   const resolvedParams = await params
 
   if (!isValidEventId(resolvedParams['event-id'])) {
@@ -24,9 +22,7 @@ export default async function HistoricalEventStats({
 
   return (
     <div className="container mx-auto px-4 py-8">
-      <h1 className="text-2xl font-bold text-white mb-4">
-        Historical Event Stats
-      </h1>
+      <h1 className="text-2xl font-bold text-white mb-4">Historical Event Stats</h1>
       {/* Event content whenever I decide what that is */}
     </div>
   )
