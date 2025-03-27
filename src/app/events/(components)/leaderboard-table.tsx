@@ -1,14 +1,6 @@
 'use client'
 
-import {
-  Table,
-  TableCaption,
-  TableHeader,
-  TableRow,
-  TableHead,
-  TableBody,
-  TableCell,
-} from '@/components/ui/table'
+import { Table, TableCaption, TableHeader, TableRow, TableHead, TableBody, TableCell } from '@/components/ui/table'
 import { useLiveStats } from '@/components/providers/live-stats-provider'
 
 export default function LeaderboardTable() {
