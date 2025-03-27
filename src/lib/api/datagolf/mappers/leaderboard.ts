@@ -35,27 +35,6 @@ function getPositionValue(position: string): number {
 }
 
 /**
- * Checks if players are in the correct order based on position
- */
-function isPlayerListInOrder(players: LeaderboardPlayer[]): boolean {
-  for (let i = 1; i < players.length; i++) {
-    const prevPos = getPositionValue(players[i - 1].currentPosition)
-    const currPos = getPositionValue(players[i].currentPosition)
-
-    // If positions are not in ascending order, list is not sorted
-    if (currPos < prevPos) return false
-
-    // If positions are equal, check first names
-    if (currPos === prevPos) {
-      const prevName = players[i - 1].playerName.split(' ')[0]
-      const currName = players[i].playerName.split(' ')[0]
-      if (currName < prevName) return false
-    }
-  }
-  return true
-}
-
-/**
  * Sorts players by position and first name
  */
 function sortPlayers(players: LeaderboardPlayer[]): LeaderboardPlayer[] {
