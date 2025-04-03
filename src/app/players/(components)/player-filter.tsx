@@ -13,10 +13,7 @@ export default function PlayerFilter() {
   }
 
   return (
-    <div className="mb-4 flex items-center gap-2">
-      <label htmlFor="filter" className="text-sm font-medium">
-        Filter:
-      </label>
+    <div className="flex items-center gap-2 ">
       <Select value={filter} onValueChange={handleFilterChange}>
         <SelectTrigger className="w-[180px] cursor-pointer">
           <SelectValue placeholder="Select filter" />

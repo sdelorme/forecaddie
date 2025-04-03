@@ -1,7 +1,6 @@
 import { Suspense } from 'react'
 import { getPlayerList } from '@/lib/api/datagolf'
 import { PlayerListUI } from '../(components)/all-players'
-import PlayerFilter from '../(components)/player-filter'
 import PlayerDetails from '../(components)/player-details'
 
 export default async function PlayersPage() {
@@ -11,9 +10,6 @@ export default async function PlayersPage() {
     <main className="min-h-screen flex flex-col">
       <div className="px-4 py-8">
         <h1 className="text-2xl font-bold text-white mb-8">PGA Tour Players</h1>
-        <Suspense fallback={<div>Loading player filter...</div>}>
-          <PlayerFilter />
-        </Suspense>
       </div>
 
       <div className="flex-1 flex flex-col lg:flex-row">
