@@ -16,8 +16,8 @@ export function PlayerListUI({ players }: PlayerListUIProps) {
 
   const filteredPlayers = players.filter((player) => {
     if (filter === 'all') return true
-    if (filter === 'pro') return player.amateur === 0
-    if (filter === 'amateur') return player.amateur === 1
+    if (filter === '0') return player.amateur === 0
+    if (filter === '1') return player.amateur === 1
     return true
   })
 

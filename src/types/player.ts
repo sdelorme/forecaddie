@@ -1,5 +1,5 @@
 export interface Player {
-  amateur: boolean
+  amateur: number
   country: string
   countryCode: string
   dgId: number

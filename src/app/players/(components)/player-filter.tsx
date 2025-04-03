@@ -1,6 +1,7 @@
 'use client'
 
 import { useRouter, useSearchParams } from 'next/navigation'
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 
 export default function PlayerFilter() {
   const router = useRouter()
@@ -12,20 +13,26 @@ export default function PlayerFilter() {
   }
 
   return (
-    <div className="mb-4">
-      <label htmlFor="filter" className="mr-2 text-white">
+    <div className="mb-4 flex items-center gap-2">
+      <label htmlFor="filter" className="text-sm font-medium">
         Filter:
       </label>
-      <select
-        id="filter"
-        value={filter}
-        onChange={(e) => handleFilterChange(e.target.value)}
-        className="border rounded p-2 bg-gray-800 text-white"
-      >
-        <option value="all">All Players</option>
-        <option value="pro">Professional</option>
-        <option value="amateur">Amateur</option>
-      </select>
+      <Select value={filter} onValueChange={handleFilterChange}>
+        <SelectTrigger className="w-[180px] cursor-pointer">
+          <SelectValue placeholder="Select filter" />
+        </SelectTrigger>
+        <SelectContent className="[&_[data-highlighted]]:bg-primary [&_[data-highlighted]]:text-white">
+          <SelectItem value="all" className="cursor-pointer">
+            All Players
+          </SelectItem>
+          <SelectItem value="0" className="cursor-pointer">
+            Professional
+          </SelectItem>
+          <SelectItem value="1" className="cursor-pointer">
+            Amateur
+          </SelectItem>
+        </SelectContent>
+      </Select>
     </div>
   )
 }
