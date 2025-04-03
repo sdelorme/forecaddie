@@ -1,38 +1,24 @@
 'use client'
 
-import { useState, forwardRef, useImperativeHandle } from 'react'
+import { useState } from 'react'
 import { Search, X } from 'lucide-react'
 import { Input } from '@/components/ui/input'
 import { Button } from '@/components/ui/button'
 
 interface PlayerSearchProps {
+  value: string
   onChange: (value: string) => void
 }
 
-export interface PlayerSearchHandle {
-  clear: () => void
-}
-
-const PlayerSearch = forwardRef<PlayerSearchHandle, PlayerSearchProps>(({ onChange }, ref) => {
+export default function PlayerSearch({ value, onChange }: PlayerSearchProps) {
   const [isExpanded, setIsExpanded] = useState(false)
-  const [inputValue, setInputValue] = useState('')
-
-  useImperativeHandle(ref, () => ({
-    clear: () => {
-      setIsExpanded(false)
-      setInputValue('')
-    }
-  }))
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const value = e.target.value
-    setInputValue(value)
-    onChange(value)
+    onChange(e.target.value)
   }
 
   const handleClear = () => {
     setIsExpanded(false)
-    setInputValue('')
     onChange('')
   }
 
@@ -43,7 +29,7 @@ const PlayerSearch = forwardRef<PlayerSearchHandle, PlayerSearchProps>(({ onChan
           <Input
             type="text"
             placeholder="Search players..."
-            value={inputValue}
+            value={value}
             onChange={handleChange}
             className="w-[200px] bg-gray-800 border-gray-700 text-white placeholder:text-gray-400"
           />
@@ -58,8 +44,4 @@ const PlayerSearch = forwardRef<PlayerSearchHandle, PlayerSearchProps>(({ onChan
       )}
     </div>
   )
-})
-
-PlayerSearch.displayName = 'PlayerSearch'
-
-export default PlayerSearch
+}

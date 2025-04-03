@@ -1,3 +1,4 @@
+import { formatPlayerListName, getFirstLetterOfLastName } from '@/lib/utils/player'
 import { dataGolfClient } from '../client'
 import { ENDPOINTS, CACHE_TAGS, REVALIDATE_INTERVALS } from '../config'
 import type { RawPlayer } from '../types/players'
@@ -5,11 +6,13 @@ import type { Player } from '@/types/player'
 
 function normalizePlayer(player: RawPlayer): Player {
   return {
-    amateur: player.amateur,
+    amateur: player.amateur ? 1 : 0,
     country: player.country,
     countryCode: player.country_code,
     dgId: player.dg_id,
-    playerName: player.player_name
+    playerName: player.player_name,
+    displayName: formatPlayerListName(player),
+    firstLetter: getFirstLetterOfLastName(player.player_name)
   }
 }
 
