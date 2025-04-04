@@ -37,7 +37,7 @@ export default function LeaderboardTable({ players, eventInfo }: LeaderboardTabl
               <TableCell>{player.r2}</TableCell>
               <TableCell>{player.r3}</TableCell>
               <TableCell>{player.r4}</TableCell>
-              <TableCell>{player.winOdds}%</TableCell>
+              <TableCell>{(player.winOdds * 100).toFixed(1)}%</TableCell>
             </TableRow>
           ))}
         </TableBody>
