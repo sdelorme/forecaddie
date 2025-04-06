@@ -15,21 +15,11 @@ export default function PlayerDetails() {
 
   return (
     <div className="space-y-8 lg:h-[calc(100vh-200px)] lg:overflow-y-auto">
-      <h2 className="text-2xl font-bold text-white">
-        Player ID: {selectedPlayerId}
-      </h2>
-      <Suspense
-        fallback={
-          <div className="h-64 bg-gray-800/50 rounded-lg animate-pulse" />
-        }
-      >
+      <h2 className="text-2xl font-bold text-white">Player ID: {selectedPlayerId}</h2>
+      <Suspense fallback={<div className="h-64 bg-gray-800/50 rounded-lg animate-pulse" />}>
         <PreviousRoundsTable playerId={selectedPlayerId} />
       </Suspense>
-      <Suspense
-        fallback={
-          <div className="h-64 bg-gray-800/50 rounded-lg animate-pulse" />
-        }
-      >
+      <Suspense fallback={<div className="h-64 bg-gray-800/50 rounded-lg animate-pulse" />}>
         <PlayerRankingsTable playerId={selectedPlayerId} />
       </Suspense>
     </div>

@@ -1,7 +1,5 @@
-import { Suspense } from 'react'
 import { getPlayerList } from '@/lib/api/datagolf'
 import { PlayerListUI } from '../(components)/all-players'
-import PlayerDetails from '../(components)/player-details'
 
 export default async function PlayersPage() {
   const players = await getPlayerList()
@@ -14,16 +12,7 @@ export default async function PlayersPage() {
 
       <div className="flex-1 flex flex-col lg:flex-row">
         <div className="w-full">
-          <Suspense fallback={<div>Loading...</div>}>
-            <PlayerListUI players={players} />
-          </Suspense>
-        </div>
-        <div className="w-full lg:w-1/2 p-4">
-          <div className="lg:sticky lg:top-8">
-            <Suspense fallback={<div>Loading player details...</div>}>
-              <PlayerDetails />
-            </Suspense>
-          </div>
+          <PlayerListUI players={players} />
         </div>
       </div>
     </main>
