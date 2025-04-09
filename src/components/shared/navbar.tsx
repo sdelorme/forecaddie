@@ -28,6 +28,11 @@ const routes = [
     href: '/players',
     label: 'Players',
     className: 'text-secondary'
+  },
+  {
+    href: '/dashboard',
+    label: 'Dashboard',
+    className: 'text-secondary'
   }
 ]
 

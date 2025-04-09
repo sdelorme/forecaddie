@@ -4,7 +4,7 @@
 @tailwind utilities;
 
 @layer utilities {
-  .header-scrolled header > div {
+  .header-scrolled header > div:first-child {
     transform: translateY(-72px);
   }
 }

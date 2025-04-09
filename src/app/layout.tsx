@@ -28,8 +28,10 @@ export default async function RootLayout({ children }: { children: React.ReactNo
             <Header />
           </LiveStatsProvider>
         </ScrollWrapper>
-        <main className="flex-1 mt-[144px]">{children}</main>
-        <Footer />
+        <div className="pt-[144px]">
+          <main className="flex-1">{children}</main>
+          <Footer />
+        </div>
       </body>
     </html>
   )
