@@ -48,7 +48,7 @@ export function PlanModal({ open, onOpenChange, onCreatePlan }: PlanModalProps) 
                 id="name"
                 value={name}
                 onChange={(e) => setName(e.target.value)}
-                className="col-span-3"
+                className="col-span-3 placeholder:text-gray-500/50"
                 placeholder="My 2024 Season"
               />
             </div>
