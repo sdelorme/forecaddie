@@ -20,6 +20,10 @@
 .DS_Store
 *.pem
 .vscode/
+REVIEW_FINDINGS*.md
+CLAUDE.md
+docs/DATAGOLF_API_SPEC.md
+docs/DATAGOLF_API_AUDIT.md
 
 # debug
 npm-debug.log*
