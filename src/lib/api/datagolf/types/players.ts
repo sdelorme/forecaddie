@@ -1,6 +1,6 @@
 // Raw API response types (snake_case)
 export interface RawPlayer {
-  amateur: boolean
+  amateur: number // 0 = professional, 1 = amateur
   country: string
   country_code: string
   dg_id: number

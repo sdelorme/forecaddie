@@ -1,13 +1,16 @@
 // Application types (normalized)
 export interface TourEvent {
+  country: string
   course: string
   courseKey: string
-  eventId: number
+  eventId: string
   eventName: string
   latitude: number
   location: string
   longitude: number
   startDate: string
+  status: 'upcoming' | 'in_progress' | 'completed'
+  winner: string
 }
 
 export interface ProcessedTourEvent extends TourEvent {

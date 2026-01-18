@@ -1,6 +1,7 @@
 import { dataGolfClient } from '../client'
-import { DataGolfOdds, NormalizedOddsData } from '../types/odds'
 import { ENDPOINTS, CACHE_TAGS, REVALIDATE_INTERVALS } from '../config'
+import { DataGolfOddsSchema } from '../schemas/odds'
+import type { DataGolfOdds, NormalizedOddsData } from '../types/odds'
 
 const normalizeOdds = (data: DataGolfOdds): NormalizedOddsData => {
   return {
@@ -17,9 +18,15 @@ const normalizeOdds = (data: DataGolfOdds): NormalizedOddsData => {
   }
 }
 
+const emptyOddsData: NormalizedOddsData = {
+  eventName: '',
+  lastUpdated: '',
+  players: []
+}
+
 export async function getOutrightOdds(): Promise<NormalizedOddsData> {
   try {
-    const data = await dataGolfClient<DataGolfOdds>(ENDPOINTS.OUTRIGHT_ODDS, {
+    const response = await dataGolfClient<unknown>(ENDPOINTS.OUTRIGHT_ODDS, {
       params: {
         market: 'win',
         odds_format: 'american'
@@ -28,14 +35,15 @@ export async function getOutrightOdds(): Promise<NormalizedOddsData> {
       tags: [CACHE_TAGS.ODDS]
     })
 
-    if (!data?.odds) {
-      console.error('Invalid odds response:', data)
-      return { eventName: '', lastUpdated: '', players: [] }
+    const parsed = DataGolfOddsSchema.safeParse(response)
+    if (!parsed.success) {
+      console.error('Invalid odds response:', parsed.error.format())
+      return emptyOddsData
     }
 
-    return normalizeOdds(data)
+    return normalizeOdds(parsed.data)
   } catch (error) {
     console.error('Error fetching outright odds:', error)
-    return { eventName: '', lastUpdated: '', players: [] }
+    return emptyOddsData
   }
 }

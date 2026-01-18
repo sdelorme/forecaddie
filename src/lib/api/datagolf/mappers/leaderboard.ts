@@ -12,7 +12,7 @@ function normalizeLiveModelPlayer(player: RawLiveModelPlayer): LeaderboardPlayer
     r4: player.R4,
     playerName: player.player_name,
     round: player.round,
-    thru: player.thru.toString(),
+    thru: player.thru,
     today: player.today,
     top10Odds: player.top_10,
     top20Odds: player.top_20,

@@ -21,3 +21,9 @@ export const REVALIDATE_INTERVALS = {
 } as const
 
 export const BASE_URL = 'https://feeds.datagolf.com'
+
+export const CLIENT_CONFIG = {
+  TIMEOUT_MS: 10000, // 10 second timeout per request
+  MAX_RETRIES: 2, // Up to 3 total attempts (initial + 2 retries)
+  RETRY_DELAY_MS: 300 // Base delay, doubles each retry (300ms, 600ms)
+} as const

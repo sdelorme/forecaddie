@@ -1,12 +1,13 @@
 import { formatPlayerListName, getFirstLetterOfLastName } from '@/lib/utils/player'
 import { dataGolfClient } from '../client'
 import { ENDPOINTS, CACHE_TAGS, REVALIDATE_INTERVALS } from '../config'
+import { RawPlayerListResponseSchema } from '../schemas/players'
 import type { RawPlayer } from '../types/players'
 import type { Player } from '@/types/player'
 
 function normalizePlayer(player: RawPlayer): Player {
   return {
-    amateur: player.amateur ? 1 : 0,
+    amateur: player.amateur,
     country: player.country,
     countryCode: player.country_code,
     dgId: player.dg_id,
@@ -18,7 +19,7 @@ function normalizePlayer(player: RawPlayer): Player {
 
 export async function getPlayerList(): Promise<Player[]> {
   try {
-    const response = await dataGolfClient<RawPlayer[]>(ENDPOINTS.PLAYERS, {
+    const response = await dataGolfClient<unknown>(ENDPOINTS.PLAYERS, {
       revalidate: REVALIDATE_INTERVALS.PLAYERS,
       tags: [CACHE_TAGS.PLAYERS],
       params: {
@@ -29,12 +30,13 @@ export async function getPlayerList(): Promise<Player[]> {
       }
     })
 
-    if (!Array.isArray(response)) {
-      console.error('Invalid player list response:', response)
+    const parsed = RawPlayerListResponseSchema.safeParse(response)
+    if (!parsed.success) {
+      console.error('Invalid player list response:', parsed.error.format())
       return []
     }
 
-    return response.map(normalizePlayer)
+    return parsed.data.map(normalizePlayer)
   } catch (error) {
     console.error('Error fetching player list:', error)
     return []

@@ -10,7 +10,7 @@ export interface RawLiveEventPlayer {
   sg_putt: number | null
   sg_t2g: number | null
   sg_total: number | null
-  thru: number
+  thru: string // Can be number or "F" for finished
   total: number
 }
 
@@ -37,7 +37,7 @@ export interface RawLiveModelPlayer {
   make_cut: number
   player_name: string
   round: number
-  thru: number
+  thru: string // Can be number or "F" for finished
   today: number
   top_10: number
   top_20: number
