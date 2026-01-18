@@ -36,20 +36,21 @@ const routes = [
   }
 ]
 
-const authRoutes = [
-  {
-    href: '/login',
-    label: 'Log in',
-    variant: 'ghost' as const,
-    className: 'text-white'
-  },
-  {
-    href: '/signup',
-    label: 'Sign Up',
-    variant: 'secondary' as const,
-    className: 'text-primary'
-  }
-]
+// TODO: Re-enable when auth is implemented
+// const authRoutes = [
+//   {
+//     href: '/login',
+//     label: 'Log in',
+//     variant: 'ghost' as const,
+//     className: 'text-white'
+//   },
+//   {
+//     href: '/signup',
+//     label: 'Sign Up',
+//     variant: 'secondary' as const,
+//     className: 'text-primary'
+//   }
+// ]
 
 const Navbar = () => {
   const [menuOpen, setMenuOpen] = useState(false)
@@ -80,6 +81,7 @@ const Navbar = () => {
               {route.label}
             </Link>
           ))}
+          {/* TODO: Re-enable when auth is implemented
           <div className="flex items-center gap-2">
             {authRoutes.map((route) => (
               <Button
@@ -92,6 +94,7 @@ const Navbar = () => {
               </Button>
             ))}
           </div>
+*/}
         </div>
 
         {/* Mobile Menu Button */}
@@ -119,6 +122,7 @@ const Navbar = () => {
                   {route.label}
                 </Link>
               ))}
+              {/* TODO: Re-enable when auth is implemented
               <div className="flex flex-col gap-2 pt-4">
                 {authRoutes.map((route) => (
                   <Button
@@ -133,6 +137,7 @@ const Navbar = () => {
                   </Button>
                 ))}
               </div>
+*/}
             </div>
           </div>
         </div>

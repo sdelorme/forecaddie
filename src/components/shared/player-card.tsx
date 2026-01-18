@@ -12,45 +12,28 @@ type PlayerCardProps = {
   player: LeaderboardPlayer
 }
 
+const iconColorClasses = {
+  yellow: 'text-yellow-400 fill-yellow-400',
+  red: 'text-red-400 fill-red-400'
+} as const
+
+type IconColor = keyof typeof iconColorClasses
+
 type IconButtonProps = {
   icon: LucideIcon
   isActive: boolean
   onClick: (e: React.MouseEvent) => void
-  activeColor: string
+  activeColor: IconColor
   ariaLabel: string
 }
 
-const IconButton = ({
-  icon: Icon,
-  isActive,
-  onClick,
-  activeColor,
-  ariaLabel,
-}: IconButtonProps) => (
-  <button
-    onClick={onClick}
-    className="hover:scale-110 transition-transform"
-    aria-label={ariaLabel}
-  >
-    <Icon
-      className={`w-3.5 h-3.5 ${
-        isActive
-          ? `text-${activeColor}-400 fill-${activeColor}-400`
-          : 'text-gray-300'
-      } stroke-[1.5]`}
-    />
+const IconButton = ({ icon: Icon, isActive, onClick, activeColor, ariaLabel }: IconButtonProps) => (
+  <button onClick={onClick} className="hover:scale-110 transition-transform" aria-label={ariaLabel}>
+    <Icon className={`w-3.5 h-3.5 ${isActive ? iconColorClasses[activeColor] : 'text-gray-300'} stroke-[1.5]`} />
   </button>
 )
 
-const PlayerAvatar = ({
-  imageUrl,
-  playerName,
-  size,
-}: {
-  imageUrl: string
-  playerName: string
-  size: number
-}) => (
+const PlayerAvatar = ({ imageUrl, playerName, size }: { imageUrl: string; playerName: string; size: number }) => (
   <div className={`flex-shrink-0 rounded-full overflow-hidden`}>
     <Image
       src={imageUrl || '/placeholder.svg'}
@@ -70,8 +53,8 @@ export function PlayerCard({
     currentPosition,
     thru,
     isFavorite: initialIsFavorite,
-    isFlagged: initialIsFlagged,
-  },
+    isFlagged: initialIsFlagged
+  }
 }: PlayerCardProps) {
   const [isFavorite, setIsFavorite] = useState(initialIsFavorite ?? false)
   const [isFlagged, setIsFlagged] = useState(initialIsFlagged ?? false)
@@ -113,21 +96,15 @@ export function PlayerCard({
 
       {/* Desktop Layout */}
       <div className="hidden sm:flex items-start gap-2">
-        <span className="text-gray-600 font-semibold text-sm">
-          {currentPosition}
-        </span>
+        <span className="text-gray-600 font-semibold text-sm">{currentPosition}</span>
         <PlayerAvatar imageUrl={imageUrl} playerName={playerName} size={48} />
 
         <div className="flex flex-col w-full overflow-hidden">
-          <span className="font-bold text-sm truncate">
-            {formattedPlayerName}
-          </span>
+          <span className="font-bold text-sm truncate">{formattedPlayerName}</span>
 
           <div className="flex items-center justify-between mt-1">
             <div className="flex items-center gap-1">
-              <span className={`font-semibold text-base ${desktopScoreStyle}`}>
-                {currentScore}
-              </span>
+              <span className={`font-semibold text-base ${desktopScoreStyle}`}>{currentScore}</span>
               <span className="text-gray-400 text-[10px]">{thru}</span>
             </div>
 
@@ -137,9 +114,7 @@ export function PlayerCard({
                 isActive={isFavorite}
                 onClick={handleToggleFavorite}
                 activeColor="yellow"
-                ariaLabel={
-                  isFavorite ? 'Remove from favorites' : 'Add to favorites'
-                }
+                ariaLabel={isFavorite ? 'Remove from favorites' : 'Add to favorites'}
               />
               <IconButton
                 icon={Flag}

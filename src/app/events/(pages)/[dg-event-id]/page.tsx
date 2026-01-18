@@ -2,7 +2,7 @@ import { notFound } from 'next/navigation'
 
 type HistoricalEventStatsProps = {
   params: Promise<{
-    'event-id': string
+    'dg-event-id': string
   }>
 }
 
@@ -16,7 +16,7 @@ function isValidEventId(id: string): boolean {
 export default async function HistoricalEventStats({ params }: HistoricalEventStatsProps) {
   const resolvedParams = await params
 
-  if (!isValidEventId(resolvedParams['event-id'])) {
+  if (!isValidEventId(resolvedParams['dg-event-id'])) {
     notFound()
   }
 
