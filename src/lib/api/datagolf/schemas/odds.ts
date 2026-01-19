@@ -1,8 +1,8 @@
 import { z } from 'zod'
 
 const DataGolfOddsValueSchema = z.object({
-  baseline: z.string(),
-  baseline_history_fit: z.string()
+  baseline: z.string().nullable(),
+  baseline_history_fit: z.string().nullable()
 })
 
 export const PlayerOddsSchema = z.object({

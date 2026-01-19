@@ -8,6 +8,7 @@ interface LiveStatsContextValue {
   eventInfo: Leaderboard['eventInfo']
   loading: boolean
   error: string | null
+  isComplete: boolean
 }
 
 const LiveStatsContext = createContext<LiveStatsContextValue | undefined>(undefined)
@@ -15,6 +16,7 @@ const LiveStatsContext = createContext<LiveStatsContextValue | undefined>(undefi
 interface LiveStatsProviderProps {
   children: React.ReactNode
   initialData?: Leaderboard
+  isComplete?: boolean
 }
 
 const defaultEventInfo: LeaderboardEvent = {
@@ -24,7 +26,7 @@ const defaultEventInfo: LeaderboardEvent = {
   currentRound: null
 }
 
-export function LiveStatsProvider({ children, initialData }: LiveStatsProviderProps) {
+export function LiveStatsProvider({ children, initialData, isComplete = false }: LiveStatsProviderProps) {
   const [players, setPlayers] = useState<LeaderboardPlayer[]>(initialData?.players || [])
   const [eventInfo, setEventInfo] = useState<LeaderboardEvent>(initialData?.eventInfo || defaultEventInfo)
   const [loading, setLoading] = useState(!initialData)
@@ -68,7 +70,8 @@ export function LiveStatsProvider({ children, initialData }: LiveStatsProviderPr
     players,
     eventInfo,
     loading,
-    error
+    error,
+    isComplete
   }
 
   return <LiveStatsContext.Provider value={value}>{children}</LiveStatsContext.Provider>

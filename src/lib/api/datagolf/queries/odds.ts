@@ -13,7 +13,7 @@ const normalizeOdds = (data: DataGolfOdds): NormalizedOddsData => {
       fanduel: player.fanduel || '',
       draftkings: player.draftkings || '',
       betmgm: player.betmgm || '',
-      datagolfBaselineHistoryFit: player.datagolf.baseline_history_fit
+      datagolfBaselineHistoryFit: player.datagolf.baseline_history_fit ?? ''
     }))
   }
 }

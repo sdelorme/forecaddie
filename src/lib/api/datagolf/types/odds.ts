@@ -16,8 +16,8 @@ export interface PlayerOdds {
   bovada?: string
   caesars?: string
   datagolf: {
-    baseline: string
-    baseline_history_fit: string
+    baseline: string | null
+    baseline_history_fit: string | null
   }
   dg_id: number
   draftkings?: string

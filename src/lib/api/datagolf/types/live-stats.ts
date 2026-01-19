@@ -2,8 +2,8 @@
 export interface RawLiveEventPlayer {
   dg_id: number
   player_name: string
-  position: string
-  round: number
+  position: string | null // CUT players may have null position
+  round: number | null // CUT players have null round
   sg_app: number | null
   sg_arg: number | null
   sg_ott: number | null
@@ -11,7 +11,7 @@ export interface RawLiveEventPlayer {
   sg_t2g: number | null
   sg_total: number | null
   thru: string // Can be number or "F" for finished
-  total: number
+  total: number | null // CUT players have null total
 }
 
 export interface RawLiveEventStats {

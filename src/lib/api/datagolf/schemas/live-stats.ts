@@ -3,16 +3,16 @@ import { z } from 'zod'
 export const RawLiveEventPlayerSchema = z.object({
   dg_id: z.number(),
   player_name: z.string(),
-  position: z.string(),
-  round: z.number(),
+  position: z.string().nullable(), // CUT players may have null position
+  round: z.number().nullable(), // CUT players have null round
   sg_app: z.number().nullable(),
   sg_arg: z.number().nullable(),
   sg_ott: z.number().nullable(),
   sg_putt: z.number().nullable(),
   sg_t2g: z.number().nullable(),
   sg_total: z.number().nullable(),
-  thru: z.union([z.string(), z.number()]).transform(String), // API may return number or "F"
-  total: z.number()
+  thru: z.union([z.string(), z.number(), z.null()]).transform((val) => val?.toString() ?? ''),
+  total: z.number().nullable() // CUT players have null total
 })
 
 export const RawLiveEventStatsSchema = z.object({

@@ -95,6 +95,21 @@ export function getCurrentEvent(events: TourEvent[], currentDate: Date): TourEve
   return null
 }
 
+/**
+ * Gets the next upcoming tournament from a list of events
+ * Returns the tournament with the earliest start date that is in the future
+ */
+export function getNextEvent(events: TourEvent[], currentDate: Date): TourEvent | null {
+  const futureEvents = events.filter((event) => isFutureTournament(event, currentDate))
+  if (!futureEvents.length) return null
+
+  return futureEvents.sort((a, b) => {
+    const aDate = getTournamentStartDate(a.startDate)
+    const bDate = getTournamentStartDate(b.startDate)
+    return aDate.getTime() - bDate.getTime()
+  })[0]
+}
+
 export function processEvents(events: TourEvent[]): ProcessedTourEvent[] {
   const now = new Date()
   const mostRecentEvent = getMostRecentTournament(events, now)

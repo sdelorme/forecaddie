@@ -5,7 +5,8 @@ import Header from '@/components/shared/header'
 import Footer from '@/components/shared/footer'
 import { ScrollWrapper } from '@/components/providers/scroll-wrapper'
 import { LiveStatsProvider } from '@/components/providers/live-stats-provider'
-import { getLiveLeaderboard } from '@/lib/api/datagolf'
+import { getLiveLeaderboard, getSchedule } from '@/lib/api/datagolf'
+import { getCurrentEvent } from '@/lib/utils/tour-events'
 
 const lora = Lora({ subsets: ['latin'] })
 
@@ -21,13 +22,17 @@ export const metadata: Metadata = {
 }
 
 export default async function RootLayout({ children }: { children: React.ReactNode }) {
-  const initialData = await getLiveLeaderboard()
+  const [initialData, schedule] = await Promise.all([getLiveLeaderboard(), getSchedule()])
+
+  const now = new Date()
+  const currentEvent = getCurrentEvent(schedule, now)
+  const isComplete = currentEvent?.status === 'completed'
 
   return (
     <html lang="en" className="h-full">
       <body className={`${lora.className} bg-black min-h-full flex flex-col`}>
         <ScrollWrapper>
-          <LiveStatsProvider initialData={initialData}>
+          <LiveStatsProvider initialData={initialData} isComplete={isComplete}>
             <Header />
           </LiveStatsProvider>
         </ScrollWrapper>

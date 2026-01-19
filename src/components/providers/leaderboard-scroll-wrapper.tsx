@@ -22,11 +22,11 @@ function LeaderboardSkeleton() {
 }
 
 export default function LeaderboardScrollWrapper() {
-  const { players, eventInfo, loading } = useLiveStats()
+  const { players, eventInfo, loading, isComplete } = useLiveStats()
 
   if (loading) {
     return <LeaderboardSkeleton />
   }
 
-  return <LeaderboardScroll leaderboardPlayers={players} eventInfo={eventInfo} />
+  return <LeaderboardScroll leaderboardPlayers={players} eventInfo={eventInfo} isComplete={isComplete} />
 }
