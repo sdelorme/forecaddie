@@ -1,3 +1,8 @@
+export const metadata = {
+  title: 'Upcoming Tournament',
+  description: 'Details for this upcoming PGA Tour tournament.'
+}
+
 const FutureEventPage = () => {
   return (
     <main>

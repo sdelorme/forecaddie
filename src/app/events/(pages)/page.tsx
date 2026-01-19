@@ -1,6 +1,11 @@
 import { getSchedule } from '@/lib/api/datagolf'
 import EventsUI from '../(components)/all-events'
 
+export const metadata = {
+  title: 'Tournament Schedule',
+  description: 'Full PGA Tour tournament schedule with dates, courses, and locations.'
+}
+
 export default async function EventsPage() {
   const events = await getSchedule()
 

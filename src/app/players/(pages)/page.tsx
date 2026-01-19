@@ -1,6 +1,11 @@
 import { getPlayerList } from '@/lib/api/datagolf'
 import { PlayerListUI } from '../(components)/all-players'
 
+export const metadata = {
+  title: 'Player Rankings',
+  description: 'PGA Tour player rankings, statistics, and DataGolf skill ratings.'
+}
+
 export default async function PlayersPage() {
   const players = await getPlayerList()
 

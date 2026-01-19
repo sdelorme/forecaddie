@@ -6,15 +6,48 @@
  * - Historical: Any past tournament that isn't the most recent
  */
 
+const EASTERN_TIMEZONE = 'America/New_York'
+
+/**
+ * Gets the UTC offset for Eastern Time on a given date, accounting for DST
+ * @param date The date to check
+ * @returns Offset string like "-05:00" (EST) or "-04:00" (EDT)
+ */
+function getEasternOffset(date: Date): string {
+  // Format a date in Eastern time and extract the offset
+  const formatter = new Intl.DateTimeFormat('en-US', {
+    timeZone: EASTERN_TIMEZONE,
+    timeZoneName: 'shortOffset'
+  })
+
+  const parts = formatter.formatToParts(date)
+  const offsetPart = parts.find((p) => p.type === 'timeZoneName')
+  const offsetStr = offsetPart?.value || 'GMT-5'
+
+  // Convert "GMT-5" or "GMT-4" to "-05:00" or "-04:00"
+  const match = offsetStr.match(/GMT([+-])(\d+)/)
+  if (match) {
+    const sign = match[1]
+    const hours = match[2].padStart(2, '0')
+    return `${sign}${hours}:00`
+  }
+
+  // Fallback to EST if parsing fails
+  return '-05:00'
+}
+
 /**
  * Converts an Eastern Time date string to a tournament start date with the correct start time
  * @param dateString Format: "YYYY-MM-DD" in Eastern Time
  * @returns Date object in UTC representing 5am ET on the given date
  */
 export function getTournamentStartDate(dateString: string): Date {
-  // Create date in ET by appending timezone
-  const etDate = new Date(`${dateString}T05:00:00-04:00`)
-  // Convert to UTC for internal handling
+  // First, create a rough date to determine DST status
+  const roughDate = new Date(`${dateString}T12:00:00Z`)
+  const offset = getEasternOffset(roughDate)
+
+  // Create date in ET with correct offset
+  const etDate = new Date(`${dateString}T05:00:00${offset}`)
   return new Date(etDate.getTime())
 }
 

@@ -2,6 +2,11 @@ import OddsTable from './(components)/odds-table'
 import { NormalizedOddsData } from '@/lib/api/datagolf/types/odds'
 import { getOutrightOdds } from '@/lib/api/datagolf/queries/odds'
 
+export const metadata = {
+  title: 'Betting Odds',
+  description: 'Current PGA Tour tournament betting odds from major sportsbooks.'
+}
+
 export default async function OddsPage() {
   const oddsData: NormalizedOddsData = await getOutrightOdds()
 

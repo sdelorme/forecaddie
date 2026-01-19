@@ -10,8 +10,11 @@ import { getLiveLeaderboard } from '@/lib/api/datagolf'
 const lora = Lora({ subsets: ['latin'] })
 
 export const metadata: Metadata = {
-  title: 'CaddieBet',
-  description: 'Make smarter golf bets',
+  title: {
+    default: 'Forecaddie - Golf Statistics & Tournament Tracking',
+    template: '%s | Forecaddie'
+  },
+  description: 'Live PGA Tour leaderboards, player rankings, and betting odds powered by DataGolf.',
   icons: {
     icon: '/favicon.ico'
   }
