@@ -1,12 +1,10 @@
 import type { Metadata } from 'next'
 import { Lora } from 'next/font/google'
 import './globals.css'
-import Header from '@/components/shared/header'
-import Footer from '@/components/shared/footer'
-import { ScrollWrapper } from '@/components/providers/scroll-wrapper'
-import { LiveStatsProvider } from '@/components/providers/live-stats-provider'
+import { Header, Footer } from '@/components/shared'
+import { ScrollWrapper, LiveStatsProvider } from '@/components/providers'
 import { getLiveLeaderboard, getSchedule } from '@/lib/api/datagolf'
-import { getCurrentEvent } from '@/lib/utils/tour-events'
+import { getCurrentEvent } from '@/lib/utils'
 
 const lora = Lora({ subsets: ['latin'] })
 

@@ -1,5 +1,4 @@
-import { TournamentStatusBadge } from '@/components/shared/tournament-status-badge'
-import { NextUpBanner } from '@/components/shared/next-up-banner'
+import { TournamentStatusBadge, NextUpBanner } from '@/components/shared'
 import type { LeaderboardEvent } from '@/types/leaderboard'
 import type { TourEvent } from '@/types/schedule'
 

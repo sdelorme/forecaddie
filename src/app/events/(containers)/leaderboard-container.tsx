@@ -1,6 +1,6 @@
 'use client'
 
-import { useLiveStats } from '@/components/providers/live-stats-provider'
+import { useLiveStats } from '@/components/providers'
 import LeaderboardTable from '../(components)/leaderboard-table'
 import { LeaderboardSkeleton } from '../(components)/leaderboard-skeleton'
 

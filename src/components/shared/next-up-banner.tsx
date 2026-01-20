@@ -1,4 +1,4 @@
-import { formatTournamentDate } from '@/lib/utils/tournament-time'
+import { formatTournamentDate } from '@/lib/utils'
 
 type NextUpBannerProps = {
   eventName: string

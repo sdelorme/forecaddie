@@ -1,7 +1,7 @@
 'use client'
 
 import { NormalizedOddsData } from '@/lib/api/datagolf/types/odds'
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow, TableCaption } from '@/components/ui/table'
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow, TableCaption } from '@/components/ui'
 
 interface OddsTableProps {
   odds: NormalizedOddsData

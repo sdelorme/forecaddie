@@ -1,6 +1,6 @@
 'use client'
 
-import { ErrorFallback } from '@/components/shared/error-fallback'
+import { ErrorFallback } from '@/components/shared'
 
 interface ErrorProps {
   error: Error & { digest?: string }

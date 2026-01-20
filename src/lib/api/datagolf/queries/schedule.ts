@@ -1,7 +1,7 @@
 import { dataGolfClient } from '../client'
 import { ENDPOINTS, CACHE_TAGS, REVALIDATE_INTERVALS } from '../config'
 import { RawTourScheduleSchema } from '../schemas/schedule'
-import { processEvents } from '@/lib/utils/tour-events'
+import { processEvents } from '@/lib/utils'
 import type { RawTourEvent } from '../types/schedule'
 import type { ProcessedTourEvent, TourEvent } from '@/types/schedule'
 

@@ -1,4 +1,4 @@
-import { cn } from '@/lib/utils/class-name'
+import { cn } from '@/lib/utils'
 
 type TournamentStatusBadgeProps = {
   status: 'live' | 'final'

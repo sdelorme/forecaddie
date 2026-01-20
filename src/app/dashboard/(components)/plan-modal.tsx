@@ -1,30 +1,30 @@
 'use client'
 
-import { Button } from '@/components/ui/button'
 import {
+  Button,
   Dialog,
   DialogContent,
   DialogDescription,
   DialogFooter,
   DialogHeader,
-  DialogTitle
-} from '@/components/ui/dialog'
-import { Input } from '@/components/ui/input'
-import { Label } from '@/components/ui/label'
+  DialogTitle,
+  Input,
+  Label
+} from '@/components/ui'
 import { useState } from 'react'
 
 interface PlanModalProps {
   open: boolean
   onOpenChange: (open: boolean) => void
-  onCreatePlan: (name: string) => void
+  onCreatePlan: (name: string) => Promise<void>
 }
 
 export function PlanModal({ open, onOpenChange, onCreatePlan }: PlanModalProps) {
   const [name, setName] = useState('')
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
-    onCreatePlan(name)
+    await onCreatePlan(name)
     setName('')
     onOpenChange(false)
   }

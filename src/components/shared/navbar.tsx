@@ -4,8 +4,8 @@ import { useState } from 'react'
 import Link from 'next/link'
 import Image from 'next/image'
 import { usePathname } from 'next/navigation'
-import { cn } from '@/lib/utils/class-name'
-import { Button } from '@/components/ui/button'
+import { cn } from '@/lib/utils'
+import { Button } from '@/components/ui'
 import { Menu, X } from 'lucide-react'
 
 const routes = [

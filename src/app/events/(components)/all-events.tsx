@@ -1,6 +1,6 @@
 import Link from 'next/link'
 import { ProcessedTourEvent } from '@/types/schedule'
-import { formatTournamentDate } from '@/lib/utils/tournament-time'
+import { formatTournamentDate } from '@/lib/utils'
 
 export default function EventsUI({ events }: { events: ProcessedTourEvent[] }) {
   return (

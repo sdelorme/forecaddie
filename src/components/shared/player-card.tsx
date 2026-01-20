@@ -4,9 +4,7 @@ import { useState } from 'react'
 import Image from 'next/image'
 import { Star, Flag, type LucideIcon } from 'lucide-react'
 import type { LeaderboardPlayer } from '@/types/leaderboard'
-import { getPlayerImageUrl } from '@/lib/utils/player-images'
-import { getScoreStyle } from '@/lib/utils/live-stats-helpers'
-import { formatLeaderboardPlayerName } from '@/lib/utils/player'
+import { getPlayerImageUrl, getScoreStyle, formatLeaderboardPlayerName } from '@/lib/utils'
 
 type PlayerCardProps = {
   player: LeaderboardPlayer

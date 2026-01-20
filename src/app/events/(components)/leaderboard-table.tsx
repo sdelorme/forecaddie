@@ -1,6 +1,6 @@
 'use client'
 
-import { Table, TableCaption, TableHeader, TableRow, TableHead, TableBody, TableCell } from '@/components/ui/table'
+import { Table, TableCaption, TableHeader, TableRow, TableHead, TableBody, TableCell } from '@/components/ui'
 import { LeaderboardPlayer, LeaderboardEvent } from '@/types/leaderboard'
 
 interface LeaderboardTableProps {

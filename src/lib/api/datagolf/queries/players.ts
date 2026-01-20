@@ -1,4 +1,4 @@
-import { formatPlayerListName, getFirstLetterOfLastName } from '@/lib/utils/player'
+import { formatPlayerListName, getFirstLetterOfLastName } from '@/lib/utils'
 import { dataGolfClient } from '../client'
 import { ENDPOINTS, CACHE_TAGS, REVALIDATE_INTERVALS } from '../config'
 import { RawPlayerListResponseSchema } from '../schemas/players'

@@ -1,8 +1,8 @@
-import { LiveStatsProvider } from '@/components/providers/live-stats-provider'
+import { LiveStatsProvider } from '@/components/providers'
 import LeaderboardContainer from '../../(containers)/leaderboard-container'
 import { LeaderboardHeader } from '../../(components)/leaderboard-header'
 import { getLiveLeaderboard, getSchedule } from '@/lib/api/datagolf'
-import { getCurrentEvent, getNextEvent } from '@/lib/utils/tour-events'
+import { getCurrentEvent, getNextEvent } from '@/lib/utils'
 
 export const metadata = {
   title: 'Live Leaderboard',

@@ -1,7 +1,7 @@
 'use client'
 
 import { useEffect } from 'react'
-import { Button } from '@/components/ui/button'
+import { Button } from '@/components/ui'
 
 interface ErrorFallbackProps {
   error: Error & { digest?: string }

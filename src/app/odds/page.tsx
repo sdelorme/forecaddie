@@ -3,7 +3,7 @@ import { OddsHeader } from './(components)/odds-header'
 import { NormalizedOddsData } from '@/lib/api/datagolf/types/odds'
 import { getOutrightOdds } from '@/lib/api/datagolf/queries/odds'
 import { getSchedule } from '@/lib/api/datagolf'
-import { getCurrentEvent, getNextEvent } from '@/lib/utils/tour-events'
+import { getCurrentEvent, getNextEvent } from '@/lib/utils'
 
 export const metadata = {
   title: 'Betting Odds',
