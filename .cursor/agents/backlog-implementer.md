@@ -19,6 +19,10 @@ DO NOT overlap responsibilities with other agents unless explicitly instructed.
 
 ## SUB-AGENT DEFINITION
 
+Recommended model:
+
+- Prefer Claude 4.5 Opus for this agent (implementation depth, fewer missed edge cases). If you’re on a different model, consider switching before invoking this subagent next time.
+
 Agent Name:
 backlog-implementer
 

@@ -1,56 +1,58 @@
 import { createClient } from './client'
 
-const DEVICE_ID_KEY = 'forecaddie_device_id'
-
 /**
- * Get or create a device ID for anonymous tracking.
- * Stores the ID in localStorage and ensures it exists in Supabase.
+ * Register or update the current user's device in Supabase.
+ * Requires an authenticated session - returns the device ID if successful.
+ * This replaces the old anonymous device-id flow.
  */
-export async function getOrCreateDeviceId(): Promise<string> {
-  // Check localStorage first
-  const existingId = localStorage.getItem(DEVICE_ID_KEY)
+export async function registerUserDevice(): Promise<string | null> {
+  const supabase = createClient()
 
-  if (existingId) {
-    // Update last_seen_at in the background
-    updateLastSeen(existingId)
-    return existingId
+  // Get current user
+  const {
+    data: { user }
+  } = await supabase.auth.getUser()
+
+  if (!user) {
+    return null
   }
 
-  // Create new device
-  const supabase = createClient()
-  const { data, error } = await supabase.from('devices').insert({}).select('id').single()
+  // Check if user already has a device record
+  const { data: existingDevice } = await supabase.from('devices').select('id').eq('user_id', user.id).single()
+
+  if (existingDevice) {
+    // Update last_seen_at
+    await supabase.from('devices').update({ last_seen_at: new Date().toISOString() }).eq('id', existingDevice.id)
+
+    return existingDevice.id
+  }
+
+  // Create new device for user
+  const { data, error } = await supabase.from('devices').insert({ user_id: user.id }).select('id').single()
 
   if (error) {
-    throw new Error(`Failed to create device: ${error.message}`)
+    console.error('Failed to create device:', error)
+    return null
   }
 
-  // Store in localStorage
-  localStorage.setItem(DEVICE_ID_KEY, data.id)
   return data.id
 }
 
 /**
- * Get device ID from localStorage without creating one.
- * Returns null if no device ID exists.
+ * Get the current user's device ID if they have one.
  */
-export function getDeviceId(): string | null {
-  if (typeof window === 'undefined') return null
-  return localStorage.getItem(DEVICE_ID_KEY)
-}
-
-/**
- * Update the last_seen_at timestamp for a device.
- * Called in the background when a returning device is detected.
- */
-async function updateLastSeen(deviceId: string): Promise<void> {
+export async function getUserDeviceId(): Promise<string | null> {
   const supabase = createClient()
-  await supabase.from('devices').update({ last_seen_at: new Date().toISOString() }).eq('id', deviceId)
-}
 
-/**
- * Clear the device ID from localStorage.
- * Useful for testing or allowing users to "reset" their device.
- */
-export function clearDeviceId(): void {
-  localStorage.removeItem(DEVICE_ID_KEY)
+  const {
+    data: { user }
+  } = await supabase.auth.getUser()
+
+  if (!user) {
+    return null
+  }
+
+  const { data } = await supabase.from('devices').select('id').eq('user_id', user.id).single()
+
+  return data?.id ?? null
 }

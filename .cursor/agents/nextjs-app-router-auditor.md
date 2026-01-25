@@ -19,6 +19,10 @@ DO NOT overlap responsibilities with other agents unless explicitly instructed.
 
 ## SUB-AGENT DEFINITION
 
+Recommended model:
+
+- Prefer GPT-5.2 Codex for this agent (highest signal on App Router + TS review). If you’re on a different model, consider switching before invoking this subagent next time.
+
 Agent Name:
 nextjs-app-router-auditor
 

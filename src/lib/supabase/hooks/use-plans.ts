@@ -1,13 +1,14 @@
 'use client'
 
 import { useCallback, useEffect, useState } from 'react'
-import { getOrCreateDeviceId } from '../device'
+import { createClient } from '../client'
 import type { SeasonPlan } from '../types'
 
 type UsePlansReturn = {
   plans: SeasonPlan[]
   isLoading: boolean
   error: string | null
+  isAuthenticated: boolean
   createPlan: (name: string, season?: number) => Promise<SeasonPlan | null>
   updatePlan: (id: string, updates: { name?: string; season?: number }) => Promise<SeasonPlan | null>
   deletePlan: (id: string) => Promise<boolean>
@@ -18,30 +19,38 @@ export function usePlans(): UsePlansReturn {
   const [plans, setPlans] = useState<SeasonPlan[]>([])
   const [isLoading, setIsLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
-  const [deviceId, setDeviceId] = useState<string | null>(null)
+  const [isAuthenticated, setIsAuthenticated] = useState(false)
 
-  // Initialize device ID
+  const supabase = createClient()
+
+  // Check auth status on mount
   useEffect(() => {
-    getOrCreateDeviceId()
-      .then(setDeviceId)
-      .catch((err) => {
-        console.error('Failed to get device ID:', err)
-        setError('Failed to initialize device')
+    supabase.auth.getUser().then(({ data: { user } }) => {
+      setIsAuthenticated(!!user)
+      if (!user) {
         setIsLoading(false)
-      })
-  }, [])
+      }
+    })
+  }, [supabase.auth])
 
-  // Fetch plans when device ID is available
+  // Fetch plans when authenticated
   const fetchPlans = useCallback(async () => {
-    if (!deviceId) return
+    if (!isAuthenticated) {
+      setIsLoading(false)
+      return
+    }
 
     setIsLoading(true)
     setError(null)
 
     try {
-      const response = await fetch('/api/plans', {
-        headers: { 'x-device-id': deviceId }
-      })
+      const response = await fetch('/api/plans')
+
+      if (response.status === 401) {
+        setIsAuthenticated(false)
+        setError('Please sign in to view your plans')
+        return
+      }
 
       if (!response.ok) {
         throw new Error('Failed to fetch plans')
@@ -55,18 +64,18 @@ export function usePlans(): UsePlansReturn {
     } finally {
       setIsLoading(false)
     }
-  }, [deviceId])
+  }, [isAuthenticated])
 
   useEffect(() => {
-    if (deviceId) {
+    if (isAuthenticated) {
       fetchPlans()
     }
-  }, [deviceId, fetchPlans])
+  }, [isAuthenticated, fetchPlans])
 
   const createPlan = useCallback(
     async (name: string, season = 2025): Promise<SeasonPlan | null> => {
-      if (!deviceId) {
-        setError('Device not initialized')
+      if (!isAuthenticated) {
+        setError('Please sign in to create plans')
         return null
       }
 
@@ -74,11 +83,16 @@ export function usePlans(): UsePlansReturn {
         const response = await fetch('/api/plans', {
           method: 'POST',
           headers: {
-            'Content-Type': 'application/json',
-            'x-device-id': deviceId
+            'Content-Type': 'application/json'
           },
           body: JSON.stringify({ name, season })
         })
+
+        if (response.status === 401) {
+          setIsAuthenticated(false)
+          setError('Please sign in to create plans')
+          return null
+        }
 
         if (!response.ok) {
           throw new Error('Failed to create plan')
@@ -93,13 +107,13 @@ export function usePlans(): UsePlansReturn {
         return null
       }
     },
-    [deviceId]
+    [isAuthenticated]
   )
 
   const updatePlan = useCallback(
     async (id: string, updates: { name?: string; season?: number }): Promise<SeasonPlan | null> => {
-      if (!deviceId) {
-        setError('Device not initialized')
+      if (!isAuthenticated) {
+        setError('Please sign in to update plans')
         return null
       }
 
@@ -107,11 +121,16 @@ export function usePlans(): UsePlansReturn {
         const response = await fetch(`/api/plans/${id}`, {
           method: 'PATCH',
           headers: {
-            'Content-Type': 'application/json',
-            'x-device-id': deviceId
+            'Content-Type': 'application/json'
           },
           body: JSON.stringify(updates)
         })
+
+        if (response.status === 401) {
+          setIsAuthenticated(false)
+          setError('Please sign in to update plans')
+          return null
+        }
 
         if (!response.ok) {
           throw new Error('Failed to update plan')
@@ -126,21 +145,26 @@ export function usePlans(): UsePlansReturn {
         return null
       }
     },
-    [deviceId]
+    [isAuthenticated]
   )
 
   const deletePlan = useCallback(
     async (id: string): Promise<boolean> => {
-      if (!deviceId) {
-        setError('Device not initialized')
+      if (!isAuthenticated) {
+        setError('Please sign in to delete plans')
         return false
       }
 
       try {
         const response = await fetch(`/api/plans/${id}`, {
-          method: 'DELETE',
-          headers: { 'x-device-id': deviceId }
+          method: 'DELETE'
         })
+
+        if (response.status === 401) {
+          setIsAuthenticated(false)
+          setError('Please sign in to delete plans')
+          return false
+        }
 
         if (!response.ok) {
           throw new Error('Failed to delete plan')
@@ -154,13 +178,14 @@ export function usePlans(): UsePlansReturn {
         return false
       }
     },
-    [deviceId]
+    [isAuthenticated]
   )
 
   return {
     plans,
     isLoading,
     error,
+    isAuthenticated,
     createPlan,
     updatePlan,
     deletePlan,

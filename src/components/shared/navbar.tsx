@@ -3,10 +3,11 @@
 import { useState } from 'react'
 import Link from 'next/link'
 import Image from 'next/image'
-import { usePathname } from 'next/navigation'
+import { usePathname, useRouter } from 'next/navigation'
 import { cn } from '@/lib/utils'
 import { Button } from '@/components/ui'
-import { Menu, X } from 'lucide-react'
+import { Menu, X, Loader2, LogOut } from 'lucide-react'
+import { useAuth } from '@/lib/supabase/hooks/use-auth'
 
 const routes = [
   {
@@ -36,25 +37,17 @@ const routes = [
   }
 ]
 
-// TODO: Re-enable when auth is implemented
-// const authRoutes = [
-//   {
-//     href: '/login',
-//     label: 'Log in',
-//     variant: 'ghost' as const,
-//     className: 'text-white'
-//   },
-//   {
-//     href: '/signup',
-//     label: 'Sign Up',
-//     variant: 'secondary' as const,
-//     className: 'text-primary'
-//   }
-// ]
-
 const Navbar = () => {
   const [menuOpen, setMenuOpen] = useState(false)
   const pathname = usePathname()
+  const router = useRouter()
+  const { user, isLoading, signOut } = useAuth()
+
+  const handleSignOut = async () => {
+    await signOut()
+    router.push('/')
+    setMenuOpen(false)
+  }
 
   return (
     <nav className="bg-primary sticky top-0 z-50 w-full border-b border-primary/20">
@@ -81,20 +74,20 @@ const Navbar = () => {
               {route.label}
             </Link>
           ))}
-          {/* TODO: Re-enable when auth is implemented
-          <div className="flex items-center gap-2">
-            {authRoutes.map((route) => (
-              <Button
-                key={route.href}
-                variant={route.variant}
-                asChild
-                className={cn('text-sm rounded-xl', route.className)}
-              >
-                <Link href={route.href}>{route.label}</Link>
+          <div className="flex items-center gap-2 ml-4">
+            {isLoading ? (
+              <Loader2 className="h-4 w-4 animate-spin text-secondary" />
+            ) : user ? (
+              <Button variant="ghost" onClick={handleSignOut} className="text-sm text-white hover:text-secondary">
+                <LogOut className="h-4 w-4 mr-2" />
+                Sign out
               </Button>
-            ))}
+            ) : (
+              <Button variant="secondary" asChild className="text-sm rounded-xl text-primary">
+                <Link href="/login">Sign in</Link>
+              </Button>
+            )}
           </div>
-*/}
         </div>
 
         {/* Mobile Menu Button */}
@@ -122,22 +115,24 @@ const Navbar = () => {
                   {route.label}
                 </Link>
               ))}
-              {/* TODO: Re-enable when auth is implemented
-              <div className="flex flex-col gap-2 pt-4">
-                {authRoutes.map((route) => (
-                  <Button
-                    key={route.href}
-                    variant={route.variant}
-                    asChild
-                    className={cn('w-full rounded-md', route.className)}
-                  >
-                    <Link href={route.href} onClick={() => setMenuOpen(false)}>
-                      {route.label}
+              <div className="flex flex-col gap-2 pt-4 border-t border-white/10">
+                {isLoading ? (
+                  <div className="flex justify-center py-2">
+                    <Loader2 className="h-4 w-4 animate-spin text-secondary" />
+                  </div>
+                ) : user ? (
+                  <Button variant="ghost" onClick={handleSignOut} className="w-full text-white justify-start">
+                    <LogOut className="h-4 w-4 mr-2" />
+                    Sign out
+                  </Button>
+                ) : (
+                  <Button variant="secondary" asChild className="w-full rounded-md text-primary">
+                    <Link href="/login" onClick={() => setMenuOpen(false)}>
+                      Sign in
                     </Link>
                   </Button>
-                ))}
+                )}
               </div>
-*/}
             </div>
           </div>
         </div>

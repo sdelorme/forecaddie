@@ -5,22 +5,24 @@ type RouteParams = {
   params: Promise<{ id: string }>
 }
 
-export async function GET(request: NextRequest, { params }: RouteParams) {
+export async function GET(_request: NextRequest, { params }: RouteParams) {
   const { id } = await params
-  const deviceId = request.headers.get('x-device-id')
-
-  if (!deviceId) {
-    return NextResponse.json({ error: 'Device ID required' }, { status: 400 })
-  }
 
   try {
     const supabase = await createClient()
-    const { data, error } = await supabase
-      .from('season_plans')
-      .select('*')
-      .eq('id', id)
-      .eq('device_id', deviceId)
-      .single()
+
+    // Get current user from session
+    const {
+      data: { user },
+      error: authError
+    } = await supabase.auth.getUser()
+
+    if (authError || !user) {
+      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+    }
+
+    // RLS ensures user can only access their own plans
+    const { data, error } = await supabase.from('season_plans').select('*').eq('id', id).single()
 
     if (error) {
       if (error.code === 'PGRST116') {
@@ -39,13 +41,20 @@ export async function GET(request: NextRequest, { params }: RouteParams) {
 
 export async function PATCH(request: NextRequest, { params }: RouteParams) {
   const { id } = await params
-  const deviceId = request.headers.get('x-device-id')
-
-  if (!deviceId) {
-    return NextResponse.json({ error: 'Device ID required' }, { status: 400 })
-  }
 
   try {
+    const supabase = await createClient()
+
+    // Get current user from session
+    const {
+      data: { user },
+      error: authError
+    } = await supabase.auth.getUser()
+
+    if (authError || !user) {
+      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+    }
+
     const body = await request.json()
     const { name, season } = body
 
@@ -53,14 +62,8 @@ export async function PATCH(request: NextRequest, { params }: RouteParams) {
     if (name !== undefined) updates.name = name.trim()
     if (season !== undefined) updates.season = season
 
-    const supabase = await createClient()
-    const { data, error } = await supabase
-      .from('season_plans')
-      .update(updates)
-      .eq('id', id)
-      .eq('device_id', deviceId)
-      .select()
-      .single()
+    // RLS ensures user can only update their own plans
+    const { data, error } = await supabase.from('season_plans').update(updates).eq('id', id).select().single()
 
     if (error) {
       if (error.code === 'PGRST116') {
@@ -77,17 +80,24 @@ export async function PATCH(request: NextRequest, { params }: RouteParams) {
   }
 }
 
-export async function DELETE(request: NextRequest, { params }: RouteParams) {
+export async function DELETE(_request: NextRequest, { params }: RouteParams) {
   const { id } = await params
-  const deviceId = request.headers.get('x-device-id')
-
-  if (!deviceId) {
-    return NextResponse.json({ error: 'Device ID required' }, { status: 400 })
-  }
 
   try {
     const supabase = await createClient()
-    const { error } = await supabase.from('season_plans').delete().eq('id', id).eq('device_id', deviceId)
+
+    // Get current user from session
+    const {
+      data: { user },
+      error: authError
+    } = await supabase.auth.getUser()
+
+    if (authError || !user) {
+      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+    }
+
+    // RLS ensures user can only delete their own plans
+    const { error } = await supabase.from('season_plans').delete().eq('id', id)
 
     if (error) {
       console.error('Error deleting plan:', error)

@@ -6,16 +6,19 @@ export interface Database {
       devices: {
         Row: {
           id: string
+          user_id: string
           created_at: string
           last_seen_at: string
         }
         Insert: {
           id?: string
+          user_id: string
           created_at?: string
           last_seen_at?: string
         }
         Update: {
           id?: string
+          user_id?: string
           created_at?: string
           last_seen_at?: string
         }
@@ -24,7 +27,7 @@ export interface Database {
       season_plans: {
         Row: {
           id: string
-          device_id: string
+          user_id: string
           name: string
           season: number
           created_at: string
@@ -32,7 +35,7 @@ export interface Database {
         }
         Insert: {
           id?: string
-          device_id: string
+          user_id: string
           name: string
           season?: number
           created_at?: string
@@ -40,25 +43,18 @@ export interface Database {
         }
         Update: {
           id?: string
-          device_id?: string
+          user_id?: string
           name?: string
           season?: number
           created_at?: string
           updated_at?: string
         }
-        Relationships: [
-          {
-            foreignKeyName: 'season_plans_device_id_fkey'
-            columns: ['device_id']
-            isOneToOne: false
-            referencedRelation: 'devices'
-            referencedColumns: ['id']
-          }
-        ]
+        Relationships: []
       }
       picks: {
         Row: {
           id: string
+          user_id: string
           plan_id: string
           event_id: string
           player_dg_id: number | null
@@ -68,6 +64,7 @@ export interface Database {
         }
         Insert: {
           id?: string
+          user_id: string
           plan_id: string
           event_id: string
           player_dg_id?: number | null
@@ -77,6 +74,7 @@ export interface Database {
         }
         Update: {
           id?: string
+          user_id?: string
           plan_id?: string
           event_id?: string
           player_dg_id?: number | null
@@ -97,7 +95,7 @@ export interface Database {
       player_flags: {
         Row: {
           id: string
-          device_id: string
+          user_id: string
           player_dg_id: number
           is_favorite: boolean
           is_flagged: boolean
@@ -105,7 +103,7 @@ export interface Database {
         }
         Insert: {
           id?: string
-          device_id: string
+          user_id: string
           player_dg_id: number
           is_favorite?: boolean
           is_flagged?: boolean
@@ -113,21 +111,13 @@ export interface Database {
         }
         Update: {
           id?: string
-          device_id?: string
+          user_id?: string
           player_dg_id?: number
           is_favorite?: boolean
           is_flagged?: boolean
           created_at?: string
         }
-        Relationships: [
-          {
-            foreignKeyName: 'player_flags_device_id_fkey'
-            columns: ['device_id']
-            isOneToOne: false
-            referencedRelation: 'devices'
-            referencedColumns: ['id']
-          }
-        ]
+        Relationships: []
       }
     }
     Views: {

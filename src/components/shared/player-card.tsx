@@ -1,10 +1,10 @@
 'use client'
 
-import { useState } from 'react'
 import Image from 'next/image'
 import { Star, Flag, type LucideIcon } from 'lucide-react'
 import type { LeaderboardPlayer } from '@/types/leaderboard'
 import { getPlayerImageUrl, getScoreStyle, formatLeaderboardPlayerName } from '@/lib/utils'
+import { usePlayerFlagsContext } from '@/components/providers'
 
 type PlayerCardProps = {
   player: LeaderboardPlayer
@@ -44,28 +44,19 @@ const PlayerAvatar = ({ imageUrl, playerName, size }: { imageUrl: string; player
   </div>
 )
 
-export function PlayerCard({
-  player: {
-    playerName,
-    currentScore,
-    currentPosition,
-    thru,
-    isFavorite: initialIsFavorite,
-    isFlagged: initialIsFlagged
-  }
-}: PlayerCardProps) {
-  const [isFavorite, setIsFavorite] = useState(initialIsFavorite ?? false)
-  const [isFlagged, setIsFlagged] = useState(initialIsFlagged ?? false)
+export function PlayerCard({ player: { dgId, playerName, currentScore, currentPosition, thru } }: PlayerCardProps) {
+  const { getPlayerFlag, toggleFavorite, toggleFlag } = usePlayerFlagsContext()
+  const { isFavorite, isFlagged } = getPlayerFlag(dgId)
   const imageUrl = getPlayerImageUrl(playerName) || '/placeholder.svg'
 
   const handleToggleFavorite = (e: React.MouseEvent) => {
     e.stopPropagation()
-    setIsFavorite(!isFavorite)
+    toggleFavorite(dgId)
   }
 
   const handleToggleFlag = (e: React.MouseEvent) => {
     e.stopPropagation()
-    setIsFlagged(!isFlagged)
+    toggleFlag(dgId)
   }
 
   const formattedPlayerName = formatLeaderboardPlayerName({ playerName })
