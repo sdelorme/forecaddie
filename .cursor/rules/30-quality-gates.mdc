@@ -1,0 +1,19 @@
+---
+type: always
+description: Quality gates before merging or deploying
+---
+
+# Quality gates
+
+Before considering a task "done":
+
+- `pnpm lint` passes
+- `pnpm typecheck` passes (ensure script exists; if not, add it)
+- New DataGolf endpoints have:
+  - runtime validation (Zod)
+  - consistent error handling (try/catch + typed error)
+  - a mapper to internal types
+- UI states include:
+  - loading skeleton or placeholder
+  - user-friendly error message
+- If behavior changes, update `docs/CONTEXT.md` and/or backlog notes.

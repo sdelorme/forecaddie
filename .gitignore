@@ -45,6 +45,9 @@ next-env.d.ts
 
 #cursor
 .cursorrules
+.cursor/settings.json
+.cursor/session*
+.cursor/tmp*
 
 # Build and cache
 .cache/

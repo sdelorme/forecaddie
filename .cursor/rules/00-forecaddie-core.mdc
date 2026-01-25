@@ -1,0 +1,38 @@
+---
+type: always
+description: Forecaddie project context and non-negotiables
+---
+
+# Forecaddie: project context
+
+Forecaddie is a golf statistics + live tournament tracking app built with Next.js (App Router), React, and TypeScript.
+
+Product intent:
+
+- A user-friendly wrapper over the DataGolf API (PGA Tour scope).
+- Betting companion for One-and-Done leagues: users plan picks per tournament; each golfer can only be used once per season.
+- Strategy-focused: users can build multiple planning scenarios using historical data and odds.
+- Future: shared accounts / multiple users per workspace.
+
+Tech baseline:
+
+- Next.js App Router. Server Components by default.
+- Tailwind + shadcn/ui components.
+- DataGolf API calls must go through `src/lib/api/datagolf/*` only.
+- Use `@/` imports.
+- Style: no semicolons, single quotes, no trailing commas (Prettier enforced).
+
+Repo structure reference:
+
+- `src/app/*` routes (App Router)
+- `src/lib/api/datagolf/` client/config/queries/mappers/types
+- `src/components/*` UI and shared components
+
+Operational commands:
+
+- `pnpm dev`, `pnpm build`, `pnpm lint`, `pnpm typecheck`, `pnpm test`
+
+When in doubt:
+
+- Prefer correctness + clarity over cleverness.
+- If introducing a new domain concept, define it in `docs/CONTEXT.md`.

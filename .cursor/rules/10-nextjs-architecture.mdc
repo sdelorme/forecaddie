@@ -1,0 +1,37 @@
+---
+type: always
+description: Next.js + TypeScript architecture and performance rules
+---
+
+# Next.js / TS architecture rules
+
+1. Server Components by default.
+
+   - Only use `'use client'` when needed (state, events, hooks, browser APIs).
+
+2. Data fetching:
+
+   - Server-side queries should live in `src/lib/api/datagolf/queries/*`.
+   - Pages call queries; queries call the client; mappers transform to internal types.
+   - Avoid fetching live leaderboard data in root layout unless it is essential for ALL routes.
+     - Prefer route-level fetch or segment-level layout.
+
+3. Errors:
+
+   - Use typed error objects from the data layer; never swallow errors.
+   - Implement `error.tsx` boundaries on critical routes and dynamic segments.
+
+4. TypeScript:
+
+   - Keep API types separate from app-domain types.
+   - Prefer explicit return types on public functions in `src/lib/*`.
+
+5. Performance:
+
+   - Use Next fetch caching/revalidate intentionally per endpoint class:
+     - Live: minutes; Odds: hour; Players: day; Schedule: week (unless changed).
+   - Avoid duplicate polling sources (client polling + server layout fetch).
+
+6. Security hygiene:
+   - Never expose `DATA_GOLF_API_KEY` to the client.
+   - API routes should validate inputs and set safe caching headers.
