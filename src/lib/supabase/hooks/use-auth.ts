@@ -1,6 +1,7 @@
 'use client'
 
 import { useCallback, useEffect, useState } from 'react'
+import { useSearchParams } from 'next/navigation'
 import { createClient } from '../client'
 import type { User, AuthError } from '@supabase/supabase-js'
 
@@ -24,6 +25,7 @@ export function useAuth(): UseAuthReturn {
   })
 
   const supabase = createClient()
+  const searchParams = useSearchParams()
 
   const refreshUser = useCallback(async () => {
     try {
@@ -68,10 +70,17 @@ export function useAuth(): UseAuthReturn {
     async (email: string) => {
       setState((prev) => ({ ...prev, isLoading: true, error: null }))
 
+      // Preserve intended redirect destination through the auth flow
+      const redirect = searchParams.get('redirect')
+      const callbackUrl = new URL('/auth/callback', window.location.origin)
+      if (redirect && redirect.startsWith('/') && !redirect.startsWith('//')) {
+        callbackUrl.searchParams.set('redirect', redirect)
+      }
+
       const { error } = await supabase.auth.signInWithOtp({
         email,
         options: {
-          emailRedirectTo: `${window.location.origin}/auth/callback`
+          emailRedirectTo: callbackUrl.toString()
         }
       })
 
@@ -83,7 +92,7 @@ export function useAuth(): UseAuthReturn {
 
       return { error }
     },
-    [supabase.auth]
+    [supabase.auth, searchParams]
   )
 
   const signOut = useCallback(async () => {

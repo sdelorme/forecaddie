@@ -1,12 +1,11 @@
-// Re-export client utilities
+// Client-safe exports only (no next/headers)
+// Server-only code must be imported directly from './server' or './auth'
+
+// Re-export browser client
 export { createClient } from './client'
-export { createClient as createServerClient } from './server'
 
-// Re-export auth utilities
-export { getUser, requireUser, getUserId } from './auth'
+// Re-export client hooks
 export { useAuth } from './hooks/use-auth'
-
-// Re-export hooks
 export { usePlans } from './hooks/use-plans'
 export { usePlayerFlags } from './hooks/use-player-flags'
 

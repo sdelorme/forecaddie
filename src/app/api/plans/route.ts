@@ -23,7 +23,9 @@ export async function GET() {
       return NextResponse.json({ error: 'Failed to fetch plans' }, { status: 500 })
     }
 
-    return NextResponse.json(data)
+    return NextResponse.json(data, {
+      headers: { 'Cache-Control': 'no-store' }
+    })
   } catch (error) {
     console.error('Error fetching plans:', error)
     return NextResponse.json({ error: 'Failed to fetch plans' }, { status: 500 })
@@ -45,10 +47,17 @@ export async function POST(request: NextRequest) {
     }
 
     const body = await request.json()
-    const { name, season = 2025 } = body
+    const { name, season } = body
 
-    if (!name || typeof name !== 'string') {
+    // Validate name
+    if (typeof name !== 'string' || name.trim().length === 0) {
       return NextResponse.json({ error: 'Plan name is required' }, { status: 400 })
+    }
+
+    // Validate season (default to current year if not provided)
+    const validatedSeason = season === undefined ? new Date().getFullYear() : season
+    if (typeof validatedSeason !== 'number' || !Number.isInteger(validatedSeason)) {
+      return NextResponse.json({ error: 'Season must be a valid year' }, { status: 400 })
     }
 
     const { data, error } = await supabase
@@ -56,7 +65,7 @@ export async function POST(request: NextRequest) {
       .insert({
         user_id: user.id,
         name: name.trim(),
-        season
+        season: validatedSeason
       })
       .select()
       .single()
@@ -66,7 +75,10 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: 'Failed to create plan' }, { status: 500 })
     }
 
-    return NextResponse.json(data, { status: 201 })
+    return NextResponse.json(data, {
+      status: 201,
+      headers: { 'Cache-Control': 'no-store' }
+    })
   } catch (error) {
     console.error('Error creating plan:', error)
     return NextResponse.json({ error: 'Failed to create plan' }, { status: 500 })

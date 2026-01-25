@@ -32,7 +32,9 @@ export async function GET(_request: NextRequest, { params }: RouteParams) {
       return NextResponse.json({ error: 'Failed to fetch plan' }, { status: 500 })
     }
 
-    return NextResponse.json(data)
+    return NextResponse.json(data, {
+      headers: { 'Cache-Control': 'no-store' }
+    })
   } catch (error) {
     console.error('Error fetching plan:', error)
     return NextResponse.json({ error: 'Failed to fetch plan' }, { status: 500 })
@@ -58,6 +60,20 @@ export async function PATCH(request: NextRequest, { params }: RouteParams) {
     const body = await request.json()
     const { name, season } = body
 
+    // Validate name if provided
+    if (name !== undefined) {
+      if (typeof name !== 'string' || name.trim().length === 0) {
+        return NextResponse.json({ error: 'Plan name must be a non-empty string' }, { status: 400 })
+      }
+    }
+
+    // Validate season if provided
+    if (season !== undefined) {
+      if (typeof season !== 'number' || !Number.isInteger(season)) {
+        return NextResponse.json({ error: 'Season must be a valid year' }, { status: 400 })
+      }
+    }
+
     const updates: Record<string, unknown> = { updated_at: new Date().toISOString() }
     if (name !== undefined) updates.name = name.trim()
     if (season !== undefined) updates.season = season
@@ -73,7 +89,9 @@ export async function PATCH(request: NextRequest, { params }: RouteParams) {
       return NextResponse.json({ error: 'Failed to update plan' }, { status: 500 })
     }
 
-    return NextResponse.json(data)
+    return NextResponse.json(data, {
+      headers: { 'Cache-Control': 'no-store' }
+    })
   } catch (error) {
     console.error('Error updating plan:', error)
     return NextResponse.json({ error: 'Failed to update plan' }, { status: 500 })
@@ -104,7 +122,12 @@ export async function DELETE(_request: NextRequest, { params }: RouteParams) {
       return NextResponse.json({ error: 'Failed to delete plan' }, { status: 500 })
     }
 
-    return NextResponse.json({ success: true })
+    return NextResponse.json(
+      { success: true },
+      {
+        headers: { 'Cache-Control': 'no-store' }
+      }
+    )
   } catch (error) {
     console.error('Error deleting plan:', error)
     return NextResponse.json({ error: 'Failed to delete plan' }, { status: 500 })

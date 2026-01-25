@@ -66,7 +66,8 @@ export default function LoginPage() {
           <div className="mb-6 p-4 bg-red-500/10 border border-red-500/20 rounded-lg flex items-start gap-3">
             <AlertCircle className="h-5 w-5 text-red-400 flex-shrink-0 mt-0.5" />
             <p className="text-red-400 text-sm">
-              {error || (authError === 'auth_failed' ? 'Authentication failed. Please try again.' : authError)}
+              {error ||
+                (authError === 'auth_failed' ? "We couldn't sign you in. Please request a new link." : authError)}
             </p>
           </div>
         )}

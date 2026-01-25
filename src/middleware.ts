@@ -1,6 +1,20 @@
 import { createServerClient } from '@supabase/ssr'
 import { NextResponse, type NextRequest } from 'next/server'
 
+/**
+ * Sanitize redirect path to prevent open redirect vulnerabilities.
+ * Only allows relative paths starting with '/'.
+ */
+function sanitizeRedirectPath(redirect: string | null): string {
+  if (!redirect) return '/dashboard'
+  // Only allow relative paths starting with '/'
+  // Reject protocol-relative URLs (//), external URLs, and malformed paths
+  if (!redirect.startsWith('/') || redirect.startsWith('//')) {
+    return '/dashboard'
+  }
+  return redirect
+}
+
 export async function middleware(request: NextRequest) {
   let supabaseResponse = NextResponse.next({ request })
 
@@ -18,6 +32,9 @@ export async function middleware(request: NextRequest) {
         return request.cookies.getAll()
       },
       setAll(cookiesToSet) {
+        // Note: request.cookies.set() is used here to ensure the modified request
+        // object reflects the new cookies when creating NextResponse.next().
+        // This pattern is from the official Supabase SSR docs for Next.js middleware.
         cookiesToSet.forEach(({ name, value }) => request.cookies.set(name, value))
         supabaseResponse = NextResponse.next({ request })
         cookiesToSet.forEach(({ name, value, options }) => supabaseResponse.cookies.set(name, value, options))
@@ -40,7 +57,7 @@ export async function middleware(request: NextRequest) {
 
   // Redirect logged-in users away from login page
   if (request.nextUrl.pathname === '/login' && user) {
-    const redirect = request.nextUrl.searchParams.get('redirect') || '/dashboard'
+    const redirect = sanitizeRedirectPath(request.nextUrl.searchParams.get('redirect'))
     const url = request.nextUrl.clone()
     url.pathname = redirect
     url.searchParams.delete('redirect')
