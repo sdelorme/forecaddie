@@ -1,5 +1,6 @@
 'use client'
 
+import Link from 'next/link'
 import { Table, TableCaption, TableHeader, TableRow, TableHead, TableBody, TableCell } from '@/components/ui'
 import { LeaderboardPlayer, LeaderboardEvent } from '@/types/leaderboard'
 
@@ -30,7 +31,11 @@ export default function LeaderboardTable({ players, eventInfo }: LeaderboardTabl
           {players.map((player) => (
             <TableRow key={player.dgId}>
               <TableCell>{player.currentPosition}</TableCell>
-              <TableCell>{player.playerName}</TableCell>
+              <TableCell>
+                <Link href={`/players/${player.dgId}`} className="hover:text-secondary transition-colors">
+                  {player.playerName}
+                </Link>
+              </TableCell>
               <TableCell>{player.currentScore}</TableCell>
               <TableCell>{player.thru}</TableCell>
               <TableCell>{player.r1}</TableCell>

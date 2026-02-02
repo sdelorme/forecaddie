@@ -4,6 +4,7 @@ import Image from 'next/image'
 import { Star, Flag, type LucideIcon } from 'lucide-react'
 import type { LeaderboardPlayer } from '@/types/leaderboard'
 import { getPlayerImageUrl, getScoreStyle, formatLeaderboardPlayerName } from '@/lib/utils'
+import { useRouter } from 'next/navigation'
 import { usePlayerFlagsContext } from '@/components/providers'
 
 type PlayerCardProps = {
@@ -46,6 +47,7 @@ const PlayerAvatar = ({ imageUrl, playerName, size }: { imageUrl: string; player
 
 export function PlayerCard({ player: { dgId, playerName, currentScore, currentPosition, thru } }: PlayerCardProps) {
   const { getPlayerFlag, toggleFavorite, toggleFlag } = usePlayerFlagsContext()
+  const router = useRouter()
   const { isFavorite, isFlagged } = getPlayerFlag(dgId)
   const imageUrl = getPlayerImageUrl(playerName) || '/placeholder.svg'
 
@@ -59,12 +61,19 @@ export function PlayerCard({ player: { dgId, playerName, currentScore, currentPo
     toggleFlag(dgId)
   }
 
+  const handleNavigate = () => {
+    router.push(`/players/${dgId}`)
+  }
+
   const formattedPlayerName = formatLeaderboardPlayerName({ playerName })
   const desktopScoreStyle = getScoreStyle(currentScore)
   const mobileScoreStyle = getScoreStyle(currentScore, 'bg')
 
   return (
-    <article className="flex-none snap-center sm:w-48 sm:bg-white sm:text-black p-1 sm:p-2 sm:rounded-sm sm:shadow-sm sm:border sm:border-gray-100">
+    <article
+      onClick={handleNavigate}
+      className="flex-none snap-center sm:w-48 sm:bg-white sm:text-black p-1 sm:p-2 sm:rounded-sm sm:shadow-sm sm:border sm:border-gray-100 cursor-pointer"
+    >
       {/* Mobile Layout */}
       <div className="sm:hidden relative flex flex-col items-center w-20">
         <div className="relative">
