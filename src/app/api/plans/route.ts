@@ -16,14 +16,23 @@ export async function GET() {
     }
 
     // RLS ensures only user's own plans are returned
-    const { data, error } = await supabase.from('season_plans').select('*').order('created_at', { ascending: false })
+    const { data, error } = await supabase
+      .from('season_plans')
+      .select('*, picks(count)')
+      .order('created_at', { ascending: false })
 
     if (error) {
       console.error('Error fetching plans:', error)
       return NextResponse.json({ error: 'Failed to fetch plans' }, { status: 500 })
     }
 
-    return NextResponse.json(data, {
+    // Flatten the picks count into a simple field
+    const plans = (data ?? []).map(({ picks, ...plan }) => ({
+      ...plan,
+      picks_count: picks?.[0]?.count ?? 0
+    }))
+
+    return NextResponse.json(plans, {
       headers: { 'Cache-Control': 'no-store' }
     })
   } catch (error) {
