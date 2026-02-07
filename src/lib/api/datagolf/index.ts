@@ -4,6 +4,7 @@
 export { getLiveLeaderboard } from './queries/live-leaderboard'
 export { getSchedule } from './queries/schedule'
 export { getPlayerList } from './queries/players'
+export { getPlayerDetail } from './queries/player-detail'
 
 /**
  * Types used across both server and client components

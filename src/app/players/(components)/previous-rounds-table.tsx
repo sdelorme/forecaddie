@@ -1,50 +1,41 @@
-'use client'
-
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui'
+import type { PlayerTournamentResult } from '@/types/player-detail'
 
 interface PreviousRoundsTableProps {
-  playerId: string
+  playerName: string
+  history: PlayerTournamentResult[]
 }
 
-export default function PreviousRoundsTable({ playerId }: PreviousRoundsTableProps) {
-  // Placeholder data
-  const rounds = [
-    {
-      tournament: 'Masters Tournament',
-      date: '2023-04-09',
-      score: -12,
-      position: 1
-    },
-    {
-      tournament: 'PGA Championship',
-      date: '2023-05-21',
-      score: -8,
-      position: 3
-    },
-    { tournament: 'U.S. Open', date: '2023-06-18', score: -6, position: 5 }
-  ]
-
+export default function PreviousRoundsTable({ playerName, history }: PreviousRoundsTableProps) {
   return (
     <div className="bg-gray-800 rounded-lg p-4">
-      <h2 className="text-xl font-bold text-white mb-4">Previous Rounds for Player {playerId}</h2>
+      <h2 className="text-xl font-bold text-white mb-4">Tournament History for {playerName}</h2>
       <Table>
         <TableHeader>
           <TableRow>
             <TableHead>Tournament</TableHead>
-            <TableHead>Date</TableHead>
-            <TableHead>Score</TableHead>
-            <TableHead>Position</TableHead>
+            <TableHead>Year</TableHead>
+            <TableHead>Finish</TableHead>
+            <TableHead>Earnings</TableHead>
           </TableRow>
         </TableHeader>
         <TableBody>
-          {rounds.map((round, index) => (
-            <TableRow key={index}>
-              <TableCell>{round.tournament}</TableCell>
-              <TableCell>{round.date}</TableCell>
-              <TableCell>{round.score}</TableCell>
-              <TableCell>{round.position}</TableCell>
+          {history.length === 0 ? (
+            <TableRow>
+              <TableCell colSpan={4} className="text-gray-400">
+                No recent tournament results available for this player.
+              </TableCell>
             </TableRow>
-          ))}
+          ) : (
+            history.map((result, index) => (
+              <TableRow key={`${result.eventName}-${index}`}>
+                <TableCell>{result.eventName}</TableCell>
+                <TableCell>{result.year ?? '—'}</TableCell>
+                <TableCell>{result.finishPosition ?? '—'}</TableCell>
+                <TableCell>{result.earnings != null ? `$${result.earnings.toLocaleString()}` : '—'}</TableCell>
+              </TableRow>
+            ))
+          )}
         </TableBody>
       </Table>
     </div>

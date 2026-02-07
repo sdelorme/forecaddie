@@ -3,21 +3,29 @@ export const ENDPOINTS = {
   LIVE_PREDICTIONS: '/preds/in-play',
   SCHEDULE: '/get-schedule',
   PLAYERS: '/get-player-list',
-  OUTRIGHT_ODDS: '/betting-tools/outrights'
+  OUTRIGHT_ODDS: '/betting-tools/outrights',
+  DG_RANKINGS: '/preds/get-dg-rankings',
+  SKILL_RATINGS: '/preds/skill-ratings',
+  EVENT_LIST: '/historical-raw-data/event-list',
+  EVENT_RESULTS: '/historical-event-data/events'
 } as const
 
 export const CACHE_TAGS = {
   LIVE: 'live-data',
   SCHEDULE: 'schedule',
   PLAYERS: 'players',
-  ODDS: 'odds'
+  ODDS: 'odds',
+  RANKINGS: 'rankings',
+  PLAYER_HISTORY: 'player-history'
 } as const
 
 export const REVALIDATE_INTERVALS = {
   LIVE_ACTIVE: 300, // 5 minutes
   SCHEDULE: 604800, // 1 week
   PLAYERS: 86400, // 24 hours
-  ODDS: 3600 // 1 hour
+  ODDS: 3600, // 1 hour
+  RANKINGS: 86400, // 24 hours
+  PLAYER_HISTORY: 604800 // 1 week
 } as const
 
 export const BASE_URL = 'https://feeds.datagolf.com'

@@ -1,24 +1,15 @@
-'use client'
-
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui'
+import type { PlayerRanking } from '@/types/player-detail'
 
 interface PlayerRankingsTableProps {
-  playerId: string
+  playerName: string
+  rankings: PlayerRanking[]
 }
 
-export default function PlayerRankingsTable({ playerId }: PlayerRankingsTableProps) {
-  // Placeholder data
-  const rankings = [
-    { category: 'World Ranking', rank: 1 },
-    { category: 'FedEx Cup', rank: 2 },
-    { category: 'Scoring Average', rank: 3 },
-    { category: 'Driving Distance', rank: 5 },
-    { category: 'Greens in Regulation', rank: 4 }
-  ]
-
+export default function PlayerRankingsTable({ playerName, rankings }: PlayerRankingsTableProps) {
   return (
     <div className="bg-gray-800 rounded-lg p-4">
-      <h2 className="text-xl font-bold text-white mb-4">Player Rankings for Player {playerId}</h2>
+      <h2 className="text-xl font-bold text-white mb-4">Rankings for {playerName}</h2>
       <Table>
         <TableHeader>
           <TableRow>
@@ -27,12 +18,20 @@ export default function PlayerRankingsTable({ playerId }: PlayerRankingsTablePro
           </TableRow>
         </TableHeader>
         <TableBody>
-          {rankings.map((ranking, index) => (
-            <TableRow key={index}>
-              <TableCell>{ranking.category}</TableCell>
-              <TableCell>{ranking.rank}</TableCell>
+          {rankings.length === 0 ? (
+            <TableRow>
+              <TableCell colSpan={2} className="text-gray-400">
+                No rankings available for this player yet.
+              </TableCell>
             </TableRow>
-          ))}
+          ) : (
+            rankings.map((ranking) => (
+              <TableRow key={ranking.label}>
+                <TableCell>{ranking.label}</TableCell>
+                <TableCell>{ranking.value}</TableCell>
+              </TableRow>
+            ))
+          )}
         </TableBody>
       </Table>
     </div>

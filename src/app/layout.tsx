@@ -20,7 +20,10 @@ export const metadata: Metadata = {
 }
 
 export default async function RootLayout({ children }: { children: React.ReactNode }) {
-  const [initialData, schedule] = await Promise.all([getLiveLeaderboard(), getSchedule()])
+  const [initialData, schedule] = await Promise.all([
+    getLiveLeaderboard().catch(() => undefined),
+    getSchedule().catch(() => [])
+  ])
 
   const now = new Date()
   const currentEvent = getCurrentEvent(schedule, now)
