@@ -73,7 +73,7 @@ export function usePlans(): UsePlansReturn {
   }, [isAuthenticated, fetchPlans])
 
   const createPlan = useCallback(
-    async (name: string, season = 2025): Promise<SeasonPlan | null> => {
+    async (name: string, season = new Date().getFullYear()): Promise<SeasonPlan | null> => {
       if (!isAuthenticated) {
         setError('Please sign in to create plans')
         return null
@@ -95,7 +95,9 @@ export function usePlans(): UsePlansReturn {
         }
 
         if (!response.ok) {
-          throw new Error('Failed to create plan')
+          const body = await response.json().catch(() => ({}))
+          console.error('Plan creation failed:', body)
+          throw new Error(body.detail || body.error || 'Failed to create plan')
         }
 
         const newPlan = await response.json()

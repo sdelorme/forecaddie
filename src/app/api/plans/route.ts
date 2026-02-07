@@ -71,8 +71,11 @@ export async function POST(request: NextRequest) {
       .single()
 
     if (error) {
-      console.error('Error creating plan:', error)
-      return NextResponse.json({ error: 'Failed to create plan' }, { status: 500 })
+      console.error('Error creating plan:', error.message, error.code, error.details, error.hint)
+      return NextResponse.json(
+        { error: 'Failed to create plan', detail: error.message, code: error.code, hint: error.hint },
+        { status: 500 }
+      )
     }
 
     return NextResponse.json(data, {
