@@ -32,7 +32,7 @@ export default async function RootLayout({ children }: { children: React.ReactNo
   return (
     <html lang="en" className="h-full">
       <body className={`${lora.className} bg-black min-h-full flex flex-col`}>
-        <PlayerFlagsProvider>
+        <PlayerFlagsProvider eventId={currentEvent?.eventId}>
           <ScrollWrapper>
             <LiveStatsProvider initialData={initialData} isComplete={isComplete}>
               <Header />

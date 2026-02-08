@@ -99,6 +99,7 @@ export interface Database {
           player_dg_id: number
           is_favorite: boolean
           is_flagged: boolean
+          event_id: string | null
           created_at: string
         }
         Insert: {
@@ -107,6 +108,7 @@ export interface Database {
           player_dg_id: number
           is_favorite?: boolean
           is_flagged?: boolean
+          event_id?: string | null
           created_at?: string
         }
         Update: {
@@ -115,6 +117,7 @@ export interface Database {
           player_dg_id?: number
           is_favorite?: boolean
           is_flagged?: boolean
+          event_id?: string | null
           created_at?: string
         }
         Relationships: []

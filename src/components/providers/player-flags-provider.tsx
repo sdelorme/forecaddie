@@ -21,10 +21,12 @@ const PlayerFlagsContext = createContext<PlayerFlagsContextValue | null>(null)
 
 type PlayerFlagsProviderProps = {
   children: React.ReactNode
+  /** Current event ID — flags are scoped to this tournament */
+  eventId?: string
 }
 
-export function PlayerFlagsProvider({ children }: PlayerFlagsProviderProps) {
-  const flagsState = usePlayerFlags()
+export function PlayerFlagsProvider({ children, eventId }: PlayerFlagsProviderProps) {
+  const flagsState = usePlayerFlags(eventId)
 
   return <PlayerFlagsContext.Provider value={flagsState}>{children}</PlayerFlagsContext.Provider>
 }

@@ -3,13 +3,24 @@ import { PlayerCard } from './player-card'
 import { TournamentStatusBadge } from './tournament-status-badge'
 
 type LeaderboardScrollProps = {
-  leaderboardPlayers: LeaderboardPlayer[]
+  starred: LeaderboardPlayer[]
+  rest: LeaderboardPlayer[]
   eventInfo?: LeaderboardEvent
   isComplete?: boolean
 }
 
-export function LeaderboardScroll({ leaderboardPlayers = [], eventInfo, isComplete = false }: LeaderboardScrollProps) {
-  if (!leaderboardPlayers || leaderboardPlayers.length === 0) {
+function ScrollDivider() {
+  return (
+    <div className="flex-none flex items-center px-1">
+      <div className="w-px h-8 bg-yellow-400/40 rounded-full" />
+    </div>
+  )
+}
+
+export function LeaderboardScroll({ starred = [], rest = [], eventInfo, isComplete = false }: LeaderboardScrollProps) {
+  const hasPlayers = starred.length > 0 || rest.length > 0
+
+  if (!hasPlayers) {
     return (
       <div className="flex overflow-x-auto snap-x snap-mandatory gap-1 sm:gap-1 p-1 sm:p-1 scrollbar-hide bg-primary border-b-[1px]">
         <div className="flex-none snap-center bg-white/10 text-white p-1 sm:p-2 rounded-sm shadow-sm min-w-[56px] sm:min-w-[180px] border border-white/10">
@@ -33,9 +44,18 @@ export function LeaderboardScroll({ leaderboardPlayers = [], eventInfo, isComple
         </div>
       )}
       <div className="flex overflow-x-auto snap-x snap-mandatory gap-1 sm:gap-1 p-1 sm:p-1 scrollbar-hide">
-        {leaderboardPlayers.map((player) => {
-          return <PlayerCard key={player.dgId} player={player} />
-        })}
+        {/* Starred players scroll first (leftmost) */}
+        {starred.map((player) => (
+          <PlayerCard key={player.dgId} player={player} />
+        ))}
+
+        {/* Visual separator between starred and rest */}
+        {starred.length > 0 && rest.length > 0 && <ScrollDivider />}
+
+        {/* Remaining players in position order */}
+        {rest.map((player) => (
+          <PlayerCard key={player.dgId} player={player} />
+        ))}
       </div>
     </div>
   )
