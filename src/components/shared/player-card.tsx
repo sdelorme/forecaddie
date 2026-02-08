@@ -24,11 +24,19 @@ type IconButtonProps = {
   onClick: (e: React.MouseEvent) => void
   activeColor: IconColor
   ariaLabel: string
+  size?: string
 }
 
-const IconButton = ({ icon: Icon, isActive, onClick, activeColor, ariaLabel }: IconButtonProps) => (
+const IconButton = ({
+  icon: Icon,
+  isActive,
+  onClick,
+  activeColor,
+  ariaLabel,
+  size = 'w-3.5 h-3.5'
+}: IconButtonProps) => (
   <button onClick={onClick} className="hover:scale-110 transition-transform" aria-label={ariaLabel}>
-    <Icon className={`w-3.5 h-3.5 ${isActive ? iconColorClasses[activeColor] : 'text-gray-300'} stroke-[1.5]`} />
+    <Icon className={`${size} ${isActive ? iconColorClasses[activeColor] : 'text-gray-300'} stroke-[1.5]`} />
   </button>
 )
 
@@ -69,10 +77,13 @@ export function PlayerCard({ player: { dgId, playerName, currentScore, currentPo
   const desktopScoreStyle = getScoreStyle(currentScore)
   const mobileScoreStyle = getScoreStyle(currentScore, 'bg')
 
+  const flaggedMobileClass = isFlagged ? 'bg-flag-highlight/30 rounded-lg' : ''
+  const flaggedDesktopClass = isFlagged ? 'sm:bg-flag-highlight sm:border-flag/25' : 'sm:bg-white sm:border-gray-100'
+
   return (
     <article
       onClick={handleNavigate}
-      className="flex-none snap-center sm:w-48 sm:bg-white sm:text-black p-1 sm:p-2 sm:rounded-sm sm:shadow-sm sm:border sm:border-gray-100 cursor-pointer"
+      className={`flex-none snap-center sm:w-48 sm:text-black p-1 sm:p-2 sm:rounded-sm sm:shadow-sm sm:border cursor-pointer transition-colors ${flaggedDesktopClass} ${flaggedMobileClass}`}
     >
       {/* Mobile Layout */}
       <div className="sm:hidden relative flex flex-col items-center w-20">
@@ -85,7 +96,27 @@ export function PlayerCard({ player: { dgId, playerName, currentScore, currentPo
           </div>
         </div>
 
-        <div className="text-center mt-1 w-20">
+        {/* Mobile star/flag icons */}
+        <div className="flex gap-1.5 mt-0.5">
+          <IconButton
+            icon={Star}
+            isActive={isFavorite}
+            onClick={handleToggleFavorite}
+            activeColor="yellow"
+            ariaLabel={isFavorite ? 'Remove from favorites' : 'Add to favorites'}
+            size="w-3 h-3"
+          />
+          <IconButton
+            icon={Flag}
+            isActive={isFlagged}
+            onClick={handleToggleFlag}
+            activeColor="red"
+            ariaLabel={isFlagged ? 'Remove flag' : 'Add flag'}
+            size="w-3 h-3"
+          />
+        </div>
+
+        <div className="text-center w-20">
           <p className="text-[9px] font-semibold text-white truncate">
             {currentPosition}. {formattedPlayerName}
           </p>

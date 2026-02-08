@@ -1,6 +1,7 @@
 'use client'
 
 import { useLiveStats } from './live-stats-provider'
+import { useSortedLeaderboard } from '@/lib/hooks/use-sorted-leaderboard'
 import { LeaderboardScroll } from '../shared/leaderboard-scroll'
 
 function LeaderboardSkeleton() {
@@ -23,10 +24,11 @@ function LeaderboardSkeleton() {
 
 export default function LeaderboardScrollWrapper() {
   const { players, eventInfo, loading, isComplete } = useLiveStats()
+  const { starred, rest } = useSortedLeaderboard(players)
 
   if (loading) {
     return <LeaderboardSkeleton />
   }
 
-  return <LeaderboardScroll leaderboardPlayers={players} eventInfo={eventInfo} isComplete={isComplete} />
+  return <LeaderboardScroll starred={starred} rest={rest} eventInfo={eventInfo} isComplete={isComplete} />
 }
