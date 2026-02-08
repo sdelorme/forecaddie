@@ -1,5 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { createClient } from '@/lib/supabase/server'
+import { authenticateRoute, unauthorizedResponse } from '@/lib/supabase/route-auth'
+import { isValidUUID, invalidUUIDResponse, parseBody } from '@/lib/api/validation/utils'
+import { CreatePickSchema } from '@/lib/api/validation/schemas'
 
 type RouteParams = {
   params: Promise<{ id: string }>
@@ -8,23 +10,16 @@ type RouteParams = {
 export async function GET(_request: NextRequest, { params }: RouteParams) {
   const { id } = await params
 
+  if (!isValidUUID(id)) return invalidUUIDResponse('id')
+
   try {
-    const supabase = await createClient()
-
-    // Get current user from session
-    const {
-      data: { user },
-      error: authError
-    } = await supabase.auth.getUser()
-
-    if (authError || !user) {
-      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
-    }
+    const { supabase, user } = await authenticateRoute()
+    if (!supabase || !user) return unauthorizedResponse()
 
     const { data, error } = await supabase.from('picks').select('*').eq('plan_id', id).order('created_at')
 
     if (error) {
-      console.error('Error fetching picks:', error)
+      console.error('[picks:list]', { userId: user.id, error: error.message })
       return NextResponse.json({ error: 'Failed to fetch picks' }, { status: 500 })
     }
 
@@ -32,7 +27,7 @@ export async function GET(_request: NextRequest, { params }: RouteParams) {
       headers: { 'Cache-Control': 'no-store' }
     })
   } catch (error) {
-    console.error('Error fetching picks:', error)
+    console.error('[picks:list]', error)
     return NextResponse.json({ error: 'Failed to fetch picks' }, { status: 500 })
   }
 }
@@ -40,26 +35,16 @@ export async function GET(_request: NextRequest, { params }: RouteParams) {
 export async function POST(request: NextRequest, { params }: RouteParams) {
   const { id } = await params
 
+  if (!isValidUUID(id)) return invalidUUIDResponse('id')
+
   try {
-    const supabase = await createClient()
+    const { supabase, user } = await authenticateRoute()
+    if (!supabase || !user) return unauthorizedResponse()
 
-    // Get current user from session
-    const {
-      data: { user },
-      error: authError
-    } = await supabase.auth.getUser()
+    const parsed = await parseBody(request, CreatePickSchema)
+    if (parsed.error) return parsed.error
 
-    if (authError || !user) {
-      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
-    }
-
-    const body = await request.json()
-    const { event_id, player_dg_id } = body
-
-    // Validate event_id
-    if (typeof event_id !== 'string' || event_id.trim().length === 0) {
-      return NextResponse.json({ error: 'event_id is required' }, { status: 400 })
-    }
+    const { event_id, player_dg_id } = parsed.data
 
     // Verify plan exists and belongs to user
     const { data: plan, error: planError } = await supabase
@@ -85,7 +70,10 @@ export async function POST(request: NextRequest, { params }: RouteParams) {
 
       if (existingPlayerPick) {
         return NextResponse.json(
-          { error: 'Player already used in this plan', event_id: existingPlayerPick.event_id },
+          {
+            error: 'Player already used in this plan',
+            event_id: existingPlayerPick.event_id
+          },
           { status: 409 }
         )
       }
@@ -116,11 +104,16 @@ export async function POST(request: NextRequest, { params }: RouteParams) {
       .single()
 
     if (error) {
-      console.error('Error creating pick:', error.message, error.code, error.details, error.hint)
-      return NextResponse.json(
-        { error: 'Failed to create pick', detail: error.message, code: error.code, hint: error.hint },
-        { status: 500 }
-      )
+      console.error('[picks:create]', {
+        userId: user.id,
+        error: error.message
+      })
+
+      if (error.code === '23505') {
+        return NextResponse.json({ error: 'Constraint violation: duplicate pick' }, { status: 409 })
+      }
+
+      return NextResponse.json({ error: 'Failed to create pick' }, { status: 500 })
     }
 
     return NextResponse.json(data, {
@@ -128,7 +121,7 @@ export async function POST(request: NextRequest, { params }: RouteParams) {
       headers: { 'Cache-Control': 'no-store' }
     })
   } catch (error) {
-    console.error('Error creating pick:', error)
+    console.error('[picks:create]', error)
     return NextResponse.json({ error: 'Failed to create pick' }, { status: 500 })
   }
 }

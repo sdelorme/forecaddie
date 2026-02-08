@@ -1,5 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { createClient } from '@/lib/supabase/server'
+import { authenticateRoute, unauthorizedResponse } from '@/lib/supabase/route-auth'
+import { isValidUUID, invalidUUIDResponse, parseBody } from '@/lib/api/validation/utils'
+import { UpdatePickSchema } from '@/lib/api/validation/schemas'
 
 type RouteParams = {
   params: Promise<{ id: string; pickId: string }>
@@ -8,21 +10,17 @@ type RouteParams = {
 export async function PATCH(request: NextRequest, { params }: RouteParams) {
   const { id, pickId } = await params
 
+  if (!isValidUUID(id)) return invalidUUIDResponse('id')
+  if (!isValidUUID(pickId)) return invalidUUIDResponse('pickId')
+
   try {
-    const supabase = await createClient()
+    const { supabase, user } = await authenticateRoute()
+    if (!supabase || !user) return unauthorizedResponse()
 
-    // Get current user from session
-    const {
-      data: { user },
-      error: authError
-    } = await supabase.auth.getUser()
+    const parsed = await parseBody(request, UpdatePickSchema)
+    if (parsed.error) return parsed.error
 
-    if (authError || !user) {
-      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
-    }
-
-    const body = await request.json()
-    const { player_dg_id } = body
+    const { player_dg_id } = parsed.data
 
     // OAD constraint: each player can only be used once per plan
     if (player_dg_id !== undefined && player_dg_id !== null) {
@@ -37,7 +35,10 @@ export async function PATCH(request: NextRequest, { params }: RouteParams) {
 
       if (existingPlayerPick) {
         return NextResponse.json(
-          { error: 'Player already used in this plan', event_id: existingPlayerPick.event_id },
+          {
+            error: 'Player already used in this plan',
+            event_id: existingPlayerPick.event_id
+          },
           { status: 409 }
         )
       }
@@ -50,6 +51,7 @@ export async function PATCH(request: NextRequest, { params }: RouteParams) {
         updated_at: new Date().toISOString()
       })
       .eq('id', pickId)
+      .eq('plan_id', id)
       .select()
       .single()
 
@@ -57,7 +59,16 @@ export async function PATCH(request: NextRequest, { params }: RouteParams) {
       if (error.code === 'PGRST116') {
         return NextResponse.json({ error: 'Pick not found' }, { status: 404 })
       }
-      console.error('Error updating pick:', error)
+
+      console.error('[picks:update]', {
+        userId: user.id,
+        error: error.message
+      })
+
+      if (error.code === '23505') {
+        return NextResponse.json({ error: 'Constraint violation: duplicate pick' }, { status: 409 })
+      }
+
       return NextResponse.json({ error: 'Failed to update pick' }, { status: 500 })
     }
 
@@ -65,31 +76,28 @@ export async function PATCH(request: NextRequest, { params }: RouteParams) {
       headers: { 'Cache-Control': 'no-store' }
     })
   } catch (error) {
-    console.error('Error updating pick:', error)
+    console.error('[picks:update]', error)
     return NextResponse.json({ error: 'Failed to update pick' }, { status: 500 })
   }
 }
 
 export async function DELETE(_request: NextRequest, { params }: RouteParams) {
-  const { pickId } = await params
+  const { id, pickId } = await params
+
+  if (!isValidUUID(id)) return invalidUUIDResponse('id')
+  if (!isValidUUID(pickId)) return invalidUUIDResponse('pickId')
 
   try {
-    const supabase = await createClient()
+    const { supabase, user } = await authenticateRoute()
+    if (!supabase || !user) return unauthorizedResponse()
 
-    // Get current user from session
-    const {
-      data: { user },
-      error: authError
-    } = await supabase.auth.getUser()
-
-    if (authError || !user) {
-      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
-    }
-
-    const { error } = await supabase.from('picks').delete().eq('id', pickId)
+    const { error } = await supabase.from('picks').delete().eq('id', pickId).eq('plan_id', id)
 
     if (error) {
-      console.error('Error deleting pick:', error)
+      console.error('[picks:delete]', {
+        userId: user.id,
+        error: error.message
+      })
       return NextResponse.json({ error: 'Failed to delete pick' }, { status: 500 })
     }
 
@@ -100,7 +108,7 @@ export async function DELETE(_request: NextRequest, { params }: RouteParams) {
       }
     )
   } catch (error) {
-    console.error('Error deleting pick:', error)
+    console.error('[picks:delete]', error)
     return NextResponse.json({ error: 'Failed to delete pick' }, { status: 500 })
   }
 }
