@@ -2,14 +2,19 @@ import type { LeaderboardPlayer } from '@/types/leaderboard'
 import type { Player } from '@/types/player'
 import { RawPlayer } from '../api/datagolf'
 
+export function formatPlayerName(playerName: string): string {
+  const parts = playerName.split(', ')
+  if (parts.length < 2) return playerName
+  return `${parts[1]} ${parts[0]}`
+}
+
 export function formatLeaderboardPlayerName(player: Pick<LeaderboardPlayer, 'playerName'>) {
   const [lastName, firstName] = player.playerName.split(', ')
   return `${firstName[0]}. ${lastName}`
 }
 
 export function formatPlayerListName(player: Pick<RawPlayer, 'player_name'>) {
-  const [lastName, firstName] = player.player_name.split(', ')
-  return `${firstName} ${lastName}`
+  return formatPlayerName(player.player_name)
 }
 
 export function getLastName(player_name: string) {

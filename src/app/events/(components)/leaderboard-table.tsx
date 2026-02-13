@@ -1,10 +1,13 @@
 'use client'
 
+import { useState, useMemo } from 'react'
 import Link from 'next/link'
 import { Star, Flag } from 'lucide-react'
 import { Table, TableCaption, TableHeader, TableRow, TableHead, TableBody, TableCell } from '@/components/ui'
+import { SearchInput } from '@/components/shared'
 import { usePlayerFlagsContext } from '@/components/providers'
 import { useSortedLeaderboard } from '@/lib/hooks/use-sorted-leaderboard'
+import { formatPlayerName } from '@/lib/utils'
 import type { LeaderboardPlayer, LeaderboardEvent } from '@/types/leaderboard'
 
 interface LeaderboardTableProps {
@@ -41,7 +44,7 @@ function PlayerRow({ player }: { player: LeaderboardPlayer }) {
       <TableCell>{player.currentPosition}</TableCell>
       <TableCell>
         <Link href={`/players/${player.dgId}`} className="hover:text-secondary transition-colors">
-          {player.playerName}
+          {formatPlayerName(player.playerName)}
         </Link>
       </TableCell>
       <TableCell>{player.currentScore}</TableCell>
@@ -55,11 +58,24 @@ function PlayerRow({ player }: { player: LeaderboardPlayer }) {
   )
 }
 
+function filterPlayers(players: LeaderboardPlayer[], search: string): LeaderboardPlayer[] {
+  if (!search) return players
+  const term = search.toLowerCase().trim()
+  return players.filter((p) => p.playerName.toLowerCase().includes(term))
+}
+
 export default function LeaderboardTable({ players, eventInfo }: LeaderboardTableProps) {
+  const [search, setSearch] = useState('')
   const { starred, rest } = useSortedLeaderboard(players)
+
+  const filteredStarred = useMemo(() => filterPlayers(starred, search), [starred, search])
+  const filteredRest = useMemo(() => filterPlayers(rest, search), [rest, search])
 
   return (
     <div className="bg-gray-800 rounded-lg p-4">
+      <div className="flex items-center justify-end mb-2">
+        <SearchInput value={search} onChange={setSearch} placeholder="Search players..." />
+      </div>
       <Table className="text-white">
         <TableCaption>Current Round: {eventInfo.currentRound}</TableCaption>
         <TableHeader>
@@ -78,23 +94,32 @@ export default function LeaderboardTable({ players, eventInfo }: LeaderboardTabl
         </TableHeader>
         <TableBody>
           {/* Starred (favorited) players — visually partitioned at top */}
-          {starred.length > 0 && (
+          {filteredStarred.length > 0 && (
             <>
-              {starred.map((player) => (
+              {filteredStarred.map((player) => (
                 <PlayerRow key={player.dgId} player={player} />
               ))}
               {/* Separator between starred and rest */}
-              <TableRow>
-                <TableCell colSpan={10} className="p-0">
-                  <div className="h-px bg-yellow-400/30" />
-                </TableCell>
-              </TableRow>
+              {filteredRest.length > 0 && (
+                <TableRow>
+                  <TableCell colSpan={10} className="p-0">
+                    <div className="h-px bg-yellow-400/30" />
+                  </TableCell>
+                </TableRow>
+              )}
             </>
           )}
           {/* Remaining players in position order */}
-          {rest.map((player) => (
+          {filteredRest.map((player) => (
             <PlayerRow key={player.dgId} player={player} />
           ))}
+          {filteredStarred.length === 0 && filteredRest.length === 0 && search && (
+            <TableRow>
+              <TableCell colSpan={10} className="text-center text-gray-400">
+                No players match &ldquo;{search}&rdquo;
+              </TableCell>
+            </TableRow>
+          )}
         </TableBody>
       </Table>
     </div>

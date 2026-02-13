@@ -47,9 +47,9 @@ function sortPlayers(players: LeaderboardPlayer[]): LeaderboardPlayer[] {
       return posA - posB
     }
 
-    // If positions are equal, sort by first name
-    const nameA = a.playerName.split(' ')[0]
-    const nameB = b.playerName.split(' ')[0]
+    // If positions are equal, sort by last name
+    const nameA = a.playerName.split(', ')[0]
+    const nameB = b.playerName.split(', ')[0]
     return nameA.localeCompare(nameB)
   })
 }

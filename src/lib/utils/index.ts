@@ -2,7 +2,13 @@
 export { cn } from './class-name'
 
 // Player utilities
-export { formatLeaderboardPlayerName, formatPlayerListName, getLastName, getFirstLetterOfLastName } from './player'
+export {
+  formatPlayerName,
+  formatLeaderboardPlayerName,
+  formatPlayerListName,
+  getLastName,
+  getFirstLetterOfLastName
+} from './player'
 
 // Player image utilities
 export { getPlayerImageUrl, preloadPlayerImages, getMissingPlayerImages } from './player-images'

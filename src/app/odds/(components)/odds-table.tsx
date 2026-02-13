@@ -1,38 +1,32 @@
 'use client'
 
+import { useState } from 'react'
 import { NormalizedOddsData } from '@/lib/api/datagolf/types/odds'
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow, TableCaption } from '@/components/ui'
+import { DataTable } from '@/components/ui'
+import { SearchInput } from '@/components/shared'
+import { oddsColumns } from './odds-columns'
 
 interface OddsTableProps {
   odds: NormalizedOddsData
 }
 
 export default function OddsTable({ odds }: OddsTableProps) {
+  const [search, setSearch] = useState('')
+
   return (
     <div className="bg-gray-800 rounded-lg p-4">
-      <Table className="text-white">
-        <TableCaption>{odds.eventName}</TableCaption>
-        <TableHeader>
-          <TableRow>
-            <TableHead>Player</TableHead>
-            <TableHead className="text-right">FanDuel</TableHead>
-            <TableHead className="text-right">DraftKings</TableHead>
-            <TableHead className="text-right">BetMGM</TableHead>
-            <TableHead className="text-right">DataGolf</TableHead>
-          </TableRow>
-        </TableHeader>
-        <TableBody>
-          {odds.players.map((player) => (
-            <TableRow key={player.dgId}>
-              <TableCell>{player.playerName}</TableCell>
-              <TableCell className="text-right">{player.fanduel}</TableCell>
-              <TableCell className="text-right">{player.draftkings}</TableCell>
-              <TableCell className="text-right">{player.betmgm}</TableCell>
-              <TableCell className="text-right">{player.datagolfBaselineHistoryFit}</TableCell>
-            </TableRow>
-          ))}
-        </TableBody>
-      </Table>
+      <div className="flex items-center justify-end mb-2">
+        <SearchInput value={search} onChange={setSearch} placeholder="Search players..." />
+      </div>
+      <DataTable
+        columns={oddsColumns}
+        data={odds.players}
+        caption={odds.eventName}
+        filterValue={search}
+        filterColumnId="playerName"
+        noResultsMessage={search ? `No players match \u201c${search}\u201d` : 'No results.'}
+        tableClassName="text-white"
+      />
     </div>
   )
 }

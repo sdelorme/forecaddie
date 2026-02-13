@@ -1,7 +1,7 @@
 import Image from 'next/image'
 import { getPlayerDetail } from '@/lib/api/datagolf'
 import PlayerRankingsTable from '../../(components)/player-rankings-table'
-import { getPlayerImageUrl } from '@/lib/utils'
+import { getPlayerImageUrl, formatPlayerName } from '@/lib/utils'
 
 type PlayerPageProps = {
   params: Promise<{
@@ -14,7 +14,7 @@ export default async function PlayerPage({ params }: PlayerPageProps) {
   const playerId = Number(resolvedParams.id)
   const detail = await getPlayerDetail(playerId)
   const profile = detail.profile
-  const playerName = profile?.playerName ?? `Player ${resolvedParams.id}`
+  const playerName = profile?.playerName ? formatPlayerName(profile.playerName) : `Player ${resolvedParams.id}`
   const playerImage = getPlayerImageUrl(playerName)
 
   return (
