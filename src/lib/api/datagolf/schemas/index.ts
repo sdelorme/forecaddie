@@ -1,3 +1,4 @@
+export * from './historical-events'
 export * from './players'
 export * from './schedule'
 export * from './live-stats'
