@@ -115,7 +115,7 @@ export function PlanDetailClient({ planId, planName, season, events, players }: 
         </div>
       </div>
 
-      {completedEvents.length > 0 && <PlanPastResults events={completedEvents} picks={picks} players={players} />}
+      <PlanPastResults events={completedEvents} picks={picks} players={players} />
     </div>
   )
 }
