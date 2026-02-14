@@ -13,7 +13,13 @@
     "test": "vitest",
     "test:run": "vitest run",
     "test:coverage": "vitest run --coverage",
-    "prepare": "husky"
+    "prepare": "husky",
+    "db:gen-types": "supabase gen types typescript --project-id \"$SUPABASE_PROJECT_REF\" --schema public > src/lib/supabase/types.generated.ts",
+    "db:migrate:new": "supabase migration new",
+    "db:migrate:up": "supabase db push",
+    "db:migrate:status": "supabase migration list",
+    "db:pull": "supabase db pull",
+    "db:link": "supabase link"
   },
   "dependencies": {
     "@radix-ui/react-dialog": "^1.1.7",
