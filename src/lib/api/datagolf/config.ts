@@ -6,8 +6,8 @@ export const ENDPOINTS = {
   OUTRIGHT_ODDS: '/betting-tools/outrights',
   DG_RANKINGS: '/preds/get-dg-rankings',
   SKILL_RATINGS: '/preds/skill-ratings',
-  EVENT_LIST: '/historical-raw-data/event-list',
-  EVENT_RESULTS: '/historical-event-data/events'
+  EVENT_LIST: '/historical-event-data/event-list',
+  HISTORICAL_EVENT_RESULTS: '/historical-event-data/events'
 } as const
 
 export const CACHE_TAGS = {
@@ -16,7 +16,9 @@ export const CACHE_TAGS = {
   PLAYERS: 'players',
   ODDS: 'odds',
   RANKINGS: 'rankings',
-  PLAYER_HISTORY: 'player-history'
+  PLAYER_HISTORY: 'player-history',
+  HISTORICAL_EVENT_LIST: 'historical-event-list',
+  HISTORICAL_EVENT_RESULTS: 'historical-event-results'
 } as const
 
 export const REVALIDATE_INTERVALS = {
@@ -25,7 +27,9 @@ export const REVALIDATE_INTERVALS = {
   PLAYERS: 86400, // 24 hours
   ODDS: 3600, // 1 hour
   RANKINGS: 86400, // 24 hours
-  PLAYER_HISTORY: 604800 // 1 week
+  PLAYER_HISTORY: 604800, // 1 week
+  HISTORICAL_EVENT_LIST: 604800, // 1 week
+  HISTORICAL_EVENT_RESULTS: 604800 // 1 week — historical data doesn't change
 } as const
 
 export const BASE_URL = 'https://feeds.datagolf.com'

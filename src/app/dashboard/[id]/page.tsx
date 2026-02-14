@@ -1,10 +1,12 @@
 import { getSchedule } from '@/lib/api/datagolf/queries/schedule'
 import { getPlayerList } from '@/lib/api/datagolf/queries/players'
+import { getHistoricalEventList } from '@/lib/api/datagolf/queries/historical-events'
 import { createClient } from '@/lib/supabase/server'
 import { notFound, redirect } from 'next/navigation'
 import { PlanDetailClient } from './(components)/plan-detail-client'
 import type { ProcessedTourEvent } from '@/types/schedule'
 import type { Player } from '@/types/player'
+import type { HistoricalEventEntry } from '@/types/historical-events'
 
 type PageProps = {
   params: Promise<{ id: string }>
@@ -36,18 +38,31 @@ export default async function PlanDetailPage({ params }: PageProps) {
   // DataGolf fetches degrade gracefully — empty arrays on failure
   let events: ProcessedTourEvent[] = []
   let players: Player[] = []
+  let historicalEvents: HistoricalEventEntry[] = []
 
   try {
-    const [scheduleResult, playerResult] = await Promise.allSettled([getSchedule(), getPlayerList()])
+    const [scheduleResult, playerResult, historicalResult] = await Promise.allSettled([
+      getSchedule(),
+      getPlayerList(),
+      getHistoricalEventList()
+    ])
     events = scheduleResult.status === 'fulfilled' ? scheduleResult.value : []
     players = playerResult.status === 'fulfilled' ? playerResult.value : []
+    historicalEvents = historicalResult.status === 'fulfilled' ? historicalResult.value : []
   } catch {
-    // Both failed — continue with empty arrays
+    // All failed — continue with empty arrays
   }
 
   return (
     <main className="container mx-auto px-4 py-8 min-h-[calc(100vh-4rem-4rem)]">
-      <PlanDetailClient planId={plan.id} planName={plan.name} season={plan.season} events={events} players={players} />
+      <PlanDetailClient
+        planId={plan.id}
+        planName={plan.name}
+        season={plan.season}
+        events={events}
+        players={players}
+        historicalEvents={historicalEvents}
+      />
     </main>
   )
 }
