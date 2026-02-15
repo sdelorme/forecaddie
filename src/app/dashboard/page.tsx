@@ -1,50 +1,51 @@
-'use client'
+import { getSchedule } from '@/lib/api/datagolf/queries/schedule'
+import { getHistoricalEventResults } from '@/lib/api/datagolf/queries/historical-events'
+import { DashboardClient } from './(components)/dashboard-client'
+import type { CompletedEventPodium } from './types'
 
-import { Button } from '@/components/ui'
-import { usePlans } from '@/lib/supabase'
-import { Loader2, PlusCircle } from 'lucide-react'
-import { useState } from 'react'
-import PlanList from './(components)/plan-list'
-import { PlanModal } from './(components)/plan-modal'
+export default async function DashboardPage() {
+  let schedule: Awaited<ReturnType<typeof getSchedule>> = []
 
-export default function DashboardPage() {
-  const { plans, isLoading, error, createPlan, deletePlan } = usePlans()
-  const [isModalOpen, setIsModalOpen] = useState(false)
-
-  const handleCreatePlan = async (name: string) => {
-    await createPlan(name)
+  try {
+    schedule = await getSchedule()
+  } catch {
+    // Degrade gracefully — continue with empty schedule
   }
 
-  return (
-    <main className="container mx-auto px-4 py-8 min-h-[calc(100vh-4rem-4rem)]">
-      <div className="flex justify-between items-center mb-8">
-        <h1 className="text-3xl font-bold text-white">Dashboard</h1>
-        <Button variant="default" className="text-white gap-2" onClick={() => setIsModalOpen(true)}>
-          <PlusCircle className="h-4 w-4" />
-          Create
-        </Button>
-      </div>
+  const currentYear =
+    schedule.length > 0
+      ? new Date(schedule[schedule.length - 1].startDate + 'T00:00:00').getFullYear()
+      : new Date().getFullYear()
 
-      {isLoading ? (
-        <div className="flex flex-col items-center justify-center py-16">
-          <Loader2 className="h-8 w-8 animate-spin text-gray-400" />
-          <p className="text-gray-400 mt-4">Loading your plans...</p>
-        </div>
-      ) : error ? (
-        <div className="flex flex-col items-center justify-center py-16">
-          <p className="text-red-400 text-lg">{error}</p>
-        </div>
-      ) : plans.length === 0 ? (
-        <div className="flex flex-col items-center justify-center py-16">
-          <div className="text-center space-y-4">
-            <p className="text-gray-400 text-lg">You haven&apos;t created any season maps yet</p>
-          </div>
-        </div>
-      ) : (
-        <PlanList plans={plans} onDeletePlan={deletePlan} />
-      )}
-
-      <PlanModal open={isModalOpen} onOpenChange={setIsModalOpen} onCreatePlan={handleCreatePlan} />
-    </main>
+  const completedEvents = schedule.filter(
+    (event) => event.isComplete && new Date(event.startDate + 'T00:00:00').getFullYear() === currentYear
   )
+
+  const podiumResults = await Promise.allSettled(
+    completedEvents.map(async (event): Promise<CompletedEventPodium> => {
+      const results = await getHistoricalEventResults(Number(event.eventId), currentYear)
+
+      const podium = results
+        .filter((r) => r.finishPosition !== null && r.finishPosition >= 1 && r.finishPosition <= 3)
+        .sort((a, b) => a.finishPosition! - b.finishPosition!)
+        .map((r) => ({
+          position: r.finishPosition!,
+          playerName: r.playerName
+        }))
+
+      return {
+        eventId: event.eventId,
+        eventName: event.eventName,
+        startDate: event.startDate,
+        course: event.course,
+        podium
+      }
+    })
+  )
+
+  const completedWithPodium: CompletedEventPodium[] = podiumResults
+    .filter((result): result is PromiseFulfilledResult<CompletedEventPodium> => result.status === 'fulfilled')
+    .map((result) => result.value)
+
+  return <DashboardClient completedEvents={completedWithPodium} />
 }

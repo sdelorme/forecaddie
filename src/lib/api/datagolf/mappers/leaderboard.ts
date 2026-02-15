@@ -1,11 +1,17 @@
 import type { RawLiveModel, RawLiveEventStats, RawLiveModelPlayer } from '../types/live-stats'
 import type { Leaderboard, LeaderboardPlayer } from '@/types/leaderboard'
 
+function formatScore(score: number | null | undefined): string {
+  if (score == null) return '-'
+  if (score === 0) return 'E'
+  return score > 0 ? `+${score}` : `${score}`
+}
+
 function normalizeLiveModelPlayer(player: RawLiveModelPlayer): LeaderboardPlayer {
   return {
     dgId: player.dg_id,
     currentPosition: player.current_pos,
-    currentScore: player.current_score?.toString() || '-',
+    currentScore: formatScore(player.current_score),
     r1: player.R1,
     r2: player.R2,
     r3: player.R3,

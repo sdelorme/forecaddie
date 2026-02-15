@@ -16,4 +16,5 @@ export interface PlayerEventFinish {
   finishPosition: number | null
   status: FinishStatus
   finishText: string
+  earnings: number | null
 }

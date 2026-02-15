@@ -5,11 +5,11 @@ import { usePicks } from '@/lib/supabase'
 import { PlanHeader } from '@/app/dashboard/(components)/plan-header'
 import { PlanEventList } from '@/app/dashboard/(components)/plan-event-list'
 import { PlanPlayerTable } from '@/app/dashboard/(components)/plan-player-table'
-import { PlanPastResults } from '@/app/dashboard/(components)/plan-past-results'
+import { ToggleGroup, ToggleGroupItem } from '@/components/ui'
 import type { ProcessedTourEvent } from '@/types/schedule'
 import type { Player } from '@/types/player'
 import type { HistoricalEventEntry, PlayerEventFinish } from '@/types/historical-events'
-import { Loader2 } from 'lucide-react'
+import { LayoutGrid, List, Loader2 } from 'lucide-react'
 
 interface PlanDetailClientProps {
   planId: string
@@ -18,6 +18,7 @@ interface PlanDetailClientProps {
   events: ProcessedTourEvent[]
   players: Player[]
   historicalEvents: HistoricalEventEntry[]
+  earningsMap: Record<string, Record<number, number>>
 }
 
 export function PlanDetailClient({
@@ -26,7 +27,8 @@ export function PlanDetailClient({
   season,
   events,
   players,
-  historicalEvents
+  historicalEvents,
+  earningsMap
 }: PlanDetailClientProps) {
   const {
     picks,
@@ -39,6 +41,7 @@ export function PlanDetailClient({
   } = usePicks(planId)
 
   const [selectedEventId, setSelectedEventId] = useState<string | null>(null)
+  const [viewMode, setViewMode] = useState<'list' | 'grid'>('list')
   const [historicalFinishes, setHistoricalFinishes] = useState<Map<number, PlayerEventFinish[]>>(new Map())
   const [isLoadingHistory, setIsLoadingHistory] = useState(false)
 
@@ -49,10 +52,6 @@ export function PlanDetailClient({
   const proPlayers = useMemo(() => players.filter((p) => p.amateur === 0), [players])
 
   const seasonEvents = useMemo(() => events.filter((e) => e.startDate.startsWith(String(season))), [events, season])
-
-  const upcomingEvents = useMemo(() => seasonEvents.filter((e) => !e.isComplete), [seasonEvents])
-
-  const completedEvents = useMemo(() => seasonEvents.filter((e) => e.isComplete), [seasonEvents])
 
   const usedPlayerIds = useMemo(() => getUsedPlayerIds(), [getUsedPlayerIds])
 
@@ -142,6 +141,24 @@ export function PlanDetailClient({
     )
   }
 
+  const playerTable = selectedEventId ? (
+    <PlanPlayerTable
+      players={proPlayers}
+      usedPlayerIds={usedPlayerIds}
+      onSelectPlayer={handleSelectPlayer}
+      onClearPick={handleClearPick}
+      currentPick={currentPick}
+      selectedEventName={selectedEventName}
+      historicalYears={historicalYears}
+      historicalFinishes={historicalFinishes}
+      isLoadingHistory={isLoadingHistory}
+    />
+  ) : (
+    <div className="flex items-center justify-center h-64 bg-gray-800 rounded-lg">
+      <p className="text-gray-500">Select an event to assign a player</p>
+    </div>
+  )
+
   return (
     <div>
       <PlanHeader
@@ -157,39 +174,51 @@ export function PlanDetailClient({
         </div>
       )}
 
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-        <div className="lg:col-span-1">
+      <div className="mb-4 flex justify-end">
+        <ToggleGroup
+          type="single"
+          value={viewMode}
+          onValueChange={(v) => v && setViewMode(v as 'list' | 'grid')}
+          size="sm"
+        >
+          <ToggleGroupItem value="list" aria-label="List view">
+            <List className="h-4 w-4" />
+          </ToggleGroupItem>
+          <ToggleGroupItem value="grid" aria-label="Grid view">
+            <LayoutGrid className="h-4 w-4" />
+          </ToggleGroupItem>
+        </ToggleGroup>
+      </div>
+
+      {viewMode === 'list' ? (
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+          <div className="lg:col-span-1">
+            <PlanEventList
+              events={seasonEvents}
+              picks={picks}
+              players={proPlayers}
+              selectedEventId={selectedEventId}
+              onSelectEvent={setSelectedEventId}
+              viewMode={viewMode}
+              earningsMap={earningsMap}
+            />
+          </div>
+          <div className="lg:col-span-2">{playerTable}</div>
+        </div>
+      ) : (
+        <div className="space-y-6">
           <PlanEventList
-            events={upcomingEvents}
+            events={seasonEvents}
             picks={picks}
             players={proPlayers}
             selectedEventId={selectedEventId}
             onSelectEvent={setSelectedEventId}
+            viewMode={viewMode}
+            earningsMap={earningsMap}
           />
+          {playerTable}
         </div>
-
-        <div className="lg:col-span-2">
-          {selectedEventId ? (
-            <PlanPlayerTable
-              players={proPlayers}
-              usedPlayerIds={usedPlayerIds}
-              onSelectPlayer={handleSelectPlayer}
-              onClearPick={handleClearPick}
-              currentPick={currentPick}
-              selectedEventName={selectedEventName}
-              historicalYears={historicalYears}
-              historicalFinishes={historicalFinishes}
-              isLoadingHistory={isLoadingHistory}
-            />
-          ) : (
-            <div className="flex items-center justify-center h-64 bg-gray-800 rounded-lg">
-              <p className="text-gray-500">Select an event to assign a player</p>
-            </div>
-          )}
-        </div>
-      </div>
-
-      <PlanPastResults events={completedEvents} picks={picks} players={proPlayers} />
+      )}
     </div>
   )
 }
