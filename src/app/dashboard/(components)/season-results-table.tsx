@@ -2,20 +2,15 @@
 
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui'
 import { CalendarCheck, Trophy } from 'lucide-react'
-import type { CompletedEventPodium } from '../types'
+import type { CompletedEventResult } from '../types'
 
 interface SeasonResultsTableProps {
-  events: CompletedEventPodium[]
+  events: CompletedEventResult[]
 }
 
 function formatDate(dateStr: string): string {
   const date = new Date(dateStr + 'T00:00:00')
   return date.toLocaleDateString('en-US', { month: 'short', day: 'numeric' })
-}
-
-function getPodiumPlayer(podium: CompletedEventPodium['podium'], position: number): string | null {
-  const entry = podium.find((p) => p.position === position)
-  return entry?.playerName ?? null
 }
 
 export function SeasonResultsTable({ events }: SeasonResultsTableProps) {
@@ -44,40 +39,36 @@ export function SeasonResultsTable({ events }: SeasonResultsTableProps) {
           <TableHeader>
             <TableRow className="bg-gray-800 border-gray-700 hover:bg-transparent">
               <TableHead className="text-gray-400 text-xs uppercase tracking-wider">Event</TableHead>
-              <TableHead className="text-gray-400 text-xs uppercase tracking-wider">1st</TableHead>
-              <TableHead className="text-gray-400 text-xs uppercase tracking-wider">2nd</TableHead>
-              <TableHead className="text-gray-400 text-xs uppercase tracking-wider">3rd</TableHead>
+              <TableHead className="text-gray-400 text-xs uppercase tracking-wider text-center" colSpan={3}>
+                Top Finishers
+              </TableHead>
               <TableHead className="text-gray-400 text-xs uppercase tracking-wider text-right">Date</TableHead>
             </TableRow>
           </TableHeader>
           <TableBody className="divide-y divide-gray-700">
             {sorted.map((event) => {
-              const first = getPodiumPlayer(event.podium, 1)
-              const second = getPodiumPlayer(event.podium, 2)
-              const third = getPodiumPlayer(event.podium, 3)
-
+              const f = event.topFinishers
               return (
                 <TableRow
                   key={event.eventId}
                   className="bg-gray-800/50 border-gray-700 hover:bg-gray-800 transition-colors"
                 >
                   <TableCell className="font-medium text-white">{event.eventName}</TableCell>
-                  <TableCell>
-                    {first ? (
-                      <span className="inline-flex items-center gap-1.5 text-yellow-400 font-semibold">
-                        <Trophy className="h-3.5 w-3.5" />
-                        {first}
-                      </span>
-                    ) : (
-                      <span className="text-gray-600">&mdash;</span>
-                    )}
-                  </TableCell>
-                  <TableCell>
-                    <span className="text-gray-300">{second ?? '—'}</span>
-                  </TableCell>
-                  <TableCell>
-                    <span className="text-gray-300">{third ?? '—'}</span>
-                  </TableCell>
+                  {[0, 1, 2].map((i) => (
+                    <TableCell key={i}>
+                      {f[i] ? (
+                        <span className="inline-flex items-center gap-1.5">
+                          {i === 0 && <Trophy className="h-3.5 w-3.5 text-yellow-400" />}
+                          <span className={i === 0 ? 'font-semibold text-yellow-400' : 'text-gray-300'}>
+                            {f[i].playerName}
+                          </span>
+                          <span className="text-gray-500 text-xs">({f[i].finishText})</span>
+                        </span>
+                      ) : (
+                        <span className="text-gray-600">&mdash;</span>
+                      )}
+                    </TableCell>
+                  ))}
                   <TableCell className="text-gray-400 text-right">{formatDate(event.startDate)}</TableCell>
                 </TableRow>
               )

@@ -188,12 +188,12 @@ export function PlanPlayerTable({
                           }
                     }
                     className={cn(
-                      'transition-colors',
-                      isDisabled ? 'opacity-50 cursor-default' : 'cursor-pointer hover:bg-gray-700/50',
+                      'group transition-colors',
+                      isDisabled ? 'opacity-50 cursor-default' : 'cursor-pointer hover:bg-gray-700',
                       isCurrent && 'bg-green-900/20 opacity-100'
                     )}
                   >
-                    <td className="sticky left-0 z-10 bg-gray-800 py-2 pr-3 pl-1">
+                    <td className="sticky left-0 z-10 bg-gray-800 group-hover:bg-gray-700 transition-colors py-2 pr-3 pl-1">
                       <div className="flex items-center gap-2 min-w-0">
                         <span className="truncate text-white">{player.displayName}</span>
                         {isUsed && (

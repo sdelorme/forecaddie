@@ -4,13 +4,13 @@ import { Button } from '@/components/ui'
 import { usePlans } from '@/lib/supabase'
 import { Loader2, PlusCircle } from 'lucide-react'
 import { useState } from 'react'
-import type { CompletedEventPodium } from '../types'
+import type { CompletedEventResult } from '../types'
 import PlanList from './plan-list'
 import { PlanModal } from './plan-modal'
 import { SeasonResultsTable } from './season-results-table'
 
 interface DashboardClientProps {
-  completedEvents: CompletedEventPodium[]
+  completedEvents: CompletedEventResult[]
 }
 
 export function DashboardClient({ completedEvents }: DashboardClientProps) {
