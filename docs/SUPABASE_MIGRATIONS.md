@@ -78,6 +78,7 @@ git commit -m "add migration: add_some_column"
 | `pnpm db:migrate:status`     | List migrations and their applied status       |
 | `pnpm db:pull`               | Pull remote schema into a new migration        |
 | `pnpm db:gen-types`          | Regenerate TypeScript types from remote schema |
+| `pnpm db:gen-types:local`    | Regenerate types from local Supabase DB        |
 
 ## Checking migration status
 
@@ -125,17 +126,18 @@ baseline to bootstrap the schema.
 
 ## CI migration validation
 
-CI includes a dedicated `migrations` job in `.github/workflows/ci.yml`:
+CI includes a dedicated `migrations` job in `.github/workflows/ci.yml`.
+It runs on pull requests (pre-merge), and uses one deterministic path:
 
 1. `supabase start`
 2. `supabase db reset --local --no-seed --yes`
-3. `supabase gen types typescript --local --schema public`
-4. Compare local generated output with committed `src/lib/supabase/types.generated.ts`
+3. `pnpm db:gen-types:local`
+4. `git diff --exit-code -- src/lib/supabase/types.generated.ts`
 
 Notes:
 
-- CI uses `--local` generation to avoid requiring Supabase cloud credentials.
-- Local generation can differ from remote generation in metadata (for example,
-  `__InternalSupabase`), so the CI comparison normalizes that metadata before
-  checking drift.
-- Formatting differences should not fail CI; schema/type drift should.
+- CI pins the Supabase CLI version for stable output.
+- Developers should run the same command (`pnpm db:gen-types:local`) when a PR
+  includes migration changes.
+- `pnpm db:gen-types` remains useful when intentionally syncing types from the
+  remote project schema.

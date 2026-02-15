@@ -45,6 +45,7 @@ jobs:
           NEXT_PUBLIC_SUPABASE_ANON_KEY: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.placeholder
 
   migrations:
+    if: github.event_name == 'pull_request'
     runs-on: ubuntu-latest
     timeout-minutes: 20
 
@@ -66,7 +67,7 @@ jobs:
       - name: Install Supabase CLI
         uses: supabase/setup-cli@v1
         with:
-          version: latest
+          version: 2.75.0
 
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
@@ -77,66 +78,11 @@ jobs:
       - name: Replay migrations on local DB
         run: supabase db reset --local --no-seed --yes
 
-      - name: Regenerate local Supabase types (temp file)
-        run: supabase gen types typescript --local --schema public > /tmp/types.generated.local.ts
+      - name: Regenerate local Supabase types
+        run: pnpm db:gen-types:local
 
       - name: Ensure generated types are committed
-        run: |
-          node <<'EOF'
-          const fs = require('fs')
-
-          function stripInternalSupabaseMetadata(content) {
-            const marker = '__InternalSupabase:'
-            const markerIndex = content.indexOf(marker)
-            if (markerIndex === -1) return content
-
-            const lineStart = content.lastIndexOf('\n', markerIndex) + 1
-            const openBraceIndex = content.indexOf('{', markerIndex)
-            if (openBraceIndex === -1) return content
-
-            let depth = 0
-            let closeBraceIndex = -1
-            for (let i = openBraceIndex; i < content.length; i++) {
-              const char = content[i]
-              if (char === '{') depth++
-              if (char === '}') {
-                depth--
-                if (depth === 0) {
-                  closeBraceIndex = i
-                  break
-                }
-              }
-            }
-
-            if (closeBraceIndex === -1) return content
-
-            let endIndex = closeBraceIndex + 1
-            while (endIndex < content.length && [' ', '\t', ';', ','].includes(content[endIndex])) {
-              endIndex++
-            }
-            if (content[endIndex] === '\n') endIndex++
-
-            return `${content.slice(0, lineStart)}${content.slice(endIndex)}`
-          }
-
-          function normalizeForComparison(path) {
-            let content = fs.readFileSync(path, 'utf8')
-            content = stripInternalSupabaseMetadata(content)
-            // Ignore non-semantic formatting differences.
-            return content.replace(/\s+/g, '')
-          }
-
-          const local = normalizeForComparison('/tmp/types.generated.local.ts')
-          const repo = normalizeForComparison('src/lib/supabase/types.generated.ts')
-
-          if (local !== repo) {
-            console.error('Supabase generated types drift detected.')
-            console.error('Run `pnpm db:gen-types` and commit `src/lib/supabase/types.generated.ts`.')
-            process.exit(1)
-          }
-
-          console.log('Supabase generated types are in sync.')
-          EOF
+        run: git diff --exit-code -- src/lib/supabase/types.generated.ts
 
       - name: Stop local Supabase
         if: always()

@@ -15,6 +15,7 @@
     "test:coverage": "vitest run --coverage",
     "prepare": "husky",
     "db:gen-types": "supabase gen types typescript --project-id \"$SUPABASE_PROJECT_REF\" --schema public > src/lib/supabase/types.generated.ts",
+    "db:gen-types:local": "supabase gen types typescript --local --schema public > src/lib/supabase/types.generated.ts && prettier --write src/lib/supabase/types.generated.ts",
     "db:migrate:new": "supabase migration new",
     "db:migrate:up": "supabase db push",
     "db:migrate:status": "supabase migration list",
