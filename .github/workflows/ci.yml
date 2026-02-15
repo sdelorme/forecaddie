@@ -76,14 +76,31 @@ jobs:
       - name: Replay migrations on local DB
         run: supabase db reset --local --no-seed --yes
 
-      - name: Regenerate local Supabase types
-        run: supabase gen types typescript --local --schema public > src/lib/supabase/types.generated.ts
-
-      - name: Format generated types
-        run: npx prettier --write src/lib/supabase/types.generated.ts
+      - name: Regenerate local Supabase types (temp file)
+        run: supabase gen types typescript --local --schema public > /tmp/types.generated.local.ts
 
       - name: Ensure generated types are committed
-        run: git diff --exit-code -- src/lib/supabase/types.generated.ts
+        run: |
+          cp src/lib/supabase/types.generated.ts /tmp/types.generated.repo.ts
+          npx prettier --write /tmp/types.generated.local.ts /tmp/types.generated.repo.ts
+          node <<'EOF'
+          const fs = require('fs')
+
+          function normalize(path) {
+            let content = fs.readFileSync(path, 'utf8')
+            // Local generation omits __InternalSupabase metadata.
+            // Ignore that block so drift checks focus on real schema types.
+            content = content.replace(
+              /\n?\s*\/\/ Allows to automatically instantiate createClient[\s\S]*?__InternalSupabase:\s*{[\s\S]*?}\n/,
+              '\n'
+            )
+            fs.writeFileSync(`${path}.normalized`, `${content.trim()}\n`)
+          }
+
+          normalize('/tmp/types.generated.local.ts')
+          normalize('/tmp/types.generated.repo.ts')
+          EOF
+          diff -u /tmp/types.generated.repo.ts.normalized /tmp/types.generated.local.ts.normalized
 
       - name: Stop local Supabase
         if: always()
