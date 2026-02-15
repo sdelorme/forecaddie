@@ -264,7 +264,7 @@ describe('normalizeHistoricalEvent', () => {
 })
 
 describe('normalizeEventFinish', () => {
-  it('maps raw result to domain type with formatted name', () => {
+  it('maps raw result to domain type with formatted name and earnings', () => {
     const result = normalizeEventFinish({
       dg_id: 10091,
       player_name: 'McIlroy, Rory',
@@ -278,11 +278,12 @@ describe('normalizeEventFinish', () => {
       playerName: 'Rory McIlroy',
       finishPosition: 1,
       status: 'finished',
-      finishText: '1st'
+      finishText: '1st',
+      earnings: 4200000
     })
   })
 
-  it('handles CUT result', () => {
+  it('handles CUT result with null earnings', () => {
     const result = normalizeEventFinish({
       dg_id: 12345,
       player_name: 'Woods, Tiger',
@@ -293,7 +294,8 @@ describe('normalizeEventFinish', () => {
       playerName: 'Tiger Woods',
       finishPosition: null,
       status: 'cut',
-      finishText: 'CUT'
+      finishText: 'CUT',
+      earnings: null
     })
   })
 
@@ -304,6 +306,7 @@ describe('normalizeEventFinish', () => {
       fin_text: 'T5'
     })
     expect(result.playerName).toBe('Scottie Scheffler')
+    expect(result.earnings).toBe(null)
   })
 
   it('handles single-name players gracefully', () => {
@@ -313,5 +316,15 @@ describe('normalizeEventFinish', () => {
       fin_text: 'T10'
     })
     expect(result.playerName).toBe('Ryo')
+  })
+
+  it('maps null earnings correctly', () => {
+    const result = normalizeEventFinish({
+      dg_id: 10091,
+      player_name: 'McIlroy, Rory',
+      fin_text: 'T5',
+      earnings: null
+    })
+    expect(result.earnings).toBe(null)
   })
 })

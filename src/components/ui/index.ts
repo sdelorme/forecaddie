@@ -41,3 +41,9 @@ export { Table, TableHeader, TableBody, TableFooter, TableHead, TableRow, TableC
 
 // DataTable
 export { DataTable } from './data-table'
+
+// Toggle
+export { Toggle, toggleVariants } from './toggle'
+
+// ToggleGroup
+export { ToggleGroup, ToggleGroupItem } from './toggle-group'

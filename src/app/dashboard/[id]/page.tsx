@@ -1,6 +1,6 @@
 import { getSchedule } from '@/lib/api/datagolf/queries/schedule'
 import { getPlayerList } from '@/lib/api/datagolf/queries/players'
-import { getHistoricalEventList } from '@/lib/api/datagolf/queries/historical-events'
+import { getHistoricalEventList, getHistoricalEventResults } from '@/lib/api/datagolf/queries/historical-events'
 import { createClient } from '@/lib/supabase/server'
 import { notFound, redirect } from 'next/navigation'
 import { PlanDetailClient } from './(components)/plan-detail-client'
@@ -53,6 +53,29 @@ export default async function PlanDetailPage({ params }: PageProps) {
     // All failed — continue with empty arrays
   }
 
+  // Build earnings map for completed events
+  const seasonEvents = events.filter((e) => e.startDate.startsWith(String(plan.season)))
+  const completedSeasonEvents = seasonEvents.filter((e) => e.isComplete)
+
+  const earningsMap: Record<string, Record<number, number>> = {}
+  if (completedSeasonEvents.length > 0) {
+    const earningsResults = await Promise.allSettled(
+      completedSeasonEvents.map((e) => getHistoricalEventResults(Number(e.eventId), plan.season))
+    )
+    completedSeasonEvents.forEach((event, i) => {
+      const result = earningsResults[i]
+      if (result.status === 'fulfilled') {
+        const map: Record<number, number> = {}
+        result.value.forEach((finish) => {
+          if (finish.earnings != null) {
+            map[finish.dgId] = finish.earnings
+          }
+        })
+        earningsMap[event.eventId] = map
+      }
+    })
+  }
+
   return (
     <main className="container mx-auto px-4 py-8 min-h-[calc(100vh-4rem-4rem)]">
       <PlanDetailClient
@@ -62,6 +85,7 @@ export default async function PlanDetailPage({ params }: PageProps) {
         events={events}
         players={players}
         historicalEvents={historicalEvents}
+        earningsMap={earningsMap}
       />
     </main>
   )

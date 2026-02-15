@@ -103,6 +103,7 @@ export function normalizeEventFinish(raw: RawHistoricalEventResult): PlayerEvent
     playerName: formatDisplayName(raw.player_name),
     finishPosition: parsed.position,
     status: parsed.status,
-    finishText: parsed.displayText
+    finishText: parsed.displayText,
+    earnings: raw.earnings ?? null
   }
 }
