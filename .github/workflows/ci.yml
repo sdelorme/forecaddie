@@ -74,7 +74,7 @@ jobs:
         run: supabase start
 
       - name: Replay migrations on local DB
-        run: supabase db reset --local --no-seed -f
+        run: supabase db reset --local --no-seed --yes
 
       - name: Regenerate local Supabase types
         run: supabase gen types typescript --local --schema public > src/lib/supabase/types.generated.ts
