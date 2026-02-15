@@ -46,6 +46,7 @@ jobs:
 
   migrations:
     runs-on: ubuntu-latest
+    timeout-minutes: 20
 
     steps:
       - name: Checkout
@@ -81,63 +82,61 @@ jobs:
 
       - name: Ensure generated types are committed
         run: |
-          cp src/lib/supabase/types.generated.ts /tmp/types.generated.repo.ts
-          npx prettier --write /tmp/types.generated.local.ts /tmp/types.generated.repo.ts
           node <<'EOF'
           const fs = require('fs')
 
-          function normalize(path) {
-            let content = fs.readFileSync(path, 'utf8')
-
-            // Local generation omits __InternalSupabase metadata.
-            // Remove it in a syntax-aware way so we only strip that property.
+          function stripInternalSupabaseMetadata(content) {
             const marker = '__InternalSupabase:'
             const markerIndex = content.indexOf(marker)
-            if (markerIndex !== -1) {
-              const lineStart = content.lastIndexOf('\n', markerIndex) + 1
-              const openBraceIndex = content.indexOf('{', markerIndex)
-              if (openBraceIndex !== -1) {
-                let depth = 0
-                let closeBraceIndex = -1
-                for (let i = openBraceIndex; i < content.length; i++) {
-                  const char = content[i]
-                  if (char === '{') depth++
-                  if (char === '}') {
-                    depth--
-                    if (depth === 0) {
-                      closeBraceIndex = i
-                      break
-                    }
-                  }
-                }
+            if (markerIndex === -1) return content
 
-                if (closeBraceIndex !== -1) {
-                  let endIndex = closeBraceIndex + 1
-                  // Trim optional punctuation/spaces after the property object (e.g. ; or ,)
-                  while (endIndex < content.length && [' ', '\t', ';', ','].includes(content[endIndex])) {
-                    endIndex++
-                  }
-                  // Also consume one trailing newline if present.
-                  if (content[endIndex] === '\n') endIndex++
+            const lineStart = content.lastIndexOf('\n', markerIndex) + 1
+            const openBraceIndex = content.indexOf('{', markerIndex)
+            if (openBraceIndex === -1) return content
 
-                  content = `${content.slice(0, lineStart)}${content.slice(endIndex)}`
+            let depth = 0
+            let closeBraceIndex = -1
+            for (let i = openBraceIndex; i < content.length; i++) {
+              const char = content[i]
+              if (char === '{') depth++
+              if (char === '}') {
+                depth--
+                if (depth === 0) {
+                  closeBraceIndex = i
+                  break
                 }
               }
             }
 
-            // Remove the adjacent explanatory comment if present.
-            content = content.replace(
-              /\s*\/\/ Allows to automatically instantiate createClient with right options\n\s*\/\/ instead of createClient<Database, \{ PostgrestVersion: 'XX' \}>\(URL, KEY\)\n?/,
-              ''
-            )
+            if (closeBraceIndex === -1) return content
 
-            fs.writeFileSync(`${path}.normalized`, `${content.trim()}\n`)
+            let endIndex = closeBraceIndex + 1
+            while (endIndex < content.length && [' ', '\t', ';', ','].includes(content[endIndex])) {
+              endIndex++
+            }
+            if (content[endIndex] === '\n') endIndex++
+
+            return `${content.slice(0, lineStart)}${content.slice(endIndex)}`
           }
 
-          normalize('/tmp/types.generated.local.ts')
-          normalize('/tmp/types.generated.repo.ts')
+          function normalizeForComparison(path) {
+            let content = fs.readFileSync(path, 'utf8')
+            content = stripInternalSupabaseMetadata(content)
+            // Ignore non-semantic formatting differences.
+            return content.replace(/\s+/g, '')
+          }
+
+          const local = normalizeForComparison('/tmp/types.generated.local.ts')
+          const repo = normalizeForComparison('src/lib/supabase/types.generated.ts')
+
+          if (local !== repo) {
+            console.error('Supabase generated types drift detected.')
+            console.error('Run `pnpm db:gen-types` and commit `src/lib/supabase/types.generated.ts`.')
+            process.exit(1)
+          }
+
+          console.log('Supabase generated types are in sync.')
           EOF
-          diff -u /tmp/types.generated.repo.ts.normalized /tmp/types.generated.local.ts.normalized
 
       - name: Stop local Supabase
         if: always()

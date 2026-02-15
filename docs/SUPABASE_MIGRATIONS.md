@@ -122,3 +122,20 @@ baseline to bootstrap the schema.
   etc.). Not overwritten by generation.
 - After schema changes, always run `pnpm db:gen-types` and commit the updated
   `types.generated.ts`.
+
+## CI migration validation
+
+CI includes a dedicated `migrations` job in `.github/workflows/ci.yml`:
+
+1. `supabase start`
+2. `supabase db reset --local --no-seed --yes`
+3. `supabase gen types typescript --local --schema public`
+4. Compare local generated output with committed `src/lib/supabase/types.generated.ts`
+
+Notes:
+
+- CI uses `--local` generation to avoid requiring Supabase cloud credentials.
+- Local generation can differ from remote generation in metadata (for example,
+  `__InternalSupabase`), so the CI comparison normalizes that metadata before
+  checking drift.
+- Formatting differences should not fail CI; schema/type drift should.
