@@ -88,12 +88,49 @@ jobs:
 
           function normalize(path) {
             let content = fs.readFileSync(path, 'utf8')
+
             // Local generation omits __InternalSupabase metadata.
-            // Ignore that block so drift checks focus on real schema types.
+            // Remove it in a syntax-aware way so we only strip that property.
+            const marker = '__InternalSupabase:'
+            const markerIndex = content.indexOf(marker)
+            if (markerIndex !== -1) {
+              const lineStart = content.lastIndexOf('\n', markerIndex) + 1
+              const openBraceIndex = content.indexOf('{', markerIndex)
+              if (openBraceIndex !== -1) {
+                let depth = 0
+                let closeBraceIndex = -1
+                for (let i = openBraceIndex; i < content.length; i++) {
+                  const char = content[i]
+                  if (char === '{') depth++
+                  if (char === '}') {
+                    depth--
+                    if (depth === 0) {
+                      closeBraceIndex = i
+                      break
+                    }
+                  }
+                }
+
+                if (closeBraceIndex !== -1) {
+                  let endIndex = closeBraceIndex + 1
+                  // Trim optional punctuation/spaces after the property object (e.g. ; or ,)
+                  while (endIndex < content.length && [' ', '\t', ';', ','].includes(content[endIndex])) {
+                    endIndex++
+                  }
+                  // Also consume one trailing newline if present.
+                  if (content[endIndex] === '\n') endIndex++
+
+                  content = `${content.slice(0, lineStart)}${content.slice(endIndex)}`
+                }
+              }
+            }
+
+            // Remove the adjacent explanatory comment if present.
             content = content.replace(
-              /\n?\s*\/\/ Allows to automatically instantiate createClient[\s\S]*?__InternalSupabase:\s*{[\s\S]*?}\n/,
-              '\n'
+              /\s*\/\/ Allows to automatically instantiate createClient with right options\n\s*\/\/ instead of createClient<Database, \{ PostgrestVersion: 'XX' \}>\(URL, KEY\)\n?/,
+              ''
             )
+
             fs.writeFileSync(`${path}.normalized`, `${content.trim()}\n`)
           }
 
