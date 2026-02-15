@@ -1,139 +1,15 @@
-export type Json = string | number | boolean | null | { [key: string]: Json | undefined } | Json[]
+/**
+ * Supabase type re-exports and convenience aliases.
+ *
+ * The raw Database interface lives in `types.generated.ts` and is overwritten
+ * by `pnpm db:gen-types`. Hand-written convenience aliases live here so they
+ * survive regeneration.
+ */
 
-export interface Database {
-  public: {
-    Tables: {
-      devices: {
-        Row: {
-          id: string
-          user_id: string
-          created_at: string
-          last_seen_at: string
-        }
-        Insert: {
-          id?: string
-          user_id: string
-          created_at?: string
-          last_seen_at?: string
-        }
-        Update: {
-          id?: string
-          user_id?: string
-          created_at?: string
-          last_seen_at?: string
-        }
-        Relationships: []
-      }
-      season_plans: {
-        Row: {
-          id: string
-          user_id: string
-          name: string
-          season: number
-          created_at: string
-          updated_at: string
-        }
-        Insert: {
-          id?: string
-          user_id: string
-          name: string
-          season?: number
-          created_at?: string
-          updated_at?: string
-        }
-        Update: {
-          id?: string
-          user_id?: string
-          name?: string
-          season?: number
-          created_at?: string
-          updated_at?: string
-        }
-        Relationships: []
-      }
-      picks: {
-        Row: {
-          id: string
-          user_id: string
-          plan_id: string
-          event_id: string
-          player_dg_id: number | null
-          result_position: number | null
-          created_at: string
-          updated_at: string
-        }
-        Insert: {
-          id?: string
-          user_id: string
-          plan_id: string
-          event_id: string
-          player_dg_id?: number | null
-          result_position?: number | null
-          created_at?: string
-          updated_at?: string
-        }
-        Update: {
-          id?: string
-          user_id?: string
-          plan_id?: string
-          event_id?: string
-          player_dg_id?: number | null
-          result_position?: number | null
-          created_at?: string
-          updated_at?: string
-        }
-        Relationships: [
-          {
-            foreignKeyName: 'picks_plan_id_fkey'
-            columns: ['plan_id']
-            isOneToOne: false
-            referencedRelation: 'season_plans'
-            referencedColumns: ['id']
-          }
-        ]
-      }
-      player_flags: {
-        Row: {
-          id: string
-          user_id: string
-          player_dg_id: number
-          is_favorite: boolean
-          is_flagged: boolean
-          event_id: string | null
-          created_at: string
-        }
-        Insert: {
-          id?: string
-          user_id: string
-          player_dg_id: number
-          is_favorite?: boolean
-          is_flagged?: boolean
-          event_id?: string | null
-          created_at?: string
-        }
-        Update: {
-          id?: string
-          user_id?: string
-          player_dg_id?: number
-          is_favorite?: boolean
-          is_flagged?: boolean
-          event_id?: string | null
-          created_at?: string
-        }
-        Relationships: []
-      }
-    }
-    Views: {
-      [_ in never]: never
-    }
-    Functions: {
-      [_ in never]: never
-    }
-    Enums: {
-      [_ in never]: never
-    }
-  }
-}
+// Re-export generated types so existing imports keep working
+export type { Database, Json } from './types.generated'
+
+import type { Database } from './types.generated'
 
 // Convenience types for working with rows
 export type Device = Database['public']['Tables']['devices']['Row']

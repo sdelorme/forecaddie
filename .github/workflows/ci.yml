@@ -43,3 +43,48 @@ jobs:
           DATA_GOLF_API_KEY: dummy_ci_key
           NEXT_PUBLIC_SUPABASE_URL: https://placeholder.supabase.co
           NEXT_PUBLIC_SUPABASE_ANON_KEY: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.placeholder
+
+  migrations:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Install pnpm
+        uses: pnpm/action-setup@v4
+        with:
+          version: 10
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version-file: '.nvmrc'
+          cache: 'pnpm'
+
+      - name: Install Supabase CLI
+        uses: supabase/setup-cli@v1
+        with:
+          version: latest
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Start local Supabase
+        run: supabase start
+
+      - name: Replay migrations on local DB
+        run: supabase db reset --local --no-seed -f
+
+      - name: Regenerate local Supabase types
+        run: supabase gen types typescript --local --schema public > src/lib/supabase/types.generated.ts
+
+      - name: Format generated types
+        run: npx prettier --write src/lib/supabase/types.generated.ts
+
+      - name: Ensure generated types are committed
+        run: git diff --exit-code -- src/lib/supabase/types.generated.ts
+
+      - name: Stop local Supabase
+        if: always()
+        run: supabase stop

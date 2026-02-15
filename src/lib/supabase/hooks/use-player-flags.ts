@@ -60,12 +60,12 @@ export function usePlayerFlags(currentEventId?: string): UsePlayerFlagsReturn {
     (rows: PlayerFlag[]): Map<number, PlayerFlagState> => {
       const map = new Map<number, PlayerFlagState>()
       rows.forEach((row) => {
-        const isFlagged = row.is_flagged && row.event_id === (currentEventId ?? null)
+        const isFlagged = (row.is_flagged ?? false) && row.event_id === (currentEventId ?? null)
         // Only add to map if at least one flag is active
-        if (row.is_favorite || isFlagged) {
+        if ((row.is_favorite ?? false) || isFlagged) {
           map.set(row.player_dg_id, {
-            isFavorite: row.is_favorite,
-            isFlagged
+            isFavorite: row.is_favorite ?? false,
+            isFlagged: isFlagged ?? false
           })
         }
       })
@@ -145,6 +145,7 @@ export function usePlayerFlags(currentEventId?: string): UsePlayerFlagsReturn {
         is_favorite: newFlag.isFavorite,
         is_flagged: newFlag.isFlagged,
         event_id: newEventId,
+        device_id: existingRow?.device_id ?? null,
         created_at: existingRow?.created_at ?? new Date().toISOString()
       }
       setRawFlags((prev) => {

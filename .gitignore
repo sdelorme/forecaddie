@@ -55,3 +55,7 @@ dist/
 .temp/
 .eslintcache
 .stylelintcache
+
+# Supabase local dev
+supabase/.branches/
+supabase/.temp/
