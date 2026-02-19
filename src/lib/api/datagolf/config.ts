@@ -7,7 +7,8 @@ export const ENDPOINTS = {
   DG_RANKINGS: '/preds/get-dg-rankings',
   SKILL_RATINGS: '/preds/skill-ratings',
   EVENT_LIST: '/historical-event-data/event-list',
-  HISTORICAL_EVENT_RESULTS: '/historical-event-data/events'
+  HISTORICAL_EVENT_RESULTS: '/historical-event-data/events',
+  FIELD_UPDATES: '/field-updates'
 } as const
 
 export const CACHE_TAGS = {
@@ -18,7 +19,8 @@ export const CACHE_TAGS = {
   RANKINGS: 'rankings',
   PLAYER_HISTORY: 'player-history',
   HISTORICAL_EVENT_LIST: 'historical-event-list',
-  HISTORICAL_EVENT_RESULTS: 'historical-event-results'
+  HISTORICAL_EVENT_RESULTS: 'historical-event-results',
+  FIELD_UPDATES: 'field-updates'
 } as const
 
 export const REVALIDATE_INTERVALS = {
@@ -29,7 +31,8 @@ export const REVALIDATE_INTERVALS = {
   RANKINGS: 86400, // 24 hours
   PLAYER_HISTORY: 604800, // 1 week
   HISTORICAL_EVENT_LIST: 604800, // 1 week
-  HISTORICAL_EVENT_RESULTS: 604800 // 1 week — historical data doesn't change
+  HISTORICAL_EVENT_RESULTS: 604800, // 1 week — historical data doesn't change
+  FIELD_UPDATES: 3600 // 1 hour
 } as const
 
 export const BASE_URL = 'https://feeds.datagolf.com'

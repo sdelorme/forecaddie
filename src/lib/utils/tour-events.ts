@@ -51,9 +51,8 @@ export function getEventHref(event: TourEvent, tournamentType: 'live' | 'histori
     case 'live':
       return `/events/live-stats`
     case 'historical':
-      return `/events/${event.eventId}`
     case 'future':
-      return `/events/future`
+      return `/events/${event.eventId}`
     default:
       return '/events'
   }

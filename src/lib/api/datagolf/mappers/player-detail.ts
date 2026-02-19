@@ -21,12 +21,28 @@ const getRecordValue = (record: Record<string, unknown>, keys: string[]): unknow
   return null
 }
 
+function toOrdinal(n: number): string {
+  const mod100 = n % 100
+  if (mod100 >= 11 && mod100 <= 13) return `${n}th`
+  const mod10 = n % 10
+  if (mod10 === 1) return `${n}st`
+  if (mod10 === 2) return `${n}nd`
+  if (mod10 === 3) return `${n}rd`
+  return `${n}th`
+}
+
+function formatRank(rank: number): string {
+  return toOrdinal(Math.round(rank))
+}
+
 export function mapPlayerRankings({
   dgRanking,
-  skillRating
+  skillRatingValue,
+  skillRatingRank
 }: {
   dgRanking?: RawDgRanking
-  skillRating?: RawSkillRating
+  skillRatingValue?: RawSkillRating
+  skillRatingRank?: RawSkillRating
 }): PlayerRanking[] {
   const rankings: PlayerRanking[] = []
 
@@ -43,21 +59,28 @@ export function mapPlayerRankings({
     }
   }
 
-  if (skillRating) {
-    const skillRecord = skillRating as Record<string, unknown>
-    const skillMetrics: Array<{ label: string; key: string }> = [
-      { label: 'SG Total', key: 'sg_total' },
-      { label: 'SG Off-the-Tee', key: 'sg_ott' },
-      { label: 'SG Approach', key: 'sg_app' },
-      { label: 'SG Around Green', key: 'sg_arg' },
-      { label: 'SG Putting', key: 'sg_putt' }
-    ]
+  const skillMetrics: Array<{ label: string; key: string }> = [
+    { label: 'SG Total', key: 'sg_total' },
+    { label: 'SG Off-the-Tee', key: 'sg_ott' },
+    { label: 'SG Approach', key: 'sg_app' },
+    { label: 'SG Around Green', key: 'sg_arg' },
+    { label: 'SG Putting', key: 'sg_putt' },
+    { label: 'Driving Accuracy', key: 'driving_acc' },
+    { label: 'Driving Distance', key: 'driving_dist' }
+  ]
 
-    skillMetrics.forEach(({ label, key }) => {
-      const value = getNumber(skillRecord[key])
+  const rankRecord = skillRatingRank ? (skillRatingRank as Record<string, unknown>) : null
+  const valueRecord = skillRatingValue ? (skillRatingValue as Record<string, unknown>) : null
+
+  skillMetrics.forEach(({ label, key }) => {
+    const rank = rankRecord ? getNumber(rankRecord[key]) : null
+    if (rank != null) {
+      rankings.push({ label, value: formatRank(rank) })
+    } else {
+      const value = valueRecord ? getNumber(valueRecord[key]) : null
       if (value != null) rankings.push({ label, value: value.toFixed(3) })
-    })
-  }
+    }
+  })
 
   return rankings
 }

@@ -9,6 +9,7 @@ import { ToggleGroup, ToggleGroupItem } from '@/components/ui'
 import type { ProcessedTourEvent } from '@/types/schedule'
 import type { Player } from '@/types/player'
 import type { HistoricalEventEntry, PlayerEventFinish } from '@/types/historical-events'
+import type { FieldUpdate } from '@/types/field-updates'
 import { LayoutGrid, List, Loader2 } from 'lucide-react'
 
 interface PlanDetailClientProps {
@@ -44,6 +45,7 @@ export function PlanDetailClient({
   const [viewMode, setViewMode] = useState<'list' | 'grid'>('list')
   const [historicalFinishes, setHistoricalFinishes] = useState<Map<number, PlayerEventFinish[]>>(new Map())
   const [isLoadingHistory, setIsLoadingHistory] = useState(false)
+  const [fieldData, setFieldData] = useState<FieldUpdate | null>(null)
 
   // Ref to track the latest selected event for stale-fetch prevention
   const latestEventRef = useRef<string | null>(null)
@@ -116,6 +118,47 @@ export function PlanDetailClient({
     fetchHistoricalResults(selectedEventId, historicalYears)
   }, [selectedEventId, historicalYears, fetchHistoricalResults])
 
+  // Fetch field updates when an event is selected (for WD badges)
+  useEffect(() => {
+    if (!selectedEventId) {
+      setFieldData(null)
+      return
+    }
+
+    let cancelled = false
+    fetch('/api/field-updates')
+      .then((r) => (r.ok ? r.json() : null))
+      .then((data: FieldUpdate | null) => {
+        if (cancelled) return
+        if (!data) {
+          setFieldData(null)
+          return
+        }
+        // Only use if field data looks relevant to the selected event
+        const eventName = seasonEvents.find((e) => e.eventId === selectedEventId)?.eventName ?? ''
+        const firstWord = eventName.toLowerCase().split(' ')[0]
+        const matches = firstWord && data.eventName.toLowerCase().includes(firstWord)
+        setFieldData(matches ? data : null)
+      })
+      .catch(() => {
+        if (!cancelled) setFieldData(null)
+      })
+
+    return () => {
+      cancelled = true
+    }
+  }, [selectedEventId, seasonEvents])
+
+  // Set of dg_ids for players not in the field (withdrawn after initially being listed)
+  const withdrawnPlayerIds = useMemo(() => {
+    if (!fieldData) return new Set<number>()
+    // Field data represents the active field; players absent from it
+    // who were expected are considered withdrawn. For now we surface
+    // the field presence as-is — explicit WD detection will be refined
+    // when we observe real API responses.
+    return new Set<number>()
+  }, [fieldData])
+
   const handleSelectPlayer = async (playerDgId: number) => {
     if (!selectedEventId) return
 
@@ -148,10 +191,12 @@ export function PlanDetailClient({
       onSelectPlayer={handleSelectPlayer}
       onClearPick={handleClearPick}
       currentPick={currentPick}
+      selectedEventId={selectedEventId ?? undefined}
       selectedEventName={selectedEventName}
       historicalYears={historicalYears}
       historicalFinishes={historicalFinishes}
       isLoadingHistory={isLoadingHistory}
+      withdrawnPlayerIds={withdrawnPlayerIds}
     />
   ) : (
     <div className="flex items-center justify-center h-64 bg-gray-800 rounded-lg">

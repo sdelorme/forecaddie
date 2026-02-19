@@ -1,7 +1,8 @@
 'use client'
 
 import { useMemo, useState } from 'react'
-import { X, Loader2 } from 'lucide-react'
+import Link from 'next/link'
+import { X, Loader2, ExternalLink } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import { Button } from '@/components/ui/button'
 import { PlayerSearch } from '@/app/dashboard/[id]/(components)/player-search'
@@ -15,10 +16,12 @@ interface PlanPlayerTableProps {
   onSelectPlayer: (playerDgId: number) => void
   onClearPick: () => void
   currentPick: Pick | undefined
+  selectedEventId?: string
   selectedEventName?: string
   historicalYears: number[]
   historicalFinishes: Map<number, PlayerEventFinish[]>
   isLoadingHistory: boolean
+  withdrawnPlayerIds?: Set<number>
 }
 
 function finishCellClass(finish: PlayerEventFinish | undefined): string {
@@ -51,10 +54,12 @@ export function PlanPlayerTable({
   onSelectPlayer,
   onClearPick,
   currentPick,
+  selectedEventId,
   selectedEventName,
   historicalYears,
   historicalFinishes,
-  isLoadingHistory
+  isLoadingHistory,
+  withdrawnPlayerIds = new Set()
 }: PlanPlayerTableProps) {
   const [searchTerm, setSearchTerm] = useState('')
 
@@ -162,6 +167,11 @@ export function PlanPlayerTable({
                       )}
                     </th>
                   ))}
+                {selectedEventId && (
+                  <th className="py-2 px-2 text-center font-medium w-10">
+                    <span className="sr-only">View</span>
+                  </th>
+                )}
               </tr>
             </thead>
             <tbody className="divide-y divide-gray-700/50">
@@ -196,6 +206,11 @@ export function PlanPlayerTable({
                     <td className="sticky left-0 z-10 bg-gray-800 group-hover:bg-gray-700 transition-colors py-2 pr-3 pl-1">
                       <div className="flex items-center gap-2 min-w-0">
                         <span className="truncate text-white">{player.displayName}</span>
+                        {withdrawnPlayerIds.has(player.dgId) && (
+                          <span className="flex-shrink-0 rounded-full bg-orange-500/20 px-2 py-0.5 text-xs text-orange-400">
+                            WD
+                          </span>
+                        )}
                         {isUsed && (
                           <span className="flex-shrink-0 rounded-full bg-red-500/20 px-2 py-0.5 text-xs text-red-400">
                             Used
@@ -227,6 +242,18 @@ export function PlanPlayerTable({
                           </td>
                         )
                       })}
+                    {selectedEventId && (
+                      <td className="py-2 px-2 text-center">
+                        <Link
+                          href={`/players/${player.dgId}?event=${selectedEventId}`}
+                          onClick={(e) => e.stopPropagation()}
+                          className="inline-flex items-center text-gray-500 hover:text-primary transition-colors"
+                          title={`View ${player.displayName}`}
+                        >
+                          <ExternalLink className="h-3.5 w-3.5" />
+                        </Link>
+                      </td>
+                    )}
                   </tr>
                 )
               })}
