@@ -12,7 +12,7 @@ import type { ProcessedTourEvent } from '@/types/schedule'
 import type { Player } from '@/types/player'
 import type { HistoricalEventEntry, PlayerEventFinish } from '@/types/historical-events'
 import type { FieldUpdate } from '@/types/field-updates'
-import type { PriorYearTopFinishers } from '@/app/dashboard/types'
+import type { PriorYearTopFinishers, EventOddsFavorites } from '@/app/dashboard/types'
 import { LayoutGrid, List, Loader2, TableProperties } from 'lucide-react'
 
 type ViewMode = 'table' | 'list' | 'grid'
@@ -26,6 +26,7 @@ interface PlanDetailClientProps {
   historicalEvents: HistoricalEventEntry[]
   earningsMap: Record<string, Record<number, number>>
   priorYearResults: Record<string, PriorYearTopFinishers>
+  oddsFavorites: EventOddsFavorites | null
 }
 
 export function PlanDetailClient({
@@ -36,7 +37,8 @@ export function PlanDetailClient({
   players,
   historicalEvents,
   earningsMap,
-  priorYearResults
+  priorYearResults,
+  oddsFavorites
 }: PlanDetailClientProps) {
   const {
     picks,
@@ -59,7 +61,13 @@ export function PlanDetailClient({
 
   const proPlayers = useMemo(() => players.filter((p) => p.amateur === 0), [players])
 
-  const seasonEvents = useMemo(() => events.filter((e) => e.startDate.startsWith(String(season))), [events, season])
+  const seasonEvents = useMemo(
+    () =>
+      events
+        .filter((e) => e.startDate.startsWith(String(season)))
+        .sort((a, b) => a.startDate.localeCompare(b.startDate)),
+    [events, season]
+  )
 
   const usedPlayerIds = useMemo(() => getUsedPlayerIds(), [getUsedPlayerIds])
 
@@ -245,6 +253,7 @@ export function PlanDetailClient({
           players={proPlayers}
           earningsMap={earningsMap}
           priorYearResults={priorYearResults}
+          oddsFavorites={oddsFavorites}
           onOpenPicker={handleOpenPicker}
         />
       ) : viewMode === 'list' ? (

@@ -1,13 +1,19 @@
 import { getSchedule } from '@/lib/api/datagolf/queries/schedule'
 import { getPlayerList } from '@/lib/api/datagolf/queries/players'
 import { getHistoricalEventList, getHistoricalEventResults } from '@/lib/api/datagolf/queries/historical-events'
+import { getOutrightOdds } from '@/lib/api/datagolf/queries/odds'
 import { createClient } from '@/lib/supabase/server'
 import { notFound, redirect } from 'next/navigation'
 import { PlanDetailClient } from './(components)/plan-detail-client'
+import { formatPlayerName } from '@/lib/utils'
 import type { ProcessedTourEvent } from '@/types/schedule'
 import type { Player } from '@/types/player'
 import type { HistoricalEventEntry } from '@/types/historical-events'
-import type { PriorYearTopFinishers } from '../types'
+import type { PriorYearTopFinishers, EventOddsFavorites } from '../types'
+
+function formatAmericanOdds(odds: number): string {
+  return odds > 0 ? `+${odds}` : String(odds)
+}
 
 type PageProps = {
   params: Promise<{ id: string }>
@@ -104,8 +110,40 @@ export default async function PlanDetailPage({ params }: PageProps) {
     })
   }
 
+  // Fetch outright odds for the current/upcoming event
+  let oddsFavorites: EventOddsFavorites | null = null
+  try {
+    const oddsData = await getOutrightOdds()
+    if (oddsData.eventName && oddsData.players.length > 0) {
+      const sorted = [...oddsData.players]
+        .map((p) => {
+          const best = [p.draftkings, p.fanduel, p.betmgm, p.datagolfBaselineHistoryFit]
+            .filter(Boolean)
+            .map(Number)
+            .filter((n) => !isNaN(n))
+            .sort((a, b) => a - b)[0]
+          return { ...p, bestOdds: best ?? null }
+        })
+        .filter((p) => p.bestOdds !== null)
+        .sort((a, b) => a.bestOdds! - b.bestOdds!)
+        .slice(0, 5)
+
+      oddsFavorites = {
+        eventName: oddsData.eventName,
+        lastUpdated: oddsData.lastUpdated,
+        favorites: sorted.map((p) => ({
+          playerName: formatPlayerName(p.playerName),
+          dgId: p.dgId,
+          odds: formatAmericanOdds(p.bestOdds!)
+        }))
+      }
+    }
+  } catch {
+    // Odds unavailable — degrade gracefully
+  }
+
   return (
-    <main className="container mx-auto px-4 py-8 min-h-[calc(100vh-4rem-4rem)]">
+    <div className="w-full px-6 py-8 min-h-[calc(100vh-4rem-4rem)]">
       <PlanDetailClient
         planId={plan.id}
         planName={plan.name}
@@ -115,7 +153,8 @@ export default async function PlanDetailPage({ params }: PageProps) {
         historicalEvents={historicalEvents}
         earningsMap={earningsMap}
         priorYearResults={priorYearResults}
+        oddsFavorites={oddsFavorites}
       />
-    </main>
+    </div>
   )
 }
