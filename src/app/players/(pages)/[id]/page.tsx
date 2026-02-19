@@ -57,7 +57,6 @@ export default async function PlayerPage({ params, searchParams }: PlayerPagePro
             <Image src={playerImage} alt={playerName} fill className="object-cover" sizes="112px" />
           </div>
           <div className="space-y-2">
-            <p className="text-sm text-gray-400">DataGolf ID: {Number.isNaN(playerId) ? '—' : playerId}</p>
             <h1 className="text-3xl font-bold text-white">{playerName}</h1>
             {profile ? (
               <div className="flex flex-wrap gap-3 text-sm text-gray-300">
@@ -105,7 +104,11 @@ export default async function PlayerPage({ params, searchParams }: PlayerPagePro
         )}
 
         <div className="grid grid-cols-1 gap-6">
-          <PlayerRankingsTable playerName={playerName} rankings={detail.rankings} />
+          <PlayerRankingsTable
+            playerName={playerName}
+            rankings={detail.rankings}
+            totalRankedPlayers={detail.totalRankedPlayers}
+          />
         </div>
       </div>
     </main>

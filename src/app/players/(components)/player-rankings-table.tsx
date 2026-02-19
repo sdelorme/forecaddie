@@ -4,9 +4,12 @@ import type { PlayerRanking } from '@/types/player-detail'
 interface PlayerRankingsTableProps {
   playerName: string
   rankings: PlayerRanking[]
+  totalRankedPlayers?: number
 }
 
-export default function PlayerRankingsTable({ playerName, rankings }: PlayerRankingsTableProps) {
+export default function PlayerRankingsTable({ playerName, rankings, totalRankedPlayers }: PlayerRankingsTableProps) {
+  const rankLabel = totalRankedPlayers ? `Rank (of ${totalRankedPlayers})` : 'Rank'
+
   return (
     <div className="bg-gray-800 rounded-lg p-4">
       <h2 className="text-xl font-bold text-white mb-4">Rankings for {playerName}</h2>
@@ -14,7 +17,7 @@ export default function PlayerRankingsTable({ playerName, rankings }: PlayerRank
         <TableHeader>
           <TableRow>
             <TableHead>Category</TableHead>
-            <TableHead>Rank</TableHead>
+            <TableHead>{rankLabel}</TableHead>
           </TableRow>
         </TableHeader>
         <TableBody>

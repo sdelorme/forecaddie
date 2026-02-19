@@ -21,5 +21,6 @@ export type PlayerTournamentResult = {
 export type PlayerDetail = {
   profile: PlayerProfile | null
   rankings: PlayerRanking[]
+  totalRankedPlayers?: number
   tournamentHistory: PlayerTournamentResult[]
 }

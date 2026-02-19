@@ -20,10 +20,11 @@ export async function getPlayerDetail(dgId: number): Promise<PlayerDetail> {
     }
   })
 
-  const skillRatingsPromise = dataGolfClient<unknown>(ENDPOINTS.SKILL_RATINGS, {
+  const skillRatingsValuePromise = dataGolfClient<unknown>(ENDPOINTS.SKILL_RATINGS, {
     revalidate: REVALIDATE_INTERVALS.RANKINGS,
     tags: [CACHE_TAGS.RANKINGS],
     params: {
+      display: 'value',
       file_format: 'json'
     },
     headers: {
@@ -31,36 +32,62 @@ export async function getPlayerDetail(dgId: number): Promise<PlayerDetail> {
     }
   })
 
-  const [playerList, rankingsResponse, skillRatingsResponse] = await Promise.all([
+  const skillRatingsRankPromise = dataGolfClient<unknown>(ENDPOINTS.SKILL_RATINGS, {
+    revalidate: REVALIDATE_INTERVALS.RANKINGS,
+    tags: [CACHE_TAGS.RANKINGS],
+    params: {
+      display: 'rank',
+      file_format: 'json'
+    },
+    headers: {
+      'Cache-Control': 'public, s-maxage=86400, stale-while-revalidate=604800'
+    }
+  })
+
+  const [playerList, rankingsResponse, skillRatingsValueResponse, skillRatingsRankResponse] = await Promise.all([
     playerListPromise,
     rankingsPromise.catch(() => null),
-    skillRatingsPromise.catch(() => null)
+    skillRatingsValuePromise.catch(() => null),
+    skillRatingsRankPromise.catch(() => null)
   ])
 
   const profile = playerList.find((player) => player.dgId === dgId) ?? null
 
   const rankingsParsed = rankingsResponse ? RawDgRankingsResponseSchema.safeParse(rankingsResponse) : null
-  const skillRatingsParsed = skillRatingsResponse ? RawSkillRatingsResponseSchema.safeParse(skillRatingsResponse) : null
+  const skillValParsed = skillRatingsValueResponse
+    ? RawSkillRatingsResponseSchema.safeParse(skillRatingsValueResponse)
+    : null
+  const skillRankParsed = skillRatingsRankResponse
+    ? RawSkillRatingsResponseSchema.safeParse(skillRatingsRankResponse)
+    : null
+
   if (rankingsParsed && !rankingsParsed.success) {
     console.error('Invalid DataGolf rankings response:', rankingsParsed.error.format())
   }
-
-  if (skillRatingsParsed && !skillRatingsParsed.success) {
-    console.error('Invalid skill ratings response:', skillRatingsParsed.error.format())
+  if (skillValParsed && !skillValParsed.success) {
+    console.error('Invalid skill ratings (value) response:', skillValParsed.error.format())
+  }
+  if (skillRankParsed && !skillRankParsed.success) {
+    console.error('Invalid skill ratings (rank) response:', skillRankParsed.error.format())
   }
 
   const dgRanking = rankingsParsed?.success
     ? rankingsParsed.data.rankings.find((ranking) => ranking.dg_id === dgId)
     : undefined
-  const skillRating = skillRatingsParsed?.success
-    ? skillRatingsParsed.data.players.find((rating) => rating.dg_id === dgId)
+  const skillRatingValue = skillValParsed?.success
+    ? skillValParsed.data.players.find((rating) => rating.dg_id === dgId)
     : undefined
+  const skillRatingRank = skillRankParsed?.success
+    ? skillRankParsed.data.players.find((rating) => rating.dg_id === dgId)
+    : undefined
+  const totalSkillPlayers = skillRankParsed?.success ? skillRankParsed.data.players.length : undefined
 
   const tournamentHistory: RawEventResult[] = []
 
   return {
     profile,
-    rankings: mapPlayerRankings({ dgRanking, skillRating }),
+    rankings: mapPlayerRankings({ dgRanking, skillRatingValue, skillRatingRank }),
+    totalRankedPlayers: totalSkillPlayers,
     tournamentHistory: mapTournamentHistory(tournamentHistory, dgId)
   }
 }
