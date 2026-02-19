@@ -1,21 +1,53 @@
 import Image from 'next/image'
 import { getPlayerDetail } from '@/lib/api/datagolf'
+import { getHistoricalEventResults } from '@/lib/api/datagolf/queries/historical-events'
+import { getHistoricalEventList } from '@/lib/api/datagolf/queries/historical-events'
 import PlayerRankingsTable from '../../(components)/player-rankings-table'
 import { getPlayerImageUrl, formatPlayerName } from '@/lib/utils'
+import { cn } from '@/lib/utils'
 
 type PlayerPageProps = {
   params: Promise<{
     id: string
   }>
+  searchParams: Promise<{
+    event?: string
+  }>
 }
 
-export default async function PlayerPage({ params }: PlayerPageProps) {
-  const resolvedParams = await params
+export default async function PlayerPage({ params, searchParams }: PlayerPageProps) {
+  const [resolvedParams, resolvedSearch] = await Promise.all([params, searchParams])
   const playerId = Number(resolvedParams.id)
+  const eventId = resolvedSearch.event
+
   const detail = await getPlayerDetail(playerId)
   const profile = detail.profile
   const playerName = profile?.playerName ? formatPlayerName(profile.playerName) : `Player ${resolvedParams.id}`
   const playerImage = getPlayerImageUrl(playerName)
+
+  let eventContext: { eventName: string; finishText: string; year: number; earnings: number | null } | null = null
+
+  if (eventId && /^\d+$/.test(eventId)) {
+    const numericEventId = Number(eventId)
+    const currentYear = new Date().getFullYear()
+
+    const [eventList, results] = await Promise.all([
+      getHistoricalEventList(),
+      getHistoricalEventResults(numericEventId, currentYear)
+    ])
+
+    const eventEntry = eventList.find((e) => e.eventId === numericEventId)
+    const playerFinish = results.find((r) => r.dgId === playerId)
+
+    if (eventEntry && playerFinish) {
+      eventContext = {
+        eventName: eventEntry.eventName,
+        finishText: playerFinish.finishText,
+        year: eventEntry.calendarYear,
+        earnings: playerFinish.earnings
+      }
+    }
+  }
 
   return (
     <main className="min-h-screen px-4 py-8">
@@ -38,6 +70,39 @@ export default async function PlayerPage({ params }: PlayerPageProps) {
             )}
           </div>
         </section>
+
+        {eventContext && (
+          <section className="bg-gray-800/60 border border-gray-700 rounded-lg px-5 py-4">
+            <p className="text-xs uppercase tracking-wide text-gray-400 mb-1">Event Context</p>
+            <p className="text-white">
+              <span className="font-medium">{eventContext.eventName}</span>
+              <span className="text-gray-400"> ({eventContext.year})</span>
+              <span className="mx-2 text-gray-600">•</span>
+              <span
+                className={cn(
+                  'font-semibold',
+                  eventContext.finishText === 'CUT' || eventContext.finishText === 'WD'
+                    ? 'text-red-400'
+                    : 'text-primary'
+                )}
+              >
+                {eventContext.finishText}
+              </span>
+              {eventContext.earnings != null && eventContext.earnings > 0 && (
+                <>
+                  <span className="mx-2 text-gray-600">•</span>
+                  <span className="text-gray-300">
+                    {new Intl.NumberFormat('en-US', {
+                      style: 'currency',
+                      currency: 'USD',
+                      maximumFractionDigits: 0
+                    }).format(eventContext.earnings)}
+                  </span>
+                </>
+              )}
+            </p>
+          </section>
+        )}
 
         <div className="grid grid-cols-1 gap-6">
           <PlayerRankingsTable playerName={playerName} rankings={detail.rankings} />
