@@ -7,6 +7,7 @@ import { PlanDetailClient } from './(components)/plan-detail-client'
 import type { ProcessedTourEvent } from '@/types/schedule'
 import type { Player } from '@/types/player'
 import type { HistoricalEventEntry } from '@/types/historical-events'
+import type { PriorYearTopFinishers } from '../types'
 
 type PageProps = {
   params: Promise<{ id: string }>
@@ -26,7 +27,6 @@ export default async function PlanDetailPage({ params }: PageProps) {
     redirect('/login')
   }
 
-  // Plan fetch is critical — 404 if not found
   const planResult = await supabase.from('season_plans').select('*').eq('id', id).single()
 
   if (planResult.error || !planResult.data) {
@@ -35,7 +35,6 @@ export default async function PlanDetailPage({ params }: PageProps) {
 
   const plan = planResult.data
 
-  // DataGolf fetches degrade gracefully — empty arrays on failure
   let events: ProcessedTourEvent[] = []
   let players: Player[] = []
   let historicalEvents: HistoricalEventEntry[] = []
@@ -53,10 +52,10 @@ export default async function PlanDetailPage({ params }: PageProps) {
     // All failed — continue with empty arrays
   }
 
-  // Build earnings map for completed events
   const seasonEvents = events.filter((e) => e.startDate.startsWith(String(plan.season)))
   const completedSeasonEvents = seasonEvents.filter((e) => e.isComplete)
 
+  // Build earnings map for completed events
   const earningsMap: Record<string, Record<number, number>> = {}
   if (completedSeasonEvents.length > 0) {
     const earningsResults = await Promise.allSettled(
@@ -76,6 +75,35 @@ export default async function PlanDetailPage({ params }: PageProps) {
     })
   }
 
+  // Build prior year top-5 finishers for each event (cached 1 week)
+  const priorYearResults: Record<string, PriorYearTopFinishers> = {}
+  const eventsToFetch = seasonEvents
+    .map((event) => {
+      const numericId = Number(event.eventId)
+      const priorEntry = historicalEvents
+        .filter((h) => h.eventId === numericId && h.calendarYear < plan.season)
+        .sort((a, b) => b.calendarYear - a.calendarYear)[0]
+      return priorEntry ? { eventId: event.eventId, numericId, year: priorEntry.calendarYear } : null
+    })
+    .filter(Boolean) as Array<{ eventId: string; numericId: number; year: number }>
+
+  if (eventsToFetch.length > 0) {
+    const priorResults = await Promise.allSettled(
+      eventsToFetch.map((e) => getHistoricalEventResults(e.numericId, e.year))
+    )
+    eventsToFetch.forEach((event, i) => {
+      const result = priorResults[i]
+      if (result.status === 'fulfilled') {
+        const top5 = result.value
+          .filter((f) => f.finishPosition !== null && f.status === 'finished')
+          .sort((a, b) => a.finishPosition! - b.finishPosition!)
+          .slice(0, 5)
+          .map((f) => ({ playerName: f.playerName, finishText: f.finishText }))
+        priorYearResults[event.eventId] = { year: event.year, topFinishers: top5 }
+      }
+    })
+  }
+
   return (
     <main className="container mx-auto px-4 py-8 min-h-[calc(100vh-4rem-4rem)]">
       <PlanDetailClient
@@ -86,6 +114,7 @@ export default async function PlanDetailPage({ params }: PageProps) {
         players={players}
         historicalEvents={historicalEvents}
         earningsMap={earningsMap}
+        priorYearResults={priorYearResults}
       />
     </main>
   )

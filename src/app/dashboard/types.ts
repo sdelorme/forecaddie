@@ -10,3 +10,8 @@ export interface CompletedEventResult {
   course: string
   topFinishers: TopFinisher[]
 }
+
+export interface PriorYearTopFinishers {
+  year: number
+  topFinishers: TopFinisher[]
+}
