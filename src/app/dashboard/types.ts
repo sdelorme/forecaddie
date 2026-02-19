@@ -10,3 +10,20 @@ export interface CompletedEventResult {
   course: string
   topFinishers: TopFinisher[]
 }
+
+export interface PriorYearTopFinishers {
+  year: number
+  topFinishers: TopFinisher[]
+}
+
+export interface OddsFavorite {
+  playerName: string
+  dgId: number
+  odds: string
+}
+
+export interface EventOddsFavorites {
+  eventName: string
+  lastUpdated: string
+  favorites: OddsFavorite[]
+}

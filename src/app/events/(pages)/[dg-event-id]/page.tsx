@@ -12,6 +12,9 @@ type EventDetailProps = {
   params: Promise<{
     'dg-event-id': string
   }>
+  searchParams: Promise<{
+    year?: string
+  }>
 }
 
 function isValidEventId(id: string): boolean {
@@ -146,8 +149,9 @@ function UpcomingEventEmpty() {
   )
 }
 
-export default async function EventDetailPage({ params }: EventDetailProps) {
+export default async function EventDetailPage({ params, searchParams }: EventDetailProps) {
   const resolvedParams = await params
+  const resolvedSearchParams = await searchParams
   const eventId = resolvedParams['dg-event-id']
 
   if (!isValidEventId(eventId)) {
@@ -161,22 +165,24 @@ export default async function EventDetailPage({ params }: EventDetailProps) {
     notFound()
   }
 
-  if (event.tournamentType === 'live') {
+  const requestedYear = resolvedSearchParams.year ? Number(resolvedSearchParams.year) : null
+  const isHistoricalYear = requestedYear !== null && !isNaN(requestedYear)
+
+  if (!isHistoricalYear && event.tournamentType === 'live') {
     const { redirect } = await import('next/navigation')
     redirect('/events/live-stats')
   }
 
-  const isCompleted = event.tournamentType === 'historical'
-  const currentYear = new Date().getFullYear()
+  const isCompleted = event.tournamentType === 'historical' || isHistoricalYear
+  const resultsYear = isHistoricalYear ? requestedYear : new Date().getFullYear()
 
   let results: PlayerEventFinish[] = []
   let fieldData: FieldUpdate | null = null
 
   if (isCompleted) {
-    results = await getHistoricalEventResults(Number(eventId), currentYear)
+    results = await getHistoricalEventResults(Number(eventId), resultsYear)
   } else {
     fieldData = await getFieldUpdates()
-    // Only use field data if it matches the event we're looking at
     if (fieldData && !fieldData.eventName.toLowerCase().includes(event.eventName.toLowerCase().split(' ')[0])) {
       fieldData = null
     }
@@ -193,6 +199,9 @@ export default async function EventDetailPage({ params }: EventDetailProps) {
           <span>{event.course}</span>
           {event.location && <span>{event.location}</span>}
           <span>{event.startDate}</span>
+          {isHistoricalYear && (
+            <span className="rounded bg-gray-700 px-2 py-0.5 text-xs text-gray-300">{requestedYear} Results</span>
+          )}
         </div>
       </div>
 

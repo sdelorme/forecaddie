@@ -1,12 +1,19 @@
 import { getSchedule } from '@/lib/api/datagolf/queries/schedule'
 import { getPlayerList } from '@/lib/api/datagolf/queries/players'
 import { getHistoricalEventList, getHistoricalEventResults } from '@/lib/api/datagolf/queries/historical-events'
+import { getOutrightOdds } from '@/lib/api/datagolf/queries/odds'
 import { createClient } from '@/lib/supabase/server'
 import { notFound, redirect } from 'next/navigation'
 import { PlanDetailClient } from './(components)/plan-detail-client'
+import { formatPlayerName } from '@/lib/utils'
 import type { ProcessedTourEvent } from '@/types/schedule'
 import type { Player } from '@/types/player'
 import type { HistoricalEventEntry } from '@/types/historical-events'
+import type { PriorYearTopFinishers, EventOddsFavorites } from '../types'
+
+function formatAmericanOdds(odds: number): string {
+  return odds > 0 ? `+${odds}` : String(odds)
+}
 
 type PageProps = {
   params: Promise<{ id: string }>
@@ -26,7 +33,6 @@ export default async function PlanDetailPage({ params }: PageProps) {
     redirect('/login')
   }
 
-  // Plan fetch is critical — 404 if not found
   const planResult = await supabase.from('season_plans').select('*').eq('id', id).single()
 
   if (planResult.error || !planResult.data) {
@@ -35,7 +41,6 @@ export default async function PlanDetailPage({ params }: PageProps) {
 
   const plan = planResult.data
 
-  // DataGolf fetches degrade gracefully — empty arrays on failure
   let events: ProcessedTourEvent[] = []
   let players: Player[] = []
   let historicalEvents: HistoricalEventEntry[] = []
@@ -53,10 +58,10 @@ export default async function PlanDetailPage({ params }: PageProps) {
     // All failed — continue with empty arrays
   }
 
-  // Build earnings map for completed events
   const seasonEvents = events.filter((e) => e.startDate.startsWith(String(plan.season)))
   const completedSeasonEvents = seasonEvents.filter((e) => e.isComplete)
 
+  // Build earnings map for completed events
   const earningsMap: Record<string, Record<number, number>> = {}
   if (completedSeasonEvents.length > 0) {
     const earningsResults = await Promise.allSettled(
@@ -76,8 +81,69 @@ export default async function PlanDetailPage({ params }: PageProps) {
     })
   }
 
+  // Build prior year top-5 finishers for each event (cached 1 week)
+  const priorYearResults: Record<string, PriorYearTopFinishers> = {}
+  const eventsToFetch = seasonEvents
+    .map((event) => {
+      const numericId = Number(event.eventId)
+      const priorEntry = historicalEvents
+        .filter((h) => h.eventId === numericId && h.calendarYear < plan.season)
+        .sort((a, b) => b.calendarYear - a.calendarYear)[0]
+      return priorEntry ? { eventId: event.eventId, numericId, year: priorEntry.calendarYear } : null
+    })
+    .filter(Boolean) as Array<{ eventId: string; numericId: number; year: number }>
+
+  if (eventsToFetch.length > 0) {
+    const priorResults = await Promise.allSettled(
+      eventsToFetch.map((e) => getHistoricalEventResults(e.numericId, e.year))
+    )
+    eventsToFetch.forEach((event, i) => {
+      const result = priorResults[i]
+      if (result.status === 'fulfilled') {
+        const top5 = result.value
+          .filter((f) => f.finishPosition !== null && f.status === 'finished')
+          .sort((a, b) => a.finishPosition! - b.finishPosition!)
+          .slice(0, 5)
+          .map((f) => ({ playerName: f.playerName, finishText: f.finishText }))
+        priorYearResults[event.eventId] = { year: event.year, topFinishers: top5 }
+      }
+    })
+  }
+
+  // Fetch outright odds for the current/upcoming event
+  let oddsFavorites: EventOddsFavorites | null = null
+  try {
+    const oddsData = await getOutrightOdds()
+    if (oddsData.eventName && oddsData.players.length > 0) {
+      const sorted = [...oddsData.players]
+        .map((p) => {
+          const best = [p.draftkings, p.fanduel, p.betmgm, p.datagolfBaselineHistoryFit]
+            .filter(Boolean)
+            .map(Number)
+            .filter((n) => !isNaN(n))
+            .sort((a, b) => a - b)[0]
+          return { ...p, bestOdds: best ?? null }
+        })
+        .filter((p) => p.bestOdds !== null)
+        .sort((a, b) => a.bestOdds! - b.bestOdds!)
+        .slice(0, 5)
+
+      oddsFavorites = {
+        eventName: oddsData.eventName,
+        lastUpdated: oddsData.lastUpdated,
+        favorites: sorted.map((p) => ({
+          playerName: formatPlayerName(p.playerName),
+          dgId: p.dgId,
+          odds: formatAmericanOdds(p.bestOdds!)
+        }))
+      }
+    }
+  } catch {
+    // Odds unavailable — degrade gracefully
+  }
+
   return (
-    <main className="container mx-auto px-4 py-8 min-h-[calc(100vh-4rem-4rem)]">
+    <div className="w-full px-6 py-8 min-h-[calc(100vh-4rem-4rem)]">
       <PlanDetailClient
         planId={plan.id}
         planName={plan.name}
@@ -86,7 +152,9 @@ export default async function PlanDetailPage({ params }: PageProps) {
         players={players}
         historicalEvents={historicalEvents}
         earningsMap={earningsMap}
+        priorYearResults={priorYearResults}
+        oddsFavorites={oddsFavorites}
       />
-    </main>
+    </div>
   )
 }

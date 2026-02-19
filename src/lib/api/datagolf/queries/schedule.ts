@@ -5,6 +5,14 @@ import { processEvents } from '@/lib/utils'
 import type { RawTourEvent } from '../types/schedule'
 import type { ProcessedTourEvent, TourEvent } from '@/types/schedule'
 
+function formatWinner(raw: string): string {
+  if (!raw || raw === 'TBD') return raw
+  const stripped = raw.replace(/\s*\(\d+\)\s*$/, '').trim()
+  const parts = stripped.split(', ')
+  if (parts.length < 2) return stripped
+  return `${parts[1]} ${parts[0]}`
+}
+
 function normalizeEvent(event: RawTourEvent): TourEvent {
   return {
     country: event.country,
@@ -17,7 +25,7 @@ function normalizeEvent(event: RawTourEvent): TourEvent {
     longitude: event.longitude,
     startDate: event.start_date,
     status: event.status,
-    winner: event.winner
+    winner: formatWinner(event.winner)
   }
 }
 
