@@ -1,6 +1,7 @@
 'use client'
 
 import { cn } from '@/lib/utils'
+import { getPurseForEvent, formatPurse } from '@/data/tournament-purses'
 import { Check, Trophy } from 'lucide-react'
 import type { ProcessedTourEvent } from '@/types/schedule'
 import type { Player } from '@/types/player'
@@ -75,25 +76,42 @@ function getPickInfo(
   muted: boolean
   pick: Pick | undefined
   player: Player | undefined
+  optionCount: number
 } {
-  const pick = picks.find((p) => p.event_id === eventId)
-  if (!pick) return { text: '—', muted: true, pick: undefined, player: undefined }
+  const eventPicks = picks.filter((p) => p.event_id === eventId)
+  const locked = eventPicks.find((p) => p.slot === 1)
+  const optionCount = eventPicks.filter((p) => p.slot !== 1 && p.player_dg_id != null).length
+
+  // Only locked picks should drive event summary, results, and earnings.
+  if (!locked) {
+    return {
+      text: optionCount > 0 ? `${optionCount} option${optionCount === 1 ? '' : 's'} saved` : '—',
+      muted: true,
+      pick: undefined,
+      player: undefined,
+      optionCount
+    }
+  }
+
+  const pick = locked
   if (pick.player_dg_id == null) {
-    return { text: 'No player selected', muted: true, pick, player: undefined }
+    return { text: 'No player selected', muted: true, pick, player: undefined, optionCount }
   }
   const player = players.find((p) => p.dgId === pick.player_dg_id)
   const name = player ? formatShortName(player) : `Player #${pick.player_dg_id}`
-  return { text: name, muted: false, pick, player }
+  return { text: name, muted: false, pick, player, optionCount }
 }
 
 function EventCardList({
   event,
+  purse,
   isSelected,
   pickInfo,
   earningsMap,
   onSelect
 }: {
   event: ProcessedTourEvent
+  purse: number | undefined
   isSelected: boolean
   pickInfo: ReturnType<typeof getPickInfo>
   earningsMap: Record<string, Record<number, number>>
@@ -132,6 +150,7 @@ function EventCardList({
             {event.course}
             {event.course && event.startDate ? ' · ' : ''}
             {formatEventDate(event.startDate)}
+            {purse != null && <span className="ml-1 tabular-nums">· {formatPurse(purse)}</span>}
           </p>
 
           {isCompleted && hasPick && (
@@ -169,12 +188,14 @@ function EventCardList({
 
 function EventCardGrid({
   event,
+  purse,
   isSelected,
   pickInfo,
   earningsMap,
   onSelect
 }: {
   event: ProcessedTourEvent
+  purse: number | undefined
   isSelected: boolean
   pickInfo: ReturnType<typeof getPickInfo>
   earningsMap: Record<string, Record<number, number>>
@@ -205,6 +226,7 @@ function EventCardGrid({
           {badge.label}
         </span>
         <span className="text-xs text-gray-500">{formatShortDate(event.startDate)}</span>
+        {purse != null && <span className="text-xs text-gray-500 tabular-nums ml-auto">{formatPurse(purse)}</span>}
       </div>
 
       <h3 className="mt-1.5 line-clamp-2 text-sm font-semibold leading-tight text-white">{event.eventName}</h3>
@@ -262,11 +284,13 @@ export function PlanEventList({
         {events.map((event) => {
           const isSelected = selectedEventId === event.eventId
           const pickInfo = getPickInfo(event.eventId, picks, players)
+          const purse = getPurseForEvent(event.eventId, event.eventName)
 
           return (
             <EventCardGrid
               key={event.eventId}
               event={event}
+              purse={purse}
               isSelected={isSelected}
               pickInfo={pickInfo}
               earningsMap={earningsMap}
@@ -283,11 +307,13 @@ export function PlanEventList({
       {events.map((event) => {
         const isSelected = selectedEventId === event.eventId
         const pickInfo = getPickInfo(event.eventId, picks, players)
+        const purse = getPurseForEvent(event.eventId, event.eventName)
 
         return (
           <EventCardList
             key={event.eventId}
             event={event}
+            purse={purse}
             isSelected={isSelected}
             pickInfo={pickInfo}
             earningsMap={earningsMap}

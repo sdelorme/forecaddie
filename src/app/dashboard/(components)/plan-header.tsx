@@ -1,17 +1,32 @@
 'use client'
 
+import { useState } from 'react'
 import Link from 'next/link'
-import { ChevronLeft } from 'lucide-react'
+import { ChevronLeft, Share2 } from 'lucide-react'
 import { cn } from '@/lib/utils'
+import { Button } from '@/components/ui'
+import { SharePlanModal } from './share-plan-modal'
 
 interface PlanHeaderProps {
+  planId: string
   planName: string
   season: number
   pickCount: number
   totalEvents: number
+  canInvite: boolean
+  currentUserId: string
 }
 
-export function PlanHeader({ planName, season, pickCount, totalEvents }: PlanHeaderProps) {
+export function PlanHeader({
+  planId,
+  planName,
+  season,
+  pickCount,
+  totalEvents,
+  canInvite,
+  currentUserId
+}: PlanHeaderProps) {
+  const [shareOpen, setShareOpen] = useState(false)
   const progress = totalEvents > 0 ? (pickCount / totalEvents) * 100 : 0
 
   return (
@@ -31,6 +46,15 @@ export function PlanHeader({ planName, season, pickCount, totalEvents }: PlanHea
         </div>
 
         <div className="flex items-center gap-3">
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={() => setShareOpen(true)}
+            className="border-gray-600 text-gray-300 hover:bg-gray-800"
+          >
+            <Share2 className="h-4 w-4" />
+            Share
+          </Button>
           <span className="text-sm text-gray-400">
             {pickCount}/{totalEvents} picks made
           </span>
@@ -45,6 +69,14 @@ export function PlanHeader({ planName, season, pickCount, totalEvents }: PlanHea
           </div>
         </div>
       </div>
+
+      <SharePlanModal
+        open={shareOpen}
+        onOpenChange={setShareOpen}
+        planId={planId}
+        canInvite={canInvite}
+        currentUserId={currentUserId}
+      />
     </div>
   )
 }

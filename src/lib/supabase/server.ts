@@ -1,6 +1,16 @@
+import { createClient as createSupabaseClient } from '@supabase/supabase-js'
 import { createServerClient } from '@supabase/ssr'
 import { cookies } from 'next/headers'
 import type { Database } from './types'
+
+export function createAdminClient() {
+  const url = process.env.NEXT_PUBLIC_SUPABASE_URL
+  const serviceKey = process.env.SUPABASE_SECRET_KEY
+  if (!url || !serviceKey) {
+    throw new Error('Missing SUPABASE_URL or SUPABASE_SECRET_KEY for admin client')
+  }
+  return createSupabaseClient<Database>(url, serviceKey, { auth: { persistSession: false } })
+}
 
 export async function createClient() {
   const cookieStore = await cookies()

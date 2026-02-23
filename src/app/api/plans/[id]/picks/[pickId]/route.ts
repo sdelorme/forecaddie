@@ -20,15 +20,26 @@ export async function PATCH(request: NextRequest, { params }: RouteParams) {
     const parsed = await parseBody(request, UpdatePickSchema)
     if (parsed.error) return parsed.error
 
-    const { player_dg_id } = parsed.data
+    const { player_dg_id, slot } = parsed.data
 
-    // OAD constraint: each player can only be used once per plan
-    if (player_dg_id !== undefined && player_dg_id !== null) {
+    // Fetch current pick to know its slot (for OAD check)
+    const { data: currentPick } = await supabase
+      .from('picks')
+      .select('slot')
+      .eq('id', pickId)
+      .eq('plan_id', id)
+      .single()
+
+    const effectiveSlot = slot ?? currentPick?.slot ?? 1
+
+    // OAD constraint: only slot 1 (locked) consumes player
+    if (effectiveSlot === 1 && player_dg_id !== undefined && player_dg_id !== null) {
       const { data: existingPlayerPick } = await supabase
         .from('picks')
         .select('id, event_id')
         .eq('plan_id', id)
         .eq('player_dg_id', player_dg_id)
+        .eq('slot', 1)
         .neq('id', pickId)
         .limit(1)
         .single()
@@ -44,12 +55,15 @@ export async function PATCH(request: NextRequest, { params }: RouteParams) {
       }
     }
 
+    const updatePayload: { player_dg_id?: number | null; slot?: number; updated_at: string } = {
+      updated_at: new Date().toISOString()
+    }
+    if (player_dg_id !== undefined) updatePayload.player_dg_id = player_dg_id
+    if (slot !== undefined) updatePayload.slot = slot
+
     const { data, error } = await supabase
       .from('picks')
-      .update({
-        player_dg_id,
-        updated_at: new Date().toISOString()
-      })
+      .update(updatePayload)
       .eq('id', pickId)
       .eq('plan_id', id)
       .select()

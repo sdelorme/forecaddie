@@ -4,14 +4,16 @@ import Link from 'next/link'
 import { cn } from '@/lib/utils'
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui'
 import { Check, Trophy, Circle, ChevronRight, ExternalLink, UserRound } from 'lucide-react'
+import { getPurseForEvent, formatPurse } from '@/data/tournament-purses'
 import type { ProcessedTourEvent } from '@/types/schedule'
 import type { Player } from '@/types/player'
 import type { Pick } from '@/lib/supabase/types'
+import type { EventPicks } from '@/lib/supabase'
 import type { PriorYearTopFinishers, EventOddsFavorites } from '../types'
 
 interface PlanSeasonTableProps {
   events: ProcessedTourEvent[]
-  picks: Pick[]
+  getPicksForEvent: (eventId: string) => EventPicks
   players: Player[]
   earningsMap: Record<string, Record<number, number>>
   priorYearResults: Record<string, PriorYearTopFinishers>
@@ -68,15 +70,24 @@ function formatEarnings(amount: number): string {
   return `$${amount.toLocaleString('en-US')}`
 }
 
-function getPickForEvent(
-  eventId: string,
-  picks: Pick[],
+function getPickDisplay(
+  eventPicks: EventPicks,
   players: Player[]
-): { pick: Pick | undefined; player: Player | undefined } {
-  const pick = picks.find((p) => p.event_id === eventId)
-  if (!pick || pick.player_dg_id == null) return { pick, player: undefined }
-  const player = players.find((p) => p.dgId === pick.player_dg_id)
-  return { pick, player }
+): {
+  locked: { pick: Pick; player: Player } | undefined
+  option1: { pick: Pick; player: Player } | undefined
+  option2: { pick: Pick; player: Player } | undefined
+} {
+  const resolve = (pick: Pick | undefined) => {
+    if (!pick || pick.player_dg_id == null) return undefined
+    const player = players.find((p) => p.dgId === pick.player_dg_id)
+    return player ? { pick, player } : undefined
+  }
+  return {
+    locked: resolve(eventPicks.locked),
+    option1: resolve(eventPicks.option1),
+    option2: resolve(eventPicks.option2)
+  }
 }
 
 function matchOddsEventId(oddsFavorites: EventOddsFavorites | null, events: ProcessedTourEvent[]): string | null {
@@ -93,7 +104,7 @@ function matchOddsEventId(oddsFavorites: EventOddsFavorites | null, events: Proc
 
 export function PlanSeasonTable({
   events,
-  picks,
+  getPicksForEvent,
   players,
   earningsMap,
   priorYearResults,
@@ -115,6 +126,7 @@ export function PlanSeasonTable({
               Event
             </TableHead>
             <TableHead className="text-gray-400 text-xs uppercase tracking-wider text-center w-[72px]">Date</TableHead>
+            <TableHead className="text-gray-400 text-xs uppercase tracking-wider text-right w-[72px]">Purse</TableHead>
             <TableHead className="text-gray-400 text-xs uppercase tracking-wider min-w-[200px]">Selected</TableHead>
             <TableHead className="text-gray-400 text-xs uppercase tracking-wider min-w-[320px]">
               Prior Year Top 5
@@ -126,13 +138,17 @@ export function PlanSeasonTable({
         </TableHeader>
         <TableBody className="divide-y divide-gray-700/50">
           {events.map((event) => {
-            const { pick, player } = getPickForEvent(event.eventId, picks, players)
-            const hasPick = pick && pick.player_dg_id != null
+            const eventPicks = getPicksForEvent(event.eventId)
+            const { locked, option1, option2 } = getPickDisplay(eventPicks, players)
+            const purse = getPurseForEvent(event.eventId, event.eventName)
+            const hasLocked = !!locked
             const isCompleted = event.isComplete
             const status = statusConfig[event.tournamentType]
             const prior = priorYearResults[event.eventId]
             const earnings =
-              hasPick && pick?.player_dg_id != null ? (earningsMap[event.eventId]?.[pick.player_dg_id] ?? null) : null
+              hasLocked && locked?.pick.player_dg_id != null
+                ? (earningsMap[event.eventId]?.[locked.pick.player_dg_id] ?? null)
+                : null
 
             const isInteractive = !isCompleted
 
@@ -156,7 +172,7 @@ export function PlanSeasonTable({
                   'bg-gray-800/50 border-gray-700/50 transition-colors',
                   isInteractive && 'cursor-pointer hover:bg-gray-700/60',
                   isCompleted && 'opacity-75',
-                  isCompleted && hasPick && 'opacity-100'
+                  isCompleted && hasLocked && 'opacity-100'
                 )}
               >
                 {/* Event column */}
@@ -175,49 +191,76 @@ export function PlanSeasonTable({
                   {formatDate(event.startDate)}
                 </TableCell>
 
+                {/* Purse column */}
+                <TableCell className="text-right text-sm text-gray-400 whitespace-nowrap tabular-nums">
+                  {purse != null ? formatPurse(purse) : '—'}
+                </TableCell>
+
                 {/* Selected pick column */}
                 <TableCell className="py-2.5">
-                  {hasPick && player ? (
-                    <div
-                      className={cn(
-                        'inline-flex items-center gap-2 rounded-md px-3 py-1.5',
-                        isCompleted
-                          ? 'bg-green-900/30 border border-green-800/50'
-                          : 'bg-primary/10 border border-primary/20'
-                      )}
-                    >
-                      <Check className="h-3.5 w-3.5 text-green-500 flex-shrink-0" />
-                      <div className="min-w-0">
-                        <span className="text-sm font-medium text-white block truncate">{player.displayName}</span>
-                        {isCompleted && (pick?.result_position != null || earnings != null) && (
-                          <span className="flex items-center gap-1.5 text-xs">
-                            {pick?.result_position != null && (
-                              <span
-                                className={cn(
-                                  'font-medium',
-                                  pick.result_position <= 3 ? 'text-yellow-400' : 'text-gray-400'
-                                )}
-                              >
-                                {formatPosition(pick.result_position)}
-                              </span>
-                            )}
-                            {earnings != null && (
-                              <span className="font-medium text-green-400">{formatEarnings(earnings)}</span>
-                            )}
-                          </span>
+                  <div className="flex flex-wrap items-center gap-1.5">
+                    {hasLocked && locked ? (
+                      <div
+                        className={cn(
+                          'inline-flex items-center gap-2 rounded-md px-3 py-1.5',
+                          isCompleted
+                            ? 'bg-green-900/30 border border-green-800/50'
+                            : 'bg-primary/10 border border-primary/20'
                         )}
+                      >
+                        <Check className="h-3.5 w-3.5 text-green-500 flex-shrink-0" />
+                        <div className="min-w-0">
+                          <span className="text-sm font-medium text-white block truncate">
+                            {locked.player.displayName}
+                          </span>
+                          {isCompleted && (locked.pick.result_position != null || earnings != null) && (
+                            <span className="flex items-center gap-1.5 text-xs">
+                              {locked.pick.result_position != null && (
+                                <span
+                                  className={cn(
+                                    'font-medium',
+                                    locked.pick.result_position <= 3 ? 'text-yellow-400' : 'text-gray-400'
+                                  )}
+                                >
+                                  {formatPosition(locked.pick.result_position)}
+                                </span>
+                              )}
+                              {earnings != null && (
+                                <span className="font-medium text-green-400">{formatEarnings(earnings)}</span>
+                              )}
+                            </span>
+                          )}
+                        </div>
+                        {!isCompleted && <ChevronRight className="h-3.5 w-3.5 text-gray-500 flex-shrink-0" />}
                       </div>
-                      {!isCompleted && <ChevronRight className="h-3.5 w-3.5 text-gray-500 flex-shrink-0" />}
-                    </div>
-                  ) : isCompleted ? (
-                    <span className="text-xs text-gray-600 pl-1">—</span>
-                  ) : (
-                    <span className="inline-flex items-center gap-2 rounded-md border border-dashed border-gray-600 px-3 py-1.5 text-sm text-gray-500">
-                      <UserRound className="h-3.5 w-3.5" />
-                      Select pick
-                      <ChevronRight className="h-3.5 w-3.5" />
-                    </span>
-                  )}
+                    ) : isCompleted ? (
+                      <span className="text-xs text-gray-600 pl-1">—</span>
+                    ) : (
+                      <span
+                        className={cn(
+                          'inline-flex items-center gap-2 rounded-md border border-dashed px-3 py-1.5 text-sm',
+                          isInteractive
+                            ? 'border-gray-600 text-gray-500 cursor-pointer hover:border-gray-500'
+                            : 'border-gray-600 text-gray-500'
+                        )}
+                        onClick={isInteractive ? () => onOpenPicker(event.eventId) : undefined}
+                      >
+                        <UserRound className="h-3.5 w-3.5" />
+                        Select pick
+                        <ChevronRight className="h-3.5 w-3.5" />
+                      </span>
+                    )}
+                    {option1 && (
+                      <span className="inline-flex items-center rounded-md bg-slate-600/30 border border-slate-500/50 px-2 py-1 text-xs text-slate-300">
+                        {option1.player.displayName}
+                      </span>
+                    )}
+                    {option2 && (
+                      <span className="inline-flex items-center rounded-md bg-slate-600/30 border border-slate-500/50 px-2 py-1 text-xs text-slate-300">
+                        {option2.player.displayName}
+                      </span>
+                    )}
+                  </div>
                 </TableCell>
 
                 {/* Prior year top 5 column */}

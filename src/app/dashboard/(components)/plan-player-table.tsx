@@ -2,17 +2,20 @@
 
 import { useMemo, useState } from 'react'
 import Link from 'next/link'
-import { X, Loader2, ExternalLink } from 'lucide-react'
+import { X, Loader2, ExternalLink, ArrowUpDown } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import { Button } from '@/components/ui/button'
 import { PlayerSearch } from '@/app/dashboard/[id]/(components)/player-search'
+import { RecentFormTooltip } from '@/app/dashboard/(components)/recent-form-tooltip'
 import type { Player } from '@/types/player'
 import type { Pick } from '@/lib/supabase/types'
 import type { PlayerEventFinish } from '@/types/historical-events'
+import type { RecentFormMap } from '@/types/hottest-golfers'
 
 interface PlanPlayerTableProps {
   players: Player[]
   usedPlayerIds: number[]
+  futurePickEventNames?: Map<number, string>
   onSelectPlayer: (playerDgId: number) => void
   onClearPick: () => void
   currentPick: Pick | undefined
@@ -22,6 +25,10 @@ interface PlanPlayerTableProps {
   historicalFinishes: Map<number, PlayerEventFinish[]>
   isLoadingHistory: boolean
   withdrawnPlayerIds?: Set<number>
+  editingSlot?: 1 | 2 | 3
+  consideredPlayerIds?: number[]
+  recentForm?: RecentFormMap
+  readOnly?: boolean
 }
 
 function finishCellClass(finish: PlayerEventFinish | undefined): string {
@@ -51,6 +58,7 @@ function finishSortRank(finish: PlayerEventFinish | undefined): number {
 export function PlanPlayerTable({
   players,
   usedPlayerIds,
+  futurePickEventNames = new Map(),
   onSelectPlayer,
   onClearPick,
   currentPick,
@@ -59,11 +67,18 @@ export function PlanPlayerTable({
   historicalYears,
   historicalFinishes,
   isLoadingHistory,
-  withdrawnPlayerIds = new Set()
+  withdrawnPlayerIds = new Set(),
+  editingSlot = 1,
+  consideredPlayerIds = [],
+  recentForm = new Map(),
+  readOnly = false
 }: PlanPlayerTableProps) {
-  const [searchTerm, setSearchTerm] = useState('')
-
   const hasHistory = historicalYears.length > 0
+  const hasRecentForm = recentForm.size > 0
+  const [searchTerm, setSearchTerm] = useState('')
+  const [sortBy, setSortBy] = useState<'history' | 'recent-form' | 'name'>(() =>
+    hasRecentForm && !hasHistory ? 'recent-form' : 'history'
+  )
 
   const finishLookup = useMemo(() => {
     const lookup = new Map<number, Map<number, PlayerEventFinish>>()
@@ -80,27 +95,30 @@ export function PlanPlayerTable({
     return players.find((p) => p.dgId === currentPick.player_dg_id) ?? null
   }, [currentPick, players])
 
-  // Sort by most recent prior-year finish (asc) when history is loaded,
-  // otherwise alphabetical. Players with a numeric finish come first,
-  // then non-finishers (CUT/WD/DQ/MDF), then players with no data.
+  // Sort by history (prior-year finish), recent form (avg finish), or name.
   const sortedPlayers = useMemo(() => {
-    const mostRecentYear = historicalYears[0] // already sorted desc
-    const yearLookup = !isLoadingHistory && mostRecentYear ? finishLookup.get(mostRecentYear) : undefined
-
     return [...players].sort((a, b) => {
+      if (sortBy === 'name') return a.displayName.localeCompare(b.displayName)
+
+      if (sortBy === 'recent-form' && hasRecentForm) {
+        const avgA = recentForm.get(a.dgId) ?? 99999
+        const avgB = recentForm.get(b.dgId) ?? 99999
+        if (avgA !== avgB) return avgA - avgB
+        return a.displayName.localeCompare(b.displayName)
+      }
+
+      const mostRecentYear = historicalYears[0]
+      const yearLookup = !isLoadingHistory && mostRecentYear ? finishLookup.get(mostRecentYear) : undefined
       if (!yearLookup) return a.displayName.localeCompare(b.displayName)
 
       const fa = yearLookup.get(a.dgId)
       const fb = yearLookup.get(b.dgId)
-
-      // Sort rank: finished (by position) → non-finish status → no data
       const rankA = finishSortRank(fa)
       const rankB = finishSortRank(fb)
-
       if (rankA !== rankB) return rankA - rankB
       return a.displayName.localeCompare(b.displayName)
     })
-  }, [players, historicalYears, finishLookup, isLoadingHistory])
+  }, [players, historicalYears, finishLookup, isLoadingHistory, sortBy, hasRecentForm, recentForm])
 
   const filtered = useMemo(() => {
     if (!searchTerm.trim()) return sortedPlayers
@@ -126,7 +144,8 @@ export function PlanPlayerTable({
           <Button
             variant="ghost"
             size="sm"
-            onClick={onClearPick}
+            onClick={readOnly ? undefined : onClearPick}
+            disabled={readOnly}
             className="h-7 gap-1 text-xs text-red-400 hover:text-red-300"
           >
             <X className="h-3 w-3" />
@@ -154,6 +173,29 @@ export function PlanPlayerTable({
             <thead className="sticky top-0 z-10 bg-gray-800">
               <tr className="text-left text-xs uppercase tracking-wider text-gray-400">
                 <th className="sticky left-0 z-20 bg-gray-800 py-2 pr-3 pl-1 font-medium">Player</th>
+                {hasRecentForm && (
+                  <th
+                    role="button"
+                    tabIndex={0}
+                    onClick={() => setSortBy((s) => (s === 'recent-form' ? 'history' : 'recent-form'))}
+                    onKeyDown={(e) => {
+                      if (e.key === 'Enter' || e.key === ' ') {
+                        e.preventDefault()
+                        setSortBy((s) => (s === 'recent-form' ? 'history' : 'recent-form'))
+                      }
+                    }}
+                    className={cn(
+                      'py-2 px-2 text-center font-medium whitespace-nowrap cursor-pointer hover:text-gray-300 transition-colors',
+                      sortBy === 'recent-form' && 'text-primary'
+                    )}
+                  >
+                    <span className="inline-flex items-center gap-1.5">
+                      Form
+                      <RecentFormTooltip />
+                      <ArrowUpDown className="h-3 w-3" />
+                    </span>
+                  </th>
+                )}
                 {hasHistory &&
                   historicalYears.map((year) => (
                     <th key={year} className="py-2 px-2 text-center font-medium whitespace-nowrap">
@@ -177,8 +219,10 @@ export function PlanPlayerTable({
             <tbody className="divide-y divide-gray-700/50">
               {filtered.map((player) => {
                 const isUsed = usedPlayerIds.includes(player.dgId)
+                const isConsidered = consideredPlayerIds.includes(player.dgId)
                 const isCurrent = currentPick?.player_dg_id === player.dgId
-                const isDisabled = isUsed || isCurrent
+                const blocksLocked = editingSlot === 1 && isUsed
+                const isDisabled = blocksLocked || isCurrent || readOnly
 
                 return (
                   <tr
@@ -213,7 +257,14 @@ export function PlanPlayerTable({
                         )}
                         {isUsed && (
                           <span className="flex-shrink-0 rounded-full bg-red-500/20 px-2 py-0.5 text-xs text-red-400">
-                            Used
+                            {futurePickEventNames.has(player.dgId)
+                              ? `Picked for ${futurePickEventNames.get(player.dgId)!}`
+                              : 'Used'}
+                          </span>
+                        )}
+                        {isConsidered && !isCurrent && (
+                          <span className="flex-shrink-0 rounded-full bg-slate-500/20 px-2 py-0.5 text-xs text-slate-400">
+                            Considered
                           </span>
                         )}
                         {isCurrent && (
@@ -223,6 +274,11 @@ export function PlanPlayerTable({
                         )}
                       </div>
                     </td>
+                    {hasRecentForm && (
+                      <td className="py-2 px-2 text-center whitespace-nowrap text-gray-300">
+                        {recentForm.has(player.dgId) ? recentForm.get(player.dgId)!.toFixed(1) : '—'}
+                      </td>
+                    )}
                     {hasHistory &&
                       historicalYears.map((year) => {
                         if (isLoadingHistory) {

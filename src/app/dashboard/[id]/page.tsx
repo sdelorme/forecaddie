@@ -1,6 +1,7 @@
 import { getSchedule } from '@/lib/api/datagolf/queries/schedule'
 import { getPlayerList } from '@/lib/api/datagolf/queries/players'
 import { getHistoricalEventList, getHistoricalEventResults } from '@/lib/api/datagolf/queries/historical-events'
+import { getHottestGolfers } from '@/lib/api/datagolf/queries/hottest-golfers'
 import { getOutrightOdds } from '@/lib/api/datagolf/queries/odds'
 import { createClient } from '@/lib/supabase/server'
 import { notFound, redirect } from 'next/navigation'
@@ -10,6 +11,7 @@ import type { ProcessedTourEvent } from '@/types/schedule'
 import type { Player } from '@/types/player'
 import type { HistoricalEventEntry } from '@/types/historical-events'
 import type { PriorYearTopFinishers, EventOddsFavorites } from '../types'
+import type { RecentFormMap } from '@/types/hottest-golfers'
 
 function formatAmericanOdds(odds: number): string {
   return odds > 0 ? `+${odds}` : String(odds)
@@ -40,6 +42,15 @@ export default async function PlanDetailPage({ params }: PageProps) {
   }
 
   const plan = planResult.data
+
+  const { data: membership } = await supabase
+    .from('plan_members')
+    .select('role')
+    .eq('plan_id', id)
+    .eq('user_id', user.id)
+    .single()
+
+  const canInvite = membership?.role === 'owner' || membership?.role === 'editor'
 
   let events: ProcessedTourEvent[] = []
   let players: Player[] = []
@@ -142,6 +153,13 @@ export default async function PlanDetailPage({ params }: PageProps) {
     // Odds unavailable — degrade gracefully
   }
 
+  let recentForm: RecentFormMap = new Map()
+  try {
+    recentForm = await getHottestGolfers()
+  } catch {
+    // Recent form unavailable — degrade gracefully
+  }
+
   return (
     <div className="w-full px-6 py-8 min-h-[calc(100vh-4rem-4rem)]">
       <PlanDetailClient
@@ -154,6 +172,9 @@ export default async function PlanDetailPage({ params }: PageProps) {
         earningsMap={earningsMap}
         priorYearResults={priorYearResults}
         oddsFavorites={oddsFavorites}
+        recentForm={recentForm}
+        canInvite={canInvite}
+        currentUserId={user.id}
       />
     </div>
   )

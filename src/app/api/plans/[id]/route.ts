@@ -16,7 +16,7 @@ export async function GET(_request: NextRequest, { params }: RouteParams) {
     const { supabase, user } = await authenticateRoute()
     if (!supabase || !user) return unauthorizedResponse()
 
-    // RLS ensures user can only access their own plans
+    // RLS ensures only plan members can access this plan
     const { data, error } = await supabase.from('season_plans').select('*').eq('id', id).single()
 
     if (error) {
@@ -56,7 +56,7 @@ export async function PATCH(request: NextRequest, { params }: RouteParams) {
     if (name !== undefined) updates.name = name
     if (season !== undefined) updates.season = season
 
-    // RLS ensures user can only update their own plans
+    // RLS ensures only owner/editor members can update this plan
     const { data, error } = await supabase.from('season_plans').update(updates).eq('id', id).select().single()
 
     if (error) {
@@ -88,7 +88,22 @@ export async function DELETE(_request: NextRequest, { params }: RouteParams) {
     const { supabase, user } = await authenticateRoute()
     if (!supabase || !user) return unauthorizedResponse()
 
-    // RLS ensures user can only delete their own plans
+    const { data: membership, error: membershipError } = await supabase
+      .from('plan_members')
+      .select('role')
+      .eq('plan_id', id)
+      .eq('user_id', user.id)
+      .single()
+
+    if (membershipError || !membership) {
+      return NextResponse.json({ error: 'Plan not found' }, { status: 404 })
+    }
+
+    if (membership.role !== 'owner') {
+      return NextResponse.json({ error: 'Only owners can delete plans' }, { status: 403 })
+    }
+
+    // RLS is still enforced for defense-in-depth.
     const { error } = await supabase.from('season_plans').delete().eq('id', id)
 
     if (error) {

@@ -32,6 +32,7 @@ export type Database = {
           plan_id: string
           player_dg_id: number | null
           result_position: number | null
+          slot: number
           updated_at: string | null
           user_id: string
         }
@@ -42,6 +43,7 @@ export type Database = {
           plan_id: string
           player_dg_id?: number | null
           result_position?: number | null
+          slot?: number
           updated_at?: string | null
           user_id: string
         }
@@ -52,6 +54,7 @@ export type Database = {
           plan_id?: string
           player_dg_id?: number | null
           result_position?: number | null
+          slot?: number
           updated_at?: string | null
           user_id?: string
         }
@@ -106,6 +109,38 @@ export type Database = {
           }
         ]
       }
+      plan_members: {
+        Row: {
+          id: string
+          plan_id: string
+          user_id: string
+          role: string
+          created_at: string | null
+        }
+        Insert: {
+          id?: string
+          plan_id: string
+          user_id: string
+          role: 'owner' | 'editor' | 'viewer'
+          created_at?: string | null
+        }
+        Update: {
+          id?: string
+          plan_id?: string
+          user_id?: string
+          role?: 'owner' | 'editor' | 'viewer'
+          created_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: 'plan_members_plan_id_fkey'
+            columns: ['plan_id']
+            isOneToOne: false
+            referencedRelation: 'season_plans'
+            referencedColumns: ['id']
+          }
+        ]
+      }
       season_plans: {
         Row: {
           created_at: string | null
@@ -149,7 +184,10 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
-      [_ in never]: never
+      get_user_id_by_email: {
+        Args: { user_email: string }
+        Returns: string | null
+      }
     }
     Enums: {
       [_ in never]: never
