@@ -1,7 +1,6 @@
 'use client'
 
-import { cn } from '@/lib/utils'
-import { getPurseForEvent, formatPurse } from '@/data/tournament-purses'
+import { cn, formatPurse } from '@/lib/utils'
 import { Check, Trophy } from 'lucide-react'
 import type { ProcessedTourEvent } from '@/types/schedule'
 import type { Player } from '@/types/player'
@@ -284,13 +283,12 @@ export function PlanEventList({
         {events.map((event) => {
           const isSelected = selectedEventId === event.eventId
           const pickInfo = getPickInfo(event.eventId, picks, players)
-          const purse = getPurseForEvent(event.eventId, event.eventName)
 
           return (
             <EventCardGrid
               key={event.eventId}
               event={event}
-              purse={purse}
+              purse={event.purse}
               isSelected={isSelected}
               pickInfo={pickInfo}
               earningsMap={earningsMap}
@@ -307,13 +305,12 @@ export function PlanEventList({
       {events.map((event) => {
         const isSelected = selectedEventId === event.eventId
         const pickInfo = getPickInfo(event.eventId, picks, players)
-        const purse = getPurseForEvent(event.eventId, event.eventName)
 
         return (
           <EventCardList
             key={event.eventId}
             event={event}
-            purse={purse}
+            purse={event.purse}
             isSelected={isSelected}
             pickInfo={pickInfo}
             earningsMap={earningsMap}

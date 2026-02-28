@@ -17,6 +17,7 @@ export interface ProcessedTourEvent extends TourEvent {
   tournamentType: 'live' | 'historical' | 'future'
   href: string
   isComplete: boolean
+  purse?: number
 }
 
 export interface TourSchedule {

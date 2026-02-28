@@ -16,7 +16,6 @@ import {
   SelectTrigger,
   SelectValue
 } from '@/components/ui'
-import { getPurseForEvent } from '@/data/tournament-purses'
 import type { ProcessedTourEvent } from '@/types/schedule'
 import type { Player } from '@/types/player'
 import type { HistoricalEventEntry, PlayerEventFinish } from '@/types/historical-events'
@@ -86,11 +85,9 @@ export function PlanDetailClient({
     if (eventSort === 'date') {
       return [...filtered].sort((a, b) => a.startDate.localeCompare(b.startDate))
     }
-    const purseA = (e: ProcessedTourEvent) => getPurseForEvent(e.eventId, e.eventName) ?? -1
-    const purseB = (e: ProcessedTourEvent) => getPurseForEvent(e.eventId, e.eventName) ?? -1
     return [...filtered].sort((a, b) => {
-      const pa = purseA(a)
-      const pb = purseB(b)
+      const pa = a.purse ?? -1
+      const pb = b.purse ?? -1
       if (eventSort === 'purse-asc') return pa - pb
       return pb - pa
     })

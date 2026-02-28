@@ -32,6 +32,9 @@ export {
   isTournamentComplete
 } from './tournament-time'
 
+// Formatting utilities
+export { formatPurse } from './format-purse'
+
 // Tour event utilities
 export {
   getTournamentType,

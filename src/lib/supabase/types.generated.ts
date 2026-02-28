@@ -141,6 +141,33 @@ export type Database = {
           }
         ]
       }
+      tournament_purses: {
+        Row: {
+          id: string
+          dg_event_id: string
+          season: number
+          event_name: string
+          purse: number
+          created_at: string | null
+        }
+        Insert: {
+          id?: string
+          dg_event_id: string
+          season: number
+          event_name: string
+          purse: number
+          created_at?: string | null
+        }
+        Update: {
+          id?: string
+          dg_event_id?: string
+          season?: number
+          event_name?: string
+          purse?: number
+          created_at?: string | null
+        }
+        Relationships: []
+      }
       season_plans: {
         Row: {
           created_at: string | null

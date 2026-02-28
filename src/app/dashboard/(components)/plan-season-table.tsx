@@ -4,7 +4,7 @@ import Link from 'next/link'
 import { cn } from '@/lib/utils'
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui'
 import { Check, Trophy, Circle, ChevronRight, ExternalLink, UserRound } from 'lucide-react'
-import { getPurseForEvent, formatPurse } from '@/data/tournament-purses'
+import { formatPurse } from '@/lib/utils'
 import type { ProcessedTourEvent } from '@/types/schedule'
 import type { Player } from '@/types/player'
 import type { Pick } from '@/lib/supabase/types'
@@ -140,7 +140,7 @@ export function PlanSeasonTable({
           {events.map((event) => {
             const eventPicks = getPicksForEvent(event.eventId)
             const { locked, option1, option2 } = getPickDisplay(eventPicks, players)
-            const purse = getPurseForEvent(event.eventId, event.eventName)
+            const purse = event.purse
             const hasLocked = !!locked
             const isCompleted = event.isComplete
             const status = statusConfig[event.tournamentType]
