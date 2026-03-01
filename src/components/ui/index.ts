@@ -47,3 +47,6 @@ export { Toggle, toggleVariants } from './toggle'
 
 // ToggleGroup
 export { ToggleGroup, ToggleGroupItem } from './toggle-group'
+
+// Tooltip
+export { Tooltip, TooltipTrigger, TooltipContent, TooltipProvider } from './tooltip'

@@ -2,7 +2,8 @@ import { notFound } from 'next/navigation'
 import { getSchedule } from '@/lib/api/datagolf'
 import { getHistoricalEventResults } from '@/lib/api/datagolf/queries/historical-events'
 import { getFieldUpdates } from '@/lib/api/datagolf/queries/field-updates'
-import { cn } from '@/lib/utils'
+import { getPurseMap, attachPurses } from '@/lib/api/supabase/queries/tournament-purses'
+import { cn, formatPurse } from '@/lib/utils'
 import Link from 'next/link'
 import type { ProcessedTourEvent } from '@/types/schedule'
 import type { PlayerEventFinish } from '@/types/historical-events'
@@ -158,7 +159,11 @@ export default async function EventDetailPage({ params, searchParams }: EventDet
     notFound()
   }
 
-  const schedule = await getSchedule()
+  const rawSchedule = await getSchedule()
+  const season =
+    rawSchedule.length > 0 ? new Date(rawSchedule[0].startDate + 'T00:00:00').getFullYear() : new Date().getFullYear()
+  const purseMap = await getPurseMap(season)
+  const schedule = attachPurses(rawSchedule, purseMap)
   const event = schedule.find((e) => e.eventId === eventId)
 
   if (!event) {
@@ -199,6 +204,7 @@ export default async function EventDetailPage({ params, searchParams }: EventDet
           <span>{event.course}</span>
           {event.location && <span>{event.location}</span>}
           <span>{event.startDate}</span>
+          {event.purse != null && <span className="tabular-nums">{formatPurse(event.purse)}</span>}
           {isHistoricalYear && (
             <span className="rounded bg-gray-700 px-2 py-0.5 text-xs text-gray-300">{requestedYear} Results</span>
           )}

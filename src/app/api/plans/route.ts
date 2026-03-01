@@ -8,10 +8,11 @@ export async function GET() {
     const { supabase, user } = await authenticateRoute()
     if (!supabase || !user) return unauthorizedResponse()
 
-    // RLS ensures only user's own plans are returned
+    // RLS ensures only plans visible to this member are returned
     const { data, error } = await supabase
       .from('season_plans')
-      .select('*, picks(count)')
+      .select('*, picks(count), plan_members!inner(role, user_id)')
+      .eq('plan_members.user_id', user.id)
       .order('created_at', { ascending: false })
 
     if (error) {
@@ -20,9 +21,10 @@ export async function GET() {
     }
 
     // Flatten the picks count into a simple field
-    const plans = (data ?? []).map(({ picks, ...plan }) => ({
+    const plans = (data ?? []).map(({ picks, plan_members, ...plan }) => ({
       ...plan,
-      picks_count: picks?.[0]?.count ?? 0
+      picks_count: picks?.[0]?.count ?? 0,
+      member_role: plan_members?.[0]?.role
     }))
 
     return NextResponse.json(plans, {

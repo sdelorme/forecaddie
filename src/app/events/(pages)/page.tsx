@@ -1,4 +1,5 @@
 import { getSchedule } from '@/lib/api/datagolf'
+import { getPurseMap, attachPurses } from '@/lib/api/supabase/queries/tournament-purses'
 import EventsUI from '../(components)/all-events'
 
 export const metadata = {
@@ -7,7 +8,11 @@ export const metadata = {
 }
 
 export default async function EventsPage() {
-  const events = await getSchedule()
+  const rawEvents = await getSchedule()
+  const season =
+    rawEvents.length > 0 ? new Date(rawEvents[0].startDate + 'T00:00:00').getFullYear() : new Date().getFullYear()
+  const purseMap = await getPurseMap(season)
+  const events = attachPurses(rawEvents, purseMap)
 
   return (
     <main className="container mx-auto px-4 py-8">

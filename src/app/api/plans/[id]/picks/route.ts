@@ -44,27 +44,23 @@ export async function POST(request: NextRequest, { params }: RouteParams) {
     const parsed = await parseBody(request, CreatePickSchema)
     if (parsed.error) return parsed.error
 
-    const { event_id, player_dg_id } = parsed.data
+    const { event_id, player_dg_id, slot = 1 } = parsed.data
 
-    // Verify plan exists and belongs to user
-    const { data: plan, error: planError } = await supabase
-      .from('season_plans')
-      .select('id')
-      .eq('id', id)
-      .eq('user_id', user.id)
-      .single()
+    // Verify plan exists (RLS ensures user is a member; editors+ can create picks)
+    const { data: plan, error: planError } = await supabase.from('season_plans').select('id').eq('id', id).single()
 
     if (planError || !plan) {
       return NextResponse.json({ error: 'Plan not found' }, { status: 404 })
     }
 
-    // OAD constraint: each player can only be used once per plan
-    if (player_dg_id !== null && player_dg_id !== undefined) {
+    // OAD constraint: only slot 1 (locked) consumes player
+    if (slot === 1 && player_dg_id !== null && player_dg_id !== undefined) {
       const { data: existingPlayerPick } = await supabase
         .from('picks')
         .select('event_id')
         .eq('plan_id', id)
         .eq('player_dg_id', player_dg_id)
+        .eq('slot', 1)
         .limit(1)
         .single()
 
@@ -79,17 +75,18 @@ export async function POST(request: NextRequest, { params }: RouteParams) {
       }
     }
 
-    // Unique event constraint: one pick per event per plan
-    const { data: existingEventPick } = await supabase
+    // Unique constraint: one pick per (plan, event, slot)
+    const { data: existingSlotPick } = await supabase
       .from('picks')
       .select('id')
       .eq('plan_id', id)
       .eq('event_id', event_id)
+      .eq('slot', slot)
       .limit(1)
       .single()
 
-    if (existingEventPick) {
-      return NextResponse.json({ error: 'Pick already exists for this event' }, { status: 409 })
+    if (existingSlotPick) {
+      return NextResponse.json({ error: 'Pick already exists for this slot' }, { status: 409 })
     }
 
     const { data, error } = await supabase
@@ -98,7 +95,8 @@ export async function POST(request: NextRequest, { params }: RouteParams) {
         user_id: user.id,
         plan_id: id,
         event_id,
-        player_dg_id: player_dg_id ?? null
+        player_dg_id: player_dg_id ?? null,
+        slot
       })
       .select()
       .single()

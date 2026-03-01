@@ -3,6 +3,7 @@ import { OddsHeader } from './(components)/odds-header'
 import { NormalizedOddsData } from '@/lib/api/datagolf/types/odds'
 import { getOutrightOdds } from '@/lib/api/datagolf/queries/odds'
 import { getSchedule } from '@/lib/api/datagolf'
+import { getPurseMap, attachPurses } from '@/lib/api/supabase/queries/tournament-purses'
 import { getCurrentEvent, getNextEvent } from '@/lib/utils'
 
 export const metadata = {
@@ -11,10 +12,14 @@ export const metadata = {
 }
 
 export default async function OddsPage() {
-  const [oddsData, schedule] = (await Promise.all([getOutrightOdds(), getSchedule()])) as [
+  const [oddsData, rawSchedule] = (await Promise.all([getOutrightOdds(), getSchedule()])) as [
     NormalizedOddsData,
     Awaited<ReturnType<typeof getSchedule>>
   ]
+  const season =
+    rawSchedule.length > 0 ? new Date(rawSchedule[0].startDate + 'T00:00:00').getFullYear() : new Date().getFullYear()
+  const purseMap = await getPurseMap(season)
+  const schedule = attachPurses(rawSchedule, purseMap)
 
   const now = new Date()
   const currentEvent = getCurrentEvent(schedule, now)

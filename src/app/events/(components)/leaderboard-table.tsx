@@ -15,6 +15,18 @@ interface LeaderboardTableProps {
   eventInfo: LeaderboardEvent
 }
 
+function getRoundValue(player: LeaderboardPlayer, roundNumber: 1 | 2 | 3 | 4): string | number {
+  const roundScore =
+    roundNumber === 1 ? player.r1 : roundNumber === 2 ? player.r2 : roundNumber === 3 ? player.r3 : player.r4
+
+  // During the live round, show "today" in the active round column.
+  if (player.round === roundNumber && player.today !== '-') {
+    return player.today
+  }
+
+  return roundScore ?? '—'
+}
+
 function PlayerRow({ player }: { player: LeaderboardPlayer }) {
   const { getPlayerFlag, toggleFavorite, toggleFlag } = usePlayerFlagsContext()
   const { isFavorite, isFlagged } = getPlayerFlag(player.dgId)
@@ -49,10 +61,10 @@ function PlayerRow({ player }: { player: LeaderboardPlayer }) {
       </TableCell>
       <TableCell>{player.currentScore}</TableCell>
       <TableCell>{player.thru}</TableCell>
-      <TableCell>{player.r1}</TableCell>
-      <TableCell>{player.r2}</TableCell>
-      <TableCell>{player.r3}</TableCell>
-      <TableCell>{player.r4}</TableCell>
+      <TableCell>{getRoundValue(player, 1)}</TableCell>
+      <TableCell>{getRoundValue(player, 2)}</TableCell>
+      <TableCell>{getRoundValue(player, 3)}</TableCell>
+      <TableCell>{getRoundValue(player, 4)}</TableCell>
       <TableCell>{player.winOdds != null ? `${(player.winOdds * 100).toFixed(1)}%` : '—'}</TableCell>
     </TableRow>
   )

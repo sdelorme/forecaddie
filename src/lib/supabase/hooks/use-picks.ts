@@ -3,15 +3,22 @@
 import { useCallback, useEffect, useState } from 'react'
 import type { Pick } from '../types'
 
+export type EventPicks = {
+  locked: Pick | undefined
+  option1: Pick | undefined
+  option2: Pick | undefined
+}
+
 type UsePicksReturn = {
   picks: Pick[]
   isLoading: boolean
   error: string | null
-  createPick: (eventId: string, playerDgId: number | null) => Promise<Pick | null>
-  updatePick: (pickId: string, playerDgId: number | null) => Promise<Pick | null>
+  createPick: (eventId: string, playerDgId: number | null, slot?: 1 | 2 | 3) => Promise<Pick | null>
+  updatePick: (pickId: string, playerDgId: number | null, slot?: 1 | 2 | 3) => Promise<Pick | null>
   deletePick: (pickId: string) => Promise<boolean>
   refetch: () => Promise<void>
   getPickForEvent: (eventId: string) => Pick | undefined
+  getPicksForEvent: (eventId: string) => EventPicks
   getUsedPlayerIds: () => number[]
 }
 
@@ -61,7 +68,7 @@ export function usePicks(planId: string): UsePicksReturn {
   }, [fetchPicks])
 
   const createPick = useCallback(
-    async (eventId: string, playerDgId: number | null): Promise<Pick | null> => {
+    async (eventId: string, playerDgId: number | null, slot: 1 | 2 | 3 = 1): Promise<Pick | null> => {
       setError(null)
       try {
         const response = await fetch(`/api/plans/${planId}/picks`, {
@@ -69,7 +76,7 @@ export function usePicks(planId: string): UsePicksReturn {
           headers: {
             'Content-Type': 'application/json'
           },
-          body: JSON.stringify({ event_id: eventId, player_dg_id: playerDgId }),
+          body: JSON.stringify({ event_id: eventId, player_dg_id: playerDgId, slot }),
           signal: AbortSignal.timeout(10_000)
         })
 
@@ -103,15 +110,17 @@ export function usePicks(planId: string): UsePicksReturn {
   )
 
   const updatePick = useCallback(
-    async (pickId: string, playerDgId: number | null): Promise<Pick | null> => {
+    async (pickId: string, playerDgId: number | null, slot?: 1 | 2 | 3): Promise<Pick | null> => {
       setError(null)
       try {
+        const body: { player_dg_id: number | null; slot?: number } = { player_dg_id: playerDgId }
+        if (slot !== undefined) body.slot = slot
         const response = await fetch(`/api/plans/${planId}/picks/${pickId}`, {
           method: 'PATCH',
           headers: {
             'Content-Type': 'application/json'
           },
-          body: JSON.stringify({ player_dg_id: playerDgId }),
+          body: JSON.stringify(body),
           signal: AbortSignal.timeout(10_000)
         })
 
@@ -178,8 +187,20 @@ export function usePicks(planId: string): UsePicksReturn {
     [picks]
   )
 
+  const getPicksForEvent = useCallback(
+    (eventId: string): EventPicks => {
+      const eventPicks = picks.filter((p) => p.event_id === eventId)
+      return {
+        locked: eventPicks.find((p) => p.slot === 1),
+        option1: eventPicks.find((p) => p.slot === 2),
+        option2: eventPicks.find((p) => p.slot === 3)
+      }
+    },
+    [picks]
+  )
+
   const getUsedPlayerIds = useCallback((): number[] => {
-    return picks.filter((p) => p.player_dg_id !== null).map((p) => p.player_dg_id!)
+    return picks.filter((p) => p.slot === 1 && p.player_dg_id !== null).map((p) => p.player_dg_id!)
   }, [picks])
 
   return {
@@ -191,6 +212,7 @@ export function usePicks(planId: string): UsePicksReturn {
     deletePick,
     refetch: fetchPicks,
     getPickForEvent,
+    getPicksForEvent,
     getUsedPlayerIds
   }
 }

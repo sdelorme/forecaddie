@@ -7,15 +7,25 @@ import { PlanEventList } from '@/app/dashboard/(components)/plan-event-list'
 import { PlanPlayerTable } from '@/app/dashboard/(components)/plan-player-table'
 import { PlanSeasonTable } from '@/app/dashboard/(components)/plan-season-table'
 import { PickDialog } from '@/app/dashboard/(components)/pick-dialog'
-import { ToggleGroup, ToggleGroupItem } from '@/components/ui'
+import {
+  ToggleGroup,
+  ToggleGroupItem,
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue
+} from '@/components/ui'
 import type { ProcessedTourEvent } from '@/types/schedule'
 import type { Player } from '@/types/player'
 import type { HistoricalEventEntry, PlayerEventFinish } from '@/types/historical-events'
 import type { FieldUpdate } from '@/types/field-updates'
 import type { PriorYearTopFinishers, EventOddsFavorites } from '@/app/dashboard/types'
+import type { RecentFormMap } from '@/types/hottest-golfers'
 import { LayoutGrid, List, Loader2, TableProperties } from 'lucide-react'
 
 type ViewMode = 'table' | 'list' | 'grid'
+type EventSort = 'date' | 'purse-asc' | 'purse-desc'
 
 interface PlanDetailClientProps {
   planId: string
@@ -27,6 +37,9 @@ interface PlanDetailClientProps {
   earningsMap: Record<string, Record<number, number>>
   priorYearResults: Record<string, PriorYearTopFinishers>
   oddsFavorites: EventOddsFavorites | null
+  recentForm: RecentFormMap
+  canInvite: boolean
+  currentUserId: string
 }
 
 export function PlanDetailClient({
@@ -38,7 +51,10 @@ export function PlanDetailClient({
   historicalEvents,
   earningsMap,
   priorYearResults,
-  oddsFavorites
+  oddsFavorites,
+  recentForm,
+  canInvite,
+  currentUserId
 }: PlanDetailClientProps) {
   const {
     picks,
@@ -47,12 +63,15 @@ export function PlanDetailClient({
     createPick,
     updatePick,
     getPickForEvent,
+    getPicksForEvent,
     getUsedPlayerIds
   } = usePicks(planId)
 
   const [selectedEventId, setSelectedEventId] = useState<string | null>(null)
   const [viewMode, setViewMode] = useState<ViewMode>('table')
+  const [eventSort, setEventSort] = useState<EventSort>('date')
   const [pickDialogOpen, setPickDialogOpen] = useState(false)
+  const [editingSlot, setEditingSlot] = useState<1 | 2 | 3>(1)
   const [historicalFinishes, setHistoricalFinishes] = useState<Map<number, PlayerEventFinish[]>>(new Map())
   const [isLoadingHistory, setIsLoadingHistory] = useState(false)
   const [fieldData, setFieldData] = useState<FieldUpdate | null>(null)
@@ -61,17 +80,59 @@ export function PlanDetailClient({
 
   const proPlayers = useMemo(() => players.filter((p) => p.amateur === 0), [players])
 
-  const seasonEvents = useMemo(
-    () =>
-      events
-        .filter((e) => e.startDate.startsWith(String(season)))
-        .sort((a, b) => a.startDate.localeCompare(b.startDate)),
-    [events, season]
-  )
+  const seasonEvents = useMemo(() => {
+    const filtered = events.filter((e) => e.startDate.startsWith(String(season)))
+    if (eventSort === 'date') {
+      return [...filtered].sort((a, b) => a.startDate.localeCompare(b.startDate))
+    }
+    return [...filtered].sort((a, b) => {
+      const pa = a.purse ?? -1
+      const pb = b.purse ?? -1
+      if (eventSort === 'purse-asc') return pa - pb
+      return pb - pa
+    })
+  }, [events, season, eventSort])
 
   const usedPlayerIds = useMemo(() => getUsedPlayerIds(), [getUsedPlayerIds])
 
-  const currentPick = selectedEventId ? getPickForEvent(selectedEventId) : undefined
+  const futurePickEventNames = useMemo(() => {
+    if (!selectedEventId) return new Map<number, string>()
+    const selected = seasonEvents.find((e) => e.eventId === selectedEventId)
+    if (!selected) return new Map<number, string>()
+    const futureEvents = seasonEvents.filter((e) => e.startDate > selected.startDate)
+    const map = new Map<number, string>()
+    for (const ev of futureEvents) {
+      const pick = picks.find((p) => p.event_id === ev.eventId && p.slot === 1 && p.player_dg_id != null)
+      if (!pick) continue
+      if (!map.has(pick.player_dg_id!)) {
+        map.set(pick.player_dg_id!, ev.eventName)
+      }
+    }
+    return map
+  }, [picks, seasonEvents, selectedEventId])
+
+  const eventPicks = useMemo(
+    () =>
+      selectedEventId
+        ? getPicksForEvent(selectedEventId)
+        : { locked: undefined, option1: undefined, option2: undefined },
+    [getPicksForEvent, selectedEventId]
+  )
+
+  const currentPick = useMemo(
+    () => (editingSlot === 1 ? eventPicks.locked : editingSlot === 2 ? eventPicks.option1 : eventPicks.option2),
+    [editingSlot, eventPicks]
+  )
+
+  const consideredPlayerIds = useMemo(() => {
+    const ids: number[] = []
+    if (eventPicks.option1?.player_dg_id != null) ids.push(eventPicks.option1.player_dg_id)
+    if (eventPicks.option2?.player_dg_id != null) ids.push(eventPicks.option2.player_dg_id)
+    if (currentPick?.player_dg_id != null) {
+      return ids.filter((id) => id !== currentPick!.player_dg_id)
+    }
+    return ids
+  }, [eventPicks, currentPick])
 
   const selectedEventName = useMemo(() => {
     if (!selectedEventId) return undefined
@@ -163,20 +224,19 @@ export function PlanDetailClient({
     return new Set<number>()
   }, [fieldData])
 
-  const handleSelectPlayer = async (playerDgId: number) => {
+  const handleSelectPlayer = async (playerDgId: number, slot: 1 | 2 | 3 = 1) => {
     if (!selectedEventId) return
 
-    const existing = getPickForEvent(selectedEventId)
-    if (existing) {
-      await updatePick(existing.id, playerDgId)
+    const pickForSlot = slot === 1 ? eventPicks.locked : slot === 2 ? eventPicks.option1 : eventPicks.option2
+    if (pickForSlot) {
+      await updatePick(pickForSlot.id, playerDgId, slot)
     } else {
-      await createPick(selectedEventId, playerDgId)
+      await createPick(selectedEventId, playerDgId, slot)
     }
   }
 
-  const handleClearPick = async () => {
-    if (!currentPick) return
-    await updatePick(currentPick.id, null)
+  const handleClearPick = async (pick: { id: string }) => {
+    await updatePick(pick.id, null)
   }
 
   const handleOpenPicker = (eventId: string) => {
@@ -201,8 +261,9 @@ export function PlanDetailClient({
     <PlanPlayerTable
       players={proPlayers}
       usedPlayerIds={usedPlayerIds}
-      onSelectPlayer={handleSelectPlayer}
-      onClearPick={handleClearPick}
+      futurePickEventNames={futurePickEventNames}
+      onSelectPlayer={(playerDgId) => handleSelectPlayer(playerDgId, 1)}
+      onClearPick={() => currentPick && handleClearPick(currentPick)}
       currentPick={currentPick}
       selectedEventId={selectedEventId ?? undefined}
       selectedEventName={selectedEventName}
@@ -210,6 +271,10 @@ export function PlanDetailClient({
       historicalFinishes={historicalFinishes}
       isLoadingHistory={isLoadingHistory}
       withdrawnPlayerIds={withdrawnPlayerIds}
+      editingSlot={1}
+      consideredPlayerIds={consideredPlayerIds}
+      recentForm={recentForm}
+      readOnly={!canInvite}
     />
   ) : (
     <div className="flex items-center justify-center h-64 bg-gray-800 rounded-lg">
@@ -220,10 +285,13 @@ export function PlanDetailClient({
   return (
     <div>
       <PlanHeader
+        planId={planId}
         planName={planName}
         season={season}
-        pickCount={picks.filter((p) => p.player_dg_id != null).length}
+        pickCount={picks.filter((p) => p.slot === 1 && p.player_dg_id != null).length}
         totalEvents={seasonEvents.length}
+        canInvite={canInvite}
+        currentUserId={currentUserId}
       />
 
       {error && (
@@ -232,7 +300,17 @@ export function PlanDetailClient({
         </div>
       )}
 
-      <div className="mb-4 flex justify-end">
+      <div className="mb-4 flex flex-wrap items-center justify-end gap-4">
+        <Select value={eventSort} onValueChange={(v) => setEventSort(v as EventSort)}>
+          <SelectTrigger className="w-[140px] h-8 text-sm">
+            <SelectValue placeholder="Sort by" />
+          </SelectTrigger>
+          <SelectContent>
+            <SelectItem value="date">Date</SelectItem>
+            <SelectItem value="purse-desc">Purse (high → low)</SelectItem>
+            <SelectItem value="purse-asc">Purse (low → high)</SelectItem>
+          </SelectContent>
+        </Select>
         <ToggleGroup type="single" value={viewMode} onValueChange={(v) => v && setViewMode(v as ViewMode)} size="sm">
           <ToggleGroupItem value="table" aria-label="Table view">
             <TableProperties className="h-4 w-4" />
@@ -249,7 +327,7 @@ export function PlanDetailClient({
       {viewMode === 'table' ? (
         <PlanSeasonTable
           events={seasonEvents}
-          picks={picks}
+          getPicksForEvent={getPicksForEvent}
           players={proPlayers}
           earningsMap={earningsMap}
           priorYearResults={priorYearResults}
@@ -293,13 +371,16 @@ export function PlanDetailClient({
         selectedEventId={selectedEventId ?? undefined}
         players={proPlayers}
         usedPlayerIds={usedPlayerIds}
-        currentPick={currentPick}
+        futurePickEventNames={futurePickEventNames}
+        eventPicks={eventPicks}
         historicalYears={historicalYears}
         historicalFinishes={historicalFinishes}
         isLoadingHistory={isLoadingHistory}
         withdrawnPlayerIds={withdrawnPlayerIds}
+        recentForm={recentForm}
         onSelectPlayer={handleSelectPlayer}
         onClearPick={handleClearPick}
+        readOnly={!canInvite}
       />
     </div>
   )

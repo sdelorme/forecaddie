@@ -1,5 +1,6 @@
 import { getSchedule } from '@/lib/api/datagolf/queries/schedule'
 import { getHistoricalEventResults } from '@/lib/api/datagolf/queries/historical-events'
+import { getPurseMap, attachPurses } from '@/lib/api/supabase/queries/tournament-purses'
 import { DashboardClient } from './(components)/dashboard-client'
 import type { CompletedEventResult } from './types'
 
@@ -7,7 +8,11 @@ export default async function DashboardPage() {
   let schedule: Awaited<ReturnType<typeof getSchedule>> = []
 
   try {
-    schedule = await getSchedule()
+    const rawSchedule = await getSchedule()
+    const season =
+      rawSchedule.length > 0 ? new Date(rawSchedule[0].startDate + 'T00:00:00').getFullYear() : new Date().getFullYear()
+    const purseMap = await getPurseMap(season)
+    schedule = attachPurses(rawSchedule, purseMap)
   } catch {
     // Degrade gracefully — continue with empty schedule
   }
