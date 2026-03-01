@@ -68,6 +68,38 @@ export type Database = {
           }
         ]
       }
+      plan_members: {
+        Row: {
+          created_at: string | null
+          id: string
+          plan_id: string
+          role: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string | null
+          id?: string
+          plan_id: string
+          role: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string | null
+          id?: string
+          plan_id?: string
+          role?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: 'plan_members_plan_id_fkey'
+            columns: ['plan_id']
+            isOneToOne: false
+            referencedRelation: 'season_plans'
+            referencedColumns: ['id']
+          }
+        ]
+      }
       player_flags: {
         Row: {
           created_at: string | null
@@ -109,65 +141,6 @@ export type Database = {
           }
         ]
       }
-      plan_members: {
-        Row: {
-          id: string
-          plan_id: string
-          user_id: string
-          role: string
-          created_at: string | null
-        }
-        Insert: {
-          id?: string
-          plan_id: string
-          user_id: string
-          role: 'owner' | 'editor' | 'viewer'
-          created_at?: string | null
-        }
-        Update: {
-          id?: string
-          plan_id?: string
-          user_id?: string
-          role?: 'owner' | 'editor' | 'viewer'
-          created_at?: string | null
-        }
-        Relationships: [
-          {
-            foreignKeyName: 'plan_members_plan_id_fkey'
-            columns: ['plan_id']
-            isOneToOne: false
-            referencedRelation: 'season_plans'
-            referencedColumns: ['id']
-          }
-        ]
-      }
-      tournament_purses: {
-        Row: {
-          id: string
-          dg_event_id: string
-          season: number
-          event_name: string
-          purse: number
-          created_at: string | null
-        }
-        Insert: {
-          id?: string
-          dg_event_id: string
-          season: number
-          event_name: string
-          purse: number
-          created_at?: string | null
-        }
-        Update: {
-          id?: string
-          dg_event_id?: string
-          season?: number
-          event_name?: string
-          purse?: number
-          created_at?: string | null
-        }
-        Relationships: []
-      }
       season_plans: {
         Row: {
           created_at: string | null
@@ -206,14 +179,42 @@ export type Database = {
           }
         ]
       }
+      tournament_purses: {
+        Row: {
+          created_at: string | null
+          dg_event_id: string
+          event_name: string
+          id: string
+          purse: number
+          season: number
+        }
+        Insert: {
+          created_at?: string | null
+          dg_event_id: string
+          event_name: string
+          id?: string
+          purse: number
+          season: number
+        }
+        Update: {
+          created_at?: string | null
+          dg_event_id?: string
+          event_name?: string
+          id?: string
+          purse?: number
+          season?: number
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never
     }
     Functions: {
-      get_user_id_by_email: {
-        Args: { user_email: string }
-        Returns: string | null
+      get_user_id_by_email: { Args: { user_email: string }; Returns: string }
+      is_plan_member: {
+        Args: { target_plan_id: string; target_user_id?: string }
+        Returns: boolean
       }
     }
     Enums: {
