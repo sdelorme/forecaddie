@@ -4,10 +4,19 @@ import { useState, useMemo } from 'react'
 import Link from 'next/link'
 import { ProcessedTourEvent } from '@/types/schedule'
 import { formatTournamentDate } from '@/lib/utils'
+import { useLiveStats } from '@/components/providers'
 import { SearchInput } from '@/components/shared'
+
+function eventNameMatches(a: string, b: string): boolean {
+  const aNorm = a.toLowerCase()
+  const bNorm = b.toLowerCase()
+  return aNorm.includes(bNorm) || bNorm.includes(aNorm)
+}
 
 export default function EventsUI({ events }: { events: ProcessedTourEvent[] }) {
   const [search, setSearch] = useState('')
+  const { eventInfo } = useLiveStats()
+  const liveEventName = eventInfo.eventName
 
   const filteredEvents = useMemo(() => {
     if (!search) return events
@@ -24,10 +33,15 @@ export default function EventsUI({ events }: { events: ProcessedTourEvent[] }) {
         <p className="text-center text-gray-400 py-12">No events match &ldquo;{search}&rdquo;</p>
       ) : (
         <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-          {filteredEvents.map((event) => (
-            <Link key={event.eventId} href={event.href}>
-              <div
-                className={`
+          {filteredEvents.map((event) => {
+            const href =
+              event.tournamentType === 'live' && liveEventName && eventNameMatches(event.eventName, liveEventName)
+                ? '/events/live-stats'
+                : event.href
+            return (
+              <Link key={event.eventId} href={href}>
+                <div
+                  className={`
                   cursor-pointer p-4 rounded-lg shadow-lg
                   transition-all duration-300 hover:scale-102
                   h-full flex flex-col justify-between
@@ -39,26 +53,27 @@ export default function EventsUI({ events }: { events: ProcessedTourEvent[] }) {
                         : 'bg-gray-900 text-white hover:bg-gray-800'
                   }
                 `}
-              >
-                <div>
-                  <div className="flex justify-between items-start mb-2">
-                    <h2 className="text-xl font-semibold line-clamp-2 flex-grow">{event.eventName}</h2>
-                    {event.isComplete ? (
-                      <span className="text-xs bg-gray-700 text-gray-300 px-2 py-1 rounded ml-2 flex-shrink-0">
-                        Completed
-                      </span>
-                    ) : event.tournamentType === 'live' ? (
-                      <span className="text-xs bg-primary/20 text-primary px-2 py-1 rounded ml-2 flex-shrink-0 animate-pulse">
-                        Live
-                      </span>
-                    ) : null}
+                >
+                  <div>
+                    <div className="flex justify-between items-start mb-2">
+                      <h2 className="text-xl font-semibold line-clamp-2 flex-grow">{event.eventName}</h2>
+                      {event.isComplete ? (
+                        <span className="text-xs bg-gray-700 text-gray-300 px-2 py-1 rounded ml-2 flex-shrink-0">
+                          Completed
+                        </span>
+                      ) : event.tournamentType === 'live' ? (
+                        <span className="text-xs bg-primary/20 text-primary px-2 py-1 rounded ml-2 flex-shrink-0 animate-pulse">
+                          Live
+                        </span>
+                      ) : null}
+                    </div>
+                    <p className="text-sm opacity-75 mb-2 line-clamp-1">{event.location}</p>
                   </div>
-                  <p className="text-sm opacity-75 mb-2 line-clamp-1">{event.location}</p>
+                  <p className="text-xs opacity-60 mt-auto">{formatTournamentDate(event.startDate)}</p>
                 </div>
-                <p className="text-xs opacity-60 mt-auto">{formatTournamentDate(event.startDate)}</p>
-              </div>
-            </Link>
-          ))}
+              </Link>
+            )
+          })}
         </div>
       )}
     </div>

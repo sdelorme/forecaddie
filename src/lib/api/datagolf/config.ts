@@ -25,7 +25,7 @@ export const CACHE_TAGS = {
 
 export const REVALIDATE_INTERVALS = {
   LIVE_ACTIVE: 300, // 5 minutes
-  SCHEDULE: 604800, // 1 week
+  SCHEDULE: 3600, // 1 hour — status transitions (upcoming → in_progress → completed) need timely refresh
   PLAYERS: 86400, // 24 hours
   ODDS: 3600, // 1 hour
   RANKINGS: 86400, // 24 hours

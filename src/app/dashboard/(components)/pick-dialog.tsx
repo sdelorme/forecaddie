@@ -20,6 +20,7 @@ interface PickDialogProps {
   players: Player[]
   usedPlayerIds: number[]
   futurePickEventNames?: Map<number, string>
+  optionPickEventNames?: Map<number, string[]>
   eventPicks: EventPicks
   historicalYears: number[]
   historicalFinishes: Map<number, PlayerEventFinish[]>
@@ -45,6 +46,7 @@ export function PickDialog({
   players,
   usedPlayerIds,
   futurePickEventNames,
+  optionPickEventNames,
   eventPicks,
   historicalYears,
   historicalFinishes,
@@ -146,6 +148,7 @@ export function PickDialog({
             players={players}
             usedPlayerIds={usedPlayerIds}
             futurePickEventNames={futurePickEventNames}
+            optionPickEventNames={optionPickEventNames}
             onSelectPlayer={handleSelectPlayer}
             onClearPick={() => currentPick && onClearPick(currentPick)}
             currentPick={currentPick}

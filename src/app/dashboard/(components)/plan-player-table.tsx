@@ -16,6 +16,7 @@ interface PlanPlayerTableProps {
   players: Player[]
   usedPlayerIds: number[]
   futurePickEventNames?: Map<number, string>
+  optionPickEventNames?: Map<number, string[]>
   onSelectPlayer: (playerDgId: number) => void
   onClearPick: () => void
   currentPick: Pick | undefined
@@ -59,6 +60,7 @@ export function PlanPlayerTable({
   players,
   usedPlayerIds,
   futurePickEventNames = new Map(),
+  optionPickEventNames = new Map(),
   onSelectPlayer,
   onClearPick,
   currentPick,
@@ -221,8 +223,9 @@ export function PlanPlayerTable({
                 const isUsed = usedPlayerIds.includes(player.dgId)
                 const isConsidered = consideredPlayerIds.includes(player.dgId)
                 const isCurrent = currentPick?.player_dg_id === player.dgId
-                const blocksLocked = editingSlot === 1 && isUsed
-                const isDisabled = blocksLocked || isCurrent || readOnly
+                const optionEvents = optionPickEventNames.get(player.dgId)
+                const isOptionElsewhere = optionEvents != null && optionEvents.length > 0
+                const isDisabled = isUsed || isCurrent || isConsidered || readOnly
 
                 return (
                   <tr
@@ -244,7 +247,8 @@ export function PlanPlayerTable({
                     className={cn(
                       'group transition-colors',
                       isDisabled ? 'opacity-50 cursor-default' : 'cursor-pointer hover:bg-gray-700',
-                      isCurrent && 'bg-green-900/20 opacity-100'
+                      isCurrent && 'bg-green-900/20 opacity-100',
+                      isOptionElsewhere && !isUsed && !isCurrent && 'bg-amber-900/10'
                     )}
                   >
                     <td className="sticky left-0 z-10 bg-gray-800 group-hover:bg-gray-700 transition-colors py-2 pr-3 pl-1">
@@ -265,6 +269,14 @@ export function PlanPlayerTable({
                         {isConsidered && !isCurrent && (
                           <span className="flex-shrink-0 rounded-full bg-slate-500/20 px-2 py-0.5 text-xs text-slate-400">
                             Considered
+                          </span>
+                        )}
+                        {isOptionElsewhere && !isUsed && !isCurrent && (
+                          <span
+                            className="flex-shrink-0 rounded-full bg-amber-500/20 px-2 py-0.5 text-xs text-amber-400"
+                            title={optionEvents!.join(', ')}
+                          >
+                            Option in {optionEvents!.length === 1 ? optionEvents![0] : `${optionEvents!.length} events`}
                           </span>
                         )}
                         {isCurrent && (

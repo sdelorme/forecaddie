@@ -1,9 +1,20 @@
 'use client'
 
+import { useMemo, useState } from 'react'
 import Link from 'next/link'
 import { cn } from '@/lib/utils'
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui'
-import { Check, Trophy, Circle, ChevronRight, ExternalLink, UserRound } from 'lucide-react'
+import {
+  Check,
+  Trophy,
+  Circle,
+  ChevronRight,
+  ExternalLink,
+  UserRound,
+  ArrowUpDown,
+  ArrowUp,
+  ArrowDown
+} from 'lucide-react'
 import { formatPurse } from '@/lib/utils'
 import type { ProcessedTourEvent } from '@/types/schedule'
 import type { Player } from '@/types/player'
@@ -102,6 +113,14 @@ function matchOddsEventId(oddsFavorites: EventOddsFavorites | null, events: Proc
   return partial?.eventId ?? null
 }
 
+type SortKey = 'date' | 'purse'
+type SortDir = 'asc' | 'desc'
+
+function SortIcon({ active, direction }: { active: boolean; direction: SortDir }) {
+  if (!active) return <ArrowUpDown className="h-3 w-3 opacity-50" />
+  return direction === 'asc' ? <ArrowUp className="h-3 w-3" /> : <ArrowDown className="h-3 w-3" />
+}
+
 export function PlanSeasonTable({
   events,
   getPicksForEvent,
@@ -111,7 +130,30 @@ export function PlanSeasonTable({
   oddsFavorites,
   onOpenPicker
 }: PlanSeasonTableProps) {
+  const [sortKey, setSortKey] = useState<SortKey>('date')
+  const [sortDir, setSortDir] = useState<SortDir>('asc')
   const oddsEventId = matchOddsEventId(oddsFavorites, events)
+
+  const toggleSort = (key: SortKey) => {
+    if (sortKey === key) {
+      setSortDir((d) => (d === 'asc' ? 'desc' : 'asc'))
+    } else {
+      setSortKey(key)
+      setSortDir(key === 'purse' ? 'desc' : 'asc')
+    }
+  }
+
+  const sortedEvents = useMemo(() => {
+    return [...events].sort((a, b) => {
+      let cmp: number
+      if (sortKey === 'purse') {
+        cmp = (a.purse ?? -1) - (b.purse ?? -1)
+      } else {
+        cmp = a.startDate.localeCompare(b.startDate)
+      }
+      return sortDir === 'desc' ? -cmp : cmp
+    })
+  }, [events, sortKey, sortDir])
 
   if (events.length === 0) {
     return <p className="py-12 text-center text-sm text-gray-500">No events found for this season.</p>
@@ -125,8 +167,40 @@ export function PlanSeasonTable({
             <TableHead className="text-gray-400 text-xs uppercase tracking-wider w-[240px] min-w-[200px]">
               Event
             </TableHead>
-            <TableHead className="text-gray-400 text-xs uppercase tracking-wider text-center w-[72px]">Date</TableHead>
-            <TableHead className="text-gray-400 text-xs uppercase tracking-wider text-right w-[72px]">Purse</TableHead>
+            <TableHead
+              role="button"
+              tabIndex={0}
+              onClick={() => toggleSort('date')}
+              onKeyDown={(e) => {
+                if (e.key === 'Enter' || e.key === ' ') {
+                  e.preventDefault()
+                  toggleSort('date')
+                }
+              }}
+              className="text-gray-400 text-xs uppercase tracking-wider text-center w-[72px] cursor-pointer hover:text-gray-300 transition-colors select-none"
+            >
+              <span className="inline-flex items-center gap-1">
+                Date
+                <SortIcon active={sortKey === 'date'} direction={sortDir} />
+              </span>
+            </TableHead>
+            <TableHead
+              role="button"
+              tabIndex={0}
+              onClick={() => toggleSort('purse')}
+              onKeyDown={(e) => {
+                if (e.key === 'Enter' || e.key === ' ') {
+                  e.preventDefault()
+                  toggleSort('purse')
+                }
+              }}
+              className="text-gray-400 text-xs uppercase tracking-wider text-right w-[72px] cursor-pointer hover:text-gray-300 transition-colors select-none"
+            >
+              <span className="inline-flex items-center gap-1 justify-end">
+                Purse
+                <SortIcon active={sortKey === 'purse'} direction={sortDir} />
+              </span>
+            </TableHead>
             <TableHead className="text-gray-400 text-xs uppercase tracking-wider min-w-[200px]">Selected</TableHead>
             <TableHead className="text-gray-400 text-xs uppercase tracking-wider min-w-[320px]">
               Prior Year Top 5
@@ -137,7 +211,7 @@ export function PlanSeasonTable({
           </TableRow>
         </TableHeader>
         <TableBody className="divide-y divide-gray-700/50">
-          {events.map((event) => {
+          {sortedEvents.map((event) => {
             const eventPicks = getPicksForEvent(event.eventId)
             const { locked, option1, option2 } = getPickDisplay(eventPicks, players)
             const purse = event.purse
@@ -150,28 +224,21 @@ export function PlanSeasonTable({
                 ? (earningsMap[event.eventId]?.[locked.pick.player_dg_id] ?? null)
                 : null
 
-            const isInteractive = !isCompleted
-
             return (
               <TableRow
                 key={event.eventId}
-                role={isInteractive ? 'button' : undefined}
-                tabIndex={isInteractive ? 0 : undefined}
-                onClick={isInteractive ? () => onOpenPicker(event.eventId) : undefined}
-                onKeyDown={
-                  isInteractive
-                    ? (e) => {
-                        if (e.key === 'Enter' || e.key === ' ') {
-                          e.preventDefault()
-                          onOpenPicker(event.eventId)
-                        }
-                      }
-                    : undefined
-                }
+                role="button"
+                tabIndex={0}
+                onClick={() => onOpenPicker(event.eventId)}
+                onKeyDown={(e) => {
+                  if (e.key === 'Enter' || e.key === ' ') {
+                    e.preventDefault()
+                    onOpenPicker(event.eventId)
+                  }
+                }}
                 className={cn(
-                  'bg-gray-800/50 border-gray-700/50 transition-colors',
-                  isInteractive && 'cursor-pointer hover:bg-gray-700/60',
-                  isCompleted && 'opacity-75',
+                  'bg-gray-800/50 border-gray-700/50 transition-colors cursor-pointer hover:bg-gray-700/60',
+                  isCompleted && !hasLocked && 'opacity-75',
                   isCompleted && hasLocked && 'opacity-100'
                 )}
               >
@@ -231,19 +298,12 @@ export function PlanSeasonTable({
                             </span>
                           )}
                         </div>
-                        {!isCompleted && <ChevronRight className="h-3.5 w-3.5 text-gray-500 flex-shrink-0" />}
+                        <ChevronRight className="h-3.5 w-3.5 text-gray-500 flex-shrink-0" />
                       </div>
-                    ) : isCompleted ? (
-                      <span className="text-xs text-gray-600 pl-1">—</span>
                     ) : (
                       <span
-                        className={cn(
-                          'inline-flex items-center gap-2 rounded-md border border-dashed px-3 py-1.5 text-sm',
-                          isInteractive
-                            ? 'border-gray-600 text-gray-500 cursor-pointer hover:border-gray-500'
-                            : 'border-gray-600 text-gray-500'
-                        )}
-                        onClick={isInteractive ? () => onOpenPicker(event.eventId) : undefined}
+                        className="inline-flex items-center gap-2 rounded-md border border-dashed px-3 py-1.5 text-sm border-gray-600 text-gray-500 cursor-pointer hover:border-gray-500"
+                        onClick={() => onOpenPicker(event.eventId)}
                       >
                         <UserRound className="h-3.5 w-3.5" />
                         Select pick

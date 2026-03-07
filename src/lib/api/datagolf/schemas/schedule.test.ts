@@ -34,12 +34,15 @@ describe('RawTourEventSchema', () => {
     }
   })
 
-  it('rejects invalid status', () => {
+  it('falls back to upcoming for unknown status values', () => {
     const result = RawTourEventSchema.safeParse({
       ...validEvent,
-      status: 'cancelled' // not a valid status
+      status: 'cancelled' // unknown status falls back to 'upcoming'
     })
-    expect(result.success).toBe(false)
+    expect(result.success).toBe(true)
+    if (result.success) {
+      expect(result.data.status).toBe('upcoming')
+    }
   })
 
   it('rejects missing required fields', () => {

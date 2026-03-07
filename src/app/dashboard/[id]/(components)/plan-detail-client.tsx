@@ -3,29 +3,15 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { usePicks } from '@/lib/supabase'
 import { PlanHeader } from '@/app/dashboard/(components)/plan-header'
-import { PlanEventList } from '@/app/dashboard/(components)/plan-event-list'
-import { PlanPlayerTable } from '@/app/dashboard/(components)/plan-player-table'
 import { PlanSeasonTable } from '@/app/dashboard/(components)/plan-season-table'
 import { PickDialog } from '@/app/dashboard/(components)/pick-dialog'
-import {
-  ToggleGroup,
-  ToggleGroupItem,
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue
-} from '@/components/ui'
 import type { ProcessedTourEvent } from '@/types/schedule'
 import type { Player } from '@/types/player'
 import type { HistoricalEventEntry, PlayerEventFinish } from '@/types/historical-events'
 import type { FieldUpdate } from '@/types/field-updates'
 import type { PriorYearTopFinishers, EventOddsFavorites } from '@/app/dashboard/types'
 import type { RecentFormMap } from '@/types/hottest-golfers'
-import { LayoutGrid, List, Loader2, TableProperties } from 'lucide-react'
-
-type ViewMode = 'table' | 'list' | 'grid'
-type EventSort = 'date' | 'purse-asc' | 'purse-desc'
+import { Loader2 } from 'lucide-react'
 
 interface PlanDetailClientProps {
   planId: string
@@ -68,8 +54,6 @@ export function PlanDetailClient({
   } = usePicks(planId)
 
   const [selectedEventId, setSelectedEventId] = useState<string | null>(null)
-  const [viewMode, setViewMode] = useState<ViewMode>('table')
-  const [eventSort, setEventSort] = useState<EventSort>('date')
   const [pickDialogOpen, setPickDialogOpen] = useState(false)
   const [editingSlot, setEditingSlot] = useState<1 | 2 | 3>(1)
   const [historicalFinishes, setHistoricalFinishes] = useState<Map<number, PlayerEventFinish[]>>(new Map())
@@ -81,17 +65,10 @@ export function PlanDetailClient({
   const proPlayers = useMemo(() => players.filter((p) => p.amateur === 0), [players])
 
   const seasonEvents = useMemo(() => {
-    const filtered = events.filter((e) => e.startDate.startsWith(String(season)))
-    if (eventSort === 'date') {
-      return [...filtered].sort((a, b) => a.startDate.localeCompare(b.startDate))
-    }
-    return [...filtered].sort((a, b) => {
-      const pa = a.purse ?? -1
-      const pb = b.purse ?? -1
-      if (eventSort === 'purse-asc') return pa - pb
-      return pb - pa
-    })
-  }, [events, season, eventSort])
+    return [...events]
+      .filter((e) => e.startDate.startsWith(String(season)))
+      .sort((a, b) => a.startDate.localeCompare(b.startDate))
+  }, [events, season])
 
   const usedPlayerIds = useMemo(() => getUsedPlayerIds(), [getUsedPlayerIds])
 
@@ -107,6 +84,20 @@ export function PlanDetailClient({
       if (!map.has(pick.player_dg_id!)) {
         map.set(pick.player_dg_id!, ev.eventName)
       }
+    }
+    return map
+  }, [picks, seasonEvents, selectedEventId])
+
+  const optionPickEventNames = useMemo(() => {
+    const map = new Map<number, string[]>()
+    for (const pick of picks) {
+      if (pick.slot === 1 || pick.player_dg_id == null) continue
+      if (pick.event_id === selectedEventId) continue
+      const ev = seasonEvents.find((e) => e.eventId === pick.event_id)
+      if (!ev) continue
+      const existing = map.get(pick.player_dg_id) ?? []
+      existing.push(ev.eventName)
+      map.set(pick.player_dg_id, existing)
     }
     return map
   }, [picks, seasonEvents, selectedEventId])
@@ -244,10 +235,6 @@ export function PlanDetailClient({
     setPickDialogOpen(true)
   }
 
-  const handleSelectEventForList = (eventId: string) => {
-    setSelectedEventId(eventId)
-  }
-
   if (picksLoading) {
     return (
       <div className="flex flex-col items-center justify-center py-16">
@@ -256,31 +243,6 @@ export function PlanDetailClient({
       </div>
     )
   }
-
-  const playerTable = selectedEventId ? (
-    <PlanPlayerTable
-      players={proPlayers}
-      usedPlayerIds={usedPlayerIds}
-      futurePickEventNames={futurePickEventNames}
-      onSelectPlayer={(playerDgId) => handleSelectPlayer(playerDgId, 1)}
-      onClearPick={() => currentPick && handleClearPick(currentPick)}
-      currentPick={currentPick}
-      selectedEventId={selectedEventId ?? undefined}
-      selectedEventName={selectedEventName}
-      historicalYears={historicalYears}
-      historicalFinishes={historicalFinishes}
-      isLoadingHistory={isLoadingHistory}
-      withdrawnPlayerIds={withdrawnPlayerIds}
-      editingSlot={1}
-      consideredPlayerIds={consideredPlayerIds}
-      recentForm={recentForm}
-      readOnly={!canInvite}
-    />
-  ) : (
-    <div className="flex items-center justify-center h-64 bg-gray-800 rounded-lg">
-      <p className="text-gray-500">Select an event to assign a player</p>
-    </div>
-  )
 
   return (
     <div>
@@ -300,69 +262,15 @@ export function PlanDetailClient({
         </div>
       )}
 
-      <div className="mb-4 flex flex-wrap items-center justify-end gap-4">
-        <Select value={eventSort} onValueChange={(v) => setEventSort(v as EventSort)}>
-          <SelectTrigger className="w-[140px] h-8 text-sm">
-            <SelectValue placeholder="Sort by" />
-          </SelectTrigger>
-          <SelectContent>
-            <SelectItem value="date">Date</SelectItem>
-            <SelectItem value="purse-desc">Purse (high → low)</SelectItem>
-            <SelectItem value="purse-asc">Purse (low → high)</SelectItem>
-          </SelectContent>
-        </Select>
-        <ToggleGroup type="single" value={viewMode} onValueChange={(v) => v && setViewMode(v as ViewMode)} size="sm">
-          <ToggleGroupItem value="table" aria-label="Table view">
-            <TableProperties className="h-4 w-4" />
-          </ToggleGroupItem>
-          <ToggleGroupItem value="list" aria-label="List view">
-            <List className="h-4 w-4" />
-          </ToggleGroupItem>
-          <ToggleGroupItem value="grid" aria-label="Grid view">
-            <LayoutGrid className="h-4 w-4" />
-          </ToggleGroupItem>
-        </ToggleGroup>
-      </div>
-
-      {viewMode === 'table' ? (
-        <PlanSeasonTable
-          events={seasonEvents}
-          getPicksForEvent={getPicksForEvent}
-          players={proPlayers}
-          earningsMap={earningsMap}
-          priorYearResults={priorYearResults}
-          oddsFavorites={oddsFavorites}
-          onOpenPicker={handleOpenPicker}
-        />
-      ) : viewMode === 'list' ? (
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-          <div className="lg:col-span-1">
-            <PlanEventList
-              events={seasonEvents}
-              picks={picks}
-              players={proPlayers}
-              selectedEventId={selectedEventId}
-              onSelectEvent={handleSelectEventForList}
-              viewMode={viewMode}
-              earningsMap={earningsMap}
-            />
-          </div>
-          <div className="lg:col-span-2">{playerTable}</div>
-        </div>
-      ) : (
-        <div className="space-y-6">
-          <PlanEventList
-            events={seasonEvents}
-            picks={picks}
-            players={proPlayers}
-            selectedEventId={selectedEventId}
-            onSelectEvent={handleSelectEventForList}
-            viewMode={viewMode}
-            earningsMap={earningsMap}
-          />
-          {playerTable}
-        </div>
-      )}
+      <PlanSeasonTable
+        events={seasonEvents}
+        getPicksForEvent={getPicksForEvent}
+        players={proPlayers}
+        earningsMap={earningsMap}
+        priorYearResults={priorYearResults}
+        oddsFavorites={oddsFavorites}
+        onOpenPicker={handleOpenPicker}
+      />
 
       <PickDialog
         open={pickDialogOpen}
@@ -372,6 +280,7 @@ export function PlanDetailClient({
         players={proPlayers}
         usedPlayerIds={usedPlayerIds}
         futurePickEventNames={futurePickEventNames}
+        optionPickEventNames={optionPickEventNames}
         eventPicks={eventPicks}
         historicalYears={historicalYears}
         historicalFinishes={historicalFinishes}

@@ -36,11 +36,4 @@ export {
 export { formatPurse } from './format-purse'
 
 // Tour event utilities
-export {
-  getTournamentType,
-  getEventHref,
-  isTransparent,
-  getCurrentEvent,
-  getNextEvent,
-  processEvents
-} from './tour-events'
+export { getTournamentType, getEventHref, getCurrentEvent, getNextEvent, processEvents } from './tour-events'

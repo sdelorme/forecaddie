@@ -35,15 +35,15 @@ export default async function RootLayout({ children }: { children: React.ReactNo
       <body className={`${lora.className} bg-black min-h-full flex flex-col`}>
         <TooltipProvider delayDuration={200}>
           <PlayerFlagsProvider eventId={currentEvent?.eventId}>
-            <ScrollWrapper>
-              <LiveStatsProvider initialData={initialData} isComplete={isComplete}>
+            <LiveStatsProvider initialData={initialData} isComplete={isComplete}>
+              <ScrollWrapper>
                 <Header />
-              </LiveStatsProvider>
-            </ScrollWrapper>
-            <div className="pt-[144px]">
-              <main className="flex-1">{children}</main>
-              <Footer />
-            </div>
+              </ScrollWrapper>
+              <div className="pt-[144px]">
+                <main className="flex-1">{children}</main>
+                <Footer />
+              </div>
+            </LiveStatsProvider>
           </PlayerFlagsProvider>
         </TooltipProvider>
       </body>
