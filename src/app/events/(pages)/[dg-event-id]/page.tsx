@@ -1,11 +1,12 @@
-import { notFound } from 'next/navigation'
-import { getSchedule } from '@/lib/api/datagolf'
+import { notFound, redirect } from 'next/navigation'
+import { getSchedule, getLiveLeaderboard } from '@/lib/api/datagolf'
 import { getHistoricalEventResults } from '@/lib/api/datagolf/queries/historical-events'
 import { getFieldUpdates } from '@/lib/api/datagolf/queries/field-updates'
 import { getPurseMap, attachPurses } from '@/lib/api/supabase/queries/tournament-purses'
 import { cn, formatPurse } from '@/lib/utils'
 import Link from 'next/link'
 import type { ProcessedTourEvent } from '@/types/schedule'
+import type { Leaderboard } from '@/types/leaderboard'
 import type { PlayerEventFinish } from '@/types/historical-events'
 import type { FieldUpdate } from '@/types/field-updates'
 
@@ -150,6 +151,25 @@ function UpcomingEventEmpty() {
   )
 }
 
+function LiveEventInProgress() {
+  return (
+    <div className="space-y-6">
+      <div className="flex items-center gap-3">
+        <span className="text-xs bg-primary/20 text-primary px-2 py-1 rounded animate-pulse">Live</span>
+      </div>
+      <p className="text-gray-400 text-center py-8">
+        This tournament is in progress. Live leaderboard data is not available for this event.
+      </p>
+    </div>
+  )
+}
+
+function leaderboardMatchesEvent(leaderboard: Leaderboard, event: ProcessedTourEvent): boolean {
+  const lbName = leaderboard.eventInfo.eventName.toLowerCase()
+  const evName = event.eventName.toLowerCase()
+  return lbName.includes(evName) || evName.includes(lbName)
+}
+
 export default async function EventDetailPage({ params, searchParams }: EventDetailProps) {
   const resolvedParams = await params
   const resolvedSearchParams = await searchParams
@@ -172,10 +192,31 @@ export default async function EventDetailPage({ params, searchParams }: EventDet
 
   const requestedYear = resolvedSearchParams.year ? Number(resolvedSearchParams.year) : null
   const isHistoricalYear = requestedYear !== null && !isNaN(requestedYear)
+  const isLive = !isHistoricalYear && event.tournamentType === 'live'
 
-  if (!isHistoricalYear && event.tournamentType === 'live') {
-    const { redirect } = await import('next/navigation')
-    redirect('/events/live-stats')
+  if (isLive) {
+    const leaderboard = await getLiveLeaderboard()
+    if (leaderboard.players.length > 0 && leaderboardMatchesEvent(leaderboard, event)) {
+      redirect('/events/live-stats')
+    }
+
+    return (
+      <main className="container mx-auto px-4 py-8">
+        <div className="mb-8">
+          <Link href="/events" className="text-sm text-gray-400 hover:text-white transition-colors mb-4 inline-block">
+            &larr; Back to Schedule
+          </Link>
+          <h1 className="text-2xl font-bold text-white">{event.eventName}</h1>
+          <div className="flex flex-wrap gap-x-4 gap-y-1 mt-2 text-sm text-gray-400">
+            <span>{event.course}</span>
+            {event.location && <span>{event.location}</span>}
+            <span>{event.startDate}</span>
+            {event.purse != null && <span className="tabular-nums">{formatPurse(event.purse)}</span>}
+          </div>
+        </div>
+        <LiveEventInProgress />
+      </main>
+    )
   }
 
   const isCompleted = event.tournamentType === 'historical' || isHistoricalYear

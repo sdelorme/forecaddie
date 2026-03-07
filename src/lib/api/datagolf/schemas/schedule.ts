@@ -10,7 +10,7 @@ export const RawTourEventSchema = z.object({
   location: z.string(),
   longitude: z.number(),
   start_date: z.string(),
-  status: z.enum(['upcoming', 'in_progress', 'completed']),
+  status: z.enum(['upcoming', 'in_progress', 'completed']).catch('upcoming'),
   tour: z.string(),
   winner: z.string()
 })
