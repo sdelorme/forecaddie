@@ -11,6 +11,7 @@ import type { Pick } from '@/lib/supabase/types'
 import type { PlayerEventFinish } from '@/types/historical-events'
 import type { EventPicks } from '@/lib/supabase'
 import type { RecentFormMap } from '@/types/hottest-golfers'
+import type { PlayerOddsMap } from './plan-player-table'
 
 interface PickDialogProps {
   open: boolean
@@ -27,6 +28,7 @@ interface PickDialogProps {
   isLoadingHistory: boolean
   withdrawnPlayerIds: Set<number>
   recentForm?: RecentFormMap
+  playerOdds?: PlayerOddsMap
   onSelectPlayer: (playerDgId: number, slot: 1 | 2 | 3) => void
   onClearPick: (pick: Pick) => void
   readOnly?: boolean
@@ -53,6 +55,7 @@ export function PickDialog({
   isLoadingHistory,
   withdrawnPlayerIds,
   recentForm,
+  playerOdds,
   onSelectPlayer,
   onClearPick,
   readOnly = false
@@ -161,6 +164,7 @@ export function PickDialog({
             editingSlot={editingSlot}
             consideredPlayerIds={consideredPlayerIds}
             recentForm={recentForm}
+            playerOdds={playerOdds}
             readOnly={readOnly}
           />
         </div>

@@ -24,6 +24,7 @@ interface PlanDetailClientProps {
   priorYearResults: Record<string, PriorYearTopFinishers>
   oddsFavorites: EventOddsFavorites | null
   recentForm: RecentFormMap
+  hiddenEventIds: string[]
   canInvite: boolean
   currentUserId: string
 }
@@ -39,6 +40,7 @@ export function PlanDetailClient({
   priorYearResults,
   oddsFavorites,
   recentForm,
+  hiddenEventIds: initialHiddenEventIds,
   canInvite,
   currentUserId
 }: PlanDetailClientProps) {
@@ -59,6 +61,7 @@ export function PlanDetailClient({
   const [historicalFinishes, setHistoricalFinishes] = useState<Map<number, PlayerEventFinish[]>>(new Map())
   const [isLoadingHistory, setIsLoadingHistory] = useState(false)
   const [fieldData, setFieldData] = useState<FieldUpdate | null>(null)
+  const [hiddenEventIds, setHiddenEventIds] = useState<string[]>(initialHiddenEventIds)
 
   const latestEventRef = useRef<string | null>(null)
 
@@ -215,6 +218,33 @@ export function PlanDetailClient({
     return new Set<number>()
   }, [fieldData])
 
+  const playerOddsMap = useMemo(() => {
+    const map = new Map<number, string>()
+    if (!oddsFavorites || !selectedEventId) return map
+    const oddsName = oddsFavorites.eventName.toLowerCase()
+    const selected = seasonEvents.find((e) => e.eventId === selectedEventId)
+    if (!selected) return map
+    const eventName = selected.eventName.toLowerCase()
+    const exact = eventName === oddsName
+    const firstWord = eventName.split(' ')[0]
+    const partial = !exact && firstWord.length > 2 && oddsName.includes(firstWord)
+    if (!exact && !partial) return map
+    for (const f of oddsFavorites.favorites) {
+      map.set(f.dgId, f.odds)
+    }
+    return map
+  }, [oddsFavorites, selectedEventId, seasonEvents])
+
+  const totalEarnings = useMemo(() => {
+    let sum = 0
+    for (const pick of picks) {
+      if (pick.slot !== 1 || pick.player_dg_id == null) continue
+      const eventEarnings = earningsMap[pick.event_id]?.[pick.player_dg_id]
+      if (eventEarnings != null) sum += eventEarnings
+    }
+    return sum
+  }, [picks, earningsMap])
+
   const handleSelectPlayer = async (playerDgId: number, slot: 1 | 2 | 3 = 1) => {
     if (!selectedEventId) return
 
@@ -229,6 +259,24 @@ export function PlanDetailClient({
   const handleClearPick = async (pick: { id: string }) => {
     await updatePick(pick.id, null)
   }
+
+  const handleToggleHideEvent = useCallback(
+    async (eventId: string) => {
+      const isHidden = hiddenEventIds.includes(eventId)
+      const updated = isHidden ? hiddenEventIds.filter((id) => id !== eventId) : [...hiddenEventIds, eventId]
+      setHiddenEventIds(updated)
+      try {
+        await fetch(`/api/plans/${planId}`, {
+          method: 'PATCH',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ hidden_events: updated })
+        })
+      } catch {
+        setHiddenEventIds(hiddenEventIds)
+      }
+    },
+    [hiddenEventIds, planId]
+  )
 
   const handleOpenPicker = (eventId: string) => {
     setSelectedEventId(eventId)
@@ -245,13 +293,14 @@ export function PlanDetailClient({
   }
 
   return (
-    <div>
+    <div className="space-y-6">
       <PlanHeader
         planId={planId}
         planName={planName}
         season={season}
         pickCount={picks.filter((p) => p.slot === 1 && p.player_dg_id != null).length}
         totalEvents={seasonEvents.length}
+        totalEarnings={totalEarnings}
         canInvite={canInvite}
         currentUserId={currentUserId}
       />
@@ -268,8 +317,9 @@ export function PlanDetailClient({
         players={proPlayers}
         earningsMap={earningsMap}
         priorYearResults={priorYearResults}
-        oddsFavorites={oddsFavorites}
+        hiddenEventIds={hiddenEventIds}
         onOpenPicker={handleOpenPicker}
+        onToggleHideEvent={handleToggleHideEvent}
       />
 
       <PickDialog
@@ -287,6 +337,7 @@ export function PlanDetailClient({
         isLoadingHistory={isLoadingHistory}
         withdrawnPlayerIds={withdrawnPlayerIds}
         recentForm={recentForm}
+        playerOdds={playerOddsMap}
         onSelectPlayer={handleSelectPlayer}
         onClearPick={handleClearPick}
         readOnly={!canInvite}
