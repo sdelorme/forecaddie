@@ -1,6 +1,6 @@
 export default function EventDetailLoading() {
   return (
-    <main className="container mx-auto px-4 py-8">
+    <div className="container mx-auto px-4 py-8">
       <div className="mb-8">
         <div className="h-4 w-28 bg-gray-700 rounded mb-4 animate-pulse" />
         <div className="h-8 w-72 bg-gray-700 rounded mb-2 animate-pulse" />
@@ -30,6 +30,6 @@ export default function EventDetailLoading() {
           </div>
         ))}
       </div>
-    </main>
+    </div>
   )
 }

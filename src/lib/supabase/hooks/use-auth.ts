@@ -31,10 +31,12 @@ export function useAuth(): UseAuthReturn {
         data: { user },
         error
       } = await supabase.auth.getUser()
+
+      const isSessionMissing = error?.message?.includes('session missing') || error?.status === 401
       setState({
         user,
         isLoading: false,
-        error: error?.message ?? null
+        error: isSessionMissing ? null : (error?.message ?? null)
       })
     } catch (err) {
       console.error('Error refreshing user:', err)

@@ -7,8 +7,6 @@ import { createClient } from '@/lib/supabase/server'
  */
 function sanitizeRedirectPath(redirect: string | null): string {
   if (!redirect) return '/dashboard'
-  // Only allow relative paths starting with '/'
-  // Reject protocol-relative URLs (//), external URLs, and malformed paths
   if (!redirect.startsWith('/') || redirect.startsWith('//')) {
     return '/dashboard'
   }
@@ -21,14 +19,17 @@ export async function GET(request: Request) {
   const redirect = sanitizeRedirectPath(searchParams.get('redirect'))
 
   if (code) {
-    const supabase = await createClient()
-    const { error } = await supabase.auth.exchangeCodeForSession(code)
+    try {
+      const supabase = await createClient()
+      const { error } = await supabase.auth.exchangeCodeForSession(code)
 
-    if (!error) {
-      return NextResponse.redirect(`${origin}${redirect}`)
+      if (!error) {
+        return NextResponse.redirect(`${origin}${redirect}`)
+      }
+    } catch (err) {
+      console.error('Auth callback error:', err)
     }
   }
 
-  // Return to login page with error if code exchange failed
   return NextResponse.redirect(`${origin}/login?error=auth_failed`)
 }

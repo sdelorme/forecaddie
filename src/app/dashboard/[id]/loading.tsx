@@ -1,6 +1,6 @@
 export default function PlanDetailLoading() {
   return (
-    <main className="container mx-auto px-4 py-8 min-h-[calc(100vh-4rem-4rem)]">
+    <div className="max-w-6xl mx-auto px-4 py-8 min-h-[calc(100vh-4rem-4rem)]">
       {/* Header skeleton */}
       <div className="mb-6">
         <div className="h-9 w-64 bg-gray-700 rounded animate-pulse" />
@@ -21,6 +21,6 @@ export default function PlanDetailLoading() {
           <div className="h-64 bg-gray-800 rounded-lg animate-pulse" />
         </div>
       </div>
-    </main>
+    </div>
   )
 }

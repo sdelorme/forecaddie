@@ -43,7 +43,7 @@ const IconButton = ({
 const PlayerAvatar = ({ imageUrl, playerName, size }: { imageUrl: string; playerName: string; size: number }) => (
   <div className={`flex-shrink-0 rounded-full overflow-hidden`}>
     <Image
-      src={imageUrl || '/placeholder.svg'}
+      src={imageUrl}
       alt={playerName}
       width={size}
       height={size}
@@ -57,7 +57,7 @@ export function PlayerCard({ player: { dgId, playerName, currentScore, currentPo
   const { getPlayerFlag, toggleFavorite, toggleFlag } = usePlayerFlagsContext()
   const router = useRouter()
   const { isFavorite, isFlagged } = getPlayerFlag(dgId)
-  const imageUrl = getPlayerImageUrl(playerName) || '/placeholder.svg'
+  const imageUrl = getPlayerImageUrl(playerName)
 
   const handleToggleFavorite = (e: React.MouseEvent) => {
     e.stopPropagation()

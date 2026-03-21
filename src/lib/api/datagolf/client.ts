@@ -3,9 +3,8 @@ import { BASE_URL, CLIENT_CONFIG } from './config'
 const delay = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms))
 
 function isRetryableError(error: unknown): boolean {
-  // Retry on network errors and timeouts
-  if (error instanceof TypeError) return true // Network error
-  if (error instanceof DOMException && error.name === 'AbortError') return true // Timeout
+  if (error instanceof TypeError) return true
+  if (error instanceof DOMException && error.name === 'AbortError') return true
   return false
 }
 
@@ -43,13 +42,29 @@ export const createDataGolfClient = () => {
           headers: options?.headers
         })
 
+        if (response.status === 429) {
+          lastError = new Error('DataGolf API rate limit exceeded (429)')
+
+          if (attempt < CLIENT_CONFIG.MAX_RETRIES) {
+            const retryAfter = response.headers.get('Retry-After')
+            const retryMs = retryAfter
+              ? parseInt(retryAfter, 10) * 1000
+              : CLIENT_CONFIG.RETRY_DELAY_MS * Math.pow(2, attempt + 2)
+            console.warn(
+              `DataGolf API rate limited (attempt ${attempt + 1}/${CLIENT_CONFIG.MAX_RETRIES + 1}), retrying in ${retryMs}ms:`,
+              endpoint
+            )
+            await delay(retryMs)
+            continue
+          }
+          throw lastError
+        }
+
         if (!response.ok) {
-          // Don't retry client errors (4xx) - they won't fix themselves
           const error = new Error(`DataGolf API error: ${response.status}`)
           if (response.status >= 400 && response.status < 500) {
             throw error
           }
-          // Server errors (5xx) are retryable
           lastError = error
           throw error
         }
@@ -76,7 +91,6 @@ export const createDataGolfClient = () => {
       }
     }
 
-    // Should never reach here, but TypeScript needs it
     throw lastError ?? new Error('DataGolf API request failed')
   }
 }

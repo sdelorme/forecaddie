@@ -11,18 +11,11 @@ export default async function PlayersPage() {
   const players = await getPlayerList()
 
   return (
-    <main className="min-h-screen flex flex-col">
-      <div className="px-4 py-8">
-        <h1 className="text-2xl font-bold text-white mb-8">PGA Tour Players</h1>
-      </div>
-
-      <div className="flex-1 flex flex-col lg:flex-row">
-        <div className="w-full">
-          <Suspense fallback={<div className="p-8 text-gray-400">Loading players...</div>}>
-            <PlayerListUI players={players} />
-          </Suspense>
-        </div>
-      </div>
-    </main>
+    <div className="container mx-auto px-4 py-8 min-h-screen">
+      <h1 className="text-2xl font-bold text-white mb-8">PGA Tour Players</h1>
+      <Suspense fallback={<div className="py-8 text-gray-400">Loading players...</div>}>
+        <PlayerListUI players={players} />
+      </Suspense>
+    </div>
   )
 }

@@ -201,7 +201,7 @@ export default async function EventDetailPage({ params, searchParams }: EventDet
     }
 
     return (
-      <main className="container mx-auto px-4 py-8">
+      <div className="container mx-auto px-4 py-8">
         <div className="mb-8">
           <Link href="/events" className="text-sm text-gray-400 hover:text-white transition-colors mb-4 inline-block">
             &larr; Back to Schedule
@@ -215,7 +215,7 @@ export default async function EventDetailPage({ params, searchParams }: EventDet
           </div>
         </div>
         <LiveEventInProgress />
-      </main>
+      </div>
     )
   }
 
@@ -235,7 +235,7 @@ export default async function EventDetailPage({ params, searchParams }: EventDet
   }
 
   return (
-    <main className="container mx-auto px-4 py-8">
+    <div className="container mx-auto px-4 py-8">
       <div className="mb-8">
         <Link href="/events" className="text-sm text-gray-400 hover:text-white transition-colors mb-4 inline-block">
           &larr; Back to Schedule
@@ -259,6 +259,6 @@ export default async function EventDetailPage({ params, searchParams }: EventDet
       ) : (
         <UpcomingEventEmpty />
       )}
-    </main>
+    </div>
   )
 }

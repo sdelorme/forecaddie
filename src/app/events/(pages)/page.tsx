@@ -15,12 +15,12 @@ export default async function EventsPage() {
   const events = attachPurses(rawEvents, purseMap)
 
   return (
-    <main className="container mx-auto px-4 py-8">
+    <div className="container mx-auto px-4 py-8">
       <div className="flex justify-between items-center mb-8">
         <h1 className="text-2xl font-bold text-white">PGA Tour Schedule</h1>
       </div>
 
       <EventsUI events={events} />
-    </main>
+    </div>
   )
 }
