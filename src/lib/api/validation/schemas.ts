@@ -7,7 +7,8 @@ export const CreatePlanSchema = z.object({
 
 export const UpdatePlanSchema = z.object({
   name: z.string().trim().min(1, 'Plan name must be a non-empty string').optional(),
-  season: z.number().int().optional()
+  season: z.number().int().optional(),
+  hidden_events: z.array(z.string()).optional()
 })
 
 export const CreatePickSchema = z.object({

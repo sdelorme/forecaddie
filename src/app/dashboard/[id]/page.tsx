@@ -141,7 +141,6 @@ export default async function PlanDetailPage({ params }: PageProps) {
         })
         .filter((p) => p.bestOdds !== null)
         .sort((a, b) => a.bestOdds! - b.bestOdds!)
-        .slice(0, 5)
 
       oddsFavorites = {
         eventName: oddsData.eventName,
@@ -177,6 +176,7 @@ export default async function PlanDetailPage({ params }: PageProps) {
         priorYearResults={priorYearResults}
         oddsFavorites={oddsFavorites}
         recentForm={recentForm}
+        hiddenEventIds={plan.hidden_events ?? []}
         canInvite={canInvite}
         currentUserId={user.id}
       />

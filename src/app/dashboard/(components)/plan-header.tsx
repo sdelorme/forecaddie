@@ -13,8 +13,17 @@ interface PlanHeaderProps {
   season: number
   pickCount: number
   totalEvents: number
+  totalEarnings: number
   canInvite: boolean
   currentUserId: string
+}
+
+function formatTotalEarnings(amount: number): string {
+  return new Intl.NumberFormat('en-US', {
+    style: 'currency',
+    currency: 'USD',
+    maximumFractionDigits: 0
+  }).format(amount)
 }
 
 export function PlanHeader({
@@ -23,6 +32,7 @@ export function PlanHeader({
   season,
   pickCount,
   totalEvents,
+  totalEarnings,
   canInvite,
   currentUserId
 }: PlanHeaderProps) {
@@ -43,18 +53,13 @@ export function PlanHeader({
         <div className="flex items-center gap-3">
           <h1 className="text-2xl font-bold text-white sm:text-3xl">{planName}</h1>
           <span className="rounded-md bg-gray-700 px-2.5 py-0.5 text-xs font-medium text-gray-300">{season}</span>
+          <div className="inline-flex items-center gap-2 rounded-full border border-green-700/60 bg-green-900/25 px-4 py-1.5">
+            <span className="text-xs uppercase tracking-wider text-green-400/70">Season Earnings</span>
+            <span className="text-sm font-bold tabular-nums text-green-400">{formatTotalEarnings(totalEarnings)}</span>
+          </div>
         </div>
 
-        <div className="flex items-center gap-3">
-          <Button
-            variant="outline"
-            size="sm"
-            onClick={() => setShareOpen(true)}
-            className="border-gray-600 text-gray-300 hover:bg-gray-800"
-          >
-            <Share2 className="h-4 w-4" />
-            Share
-          </Button>
+        <div className="flex items-center gap-2">
           <span className="text-sm text-gray-400">
             {pickCount}/{totalEvents} picks made
           </span>
@@ -67,6 +72,15 @@ export function PlanHeader({
               style={{ width: `${progress}%` }}
             />
           </div>
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={() => setShareOpen(true)}
+            className="border-gray-600 text-gray-300 hover:bg-gray-800 ml-1"
+          >
+            <Share2 className="h-4 w-4" />
+            Share
+          </Button>
         </div>
       </div>
 

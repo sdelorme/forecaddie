@@ -48,13 +48,14 @@ export async function PATCH(request: NextRequest, { params }: RouteParams) {
     const parsed = await parseBody(request, UpdatePlanSchema)
     if (parsed.error) return parsed.error
 
-    const { name, season } = parsed.data
+    const { name, season, hidden_events } = parsed.data
 
     const updates: Record<string, unknown> = {
       updated_at: new Date().toISOString()
     }
     if (name !== undefined) updates.name = name
     if (season !== undefined) updates.season = season
+    if (hidden_events !== undefined) updates.hidden_events = hidden_events
 
     // RLS ensures only owner/editor members can update this plan
     const { data, error } = await supabase.from('season_plans').update(updates).eq('id', id).select().single()

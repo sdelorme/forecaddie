@@ -12,6 +12,9 @@ import type { Pick } from '@/lib/supabase/types'
 import type { PlayerEventFinish } from '@/types/historical-events'
 import type { RecentFormMap } from '@/types/hottest-golfers'
 
+/** dgId → odds string (e.g. "+650") */
+export type PlayerOddsMap = Map<number, string>
+
 interface PlanPlayerTableProps {
   players: Player[]
   usedPlayerIds: number[]
@@ -29,6 +32,7 @@ interface PlanPlayerTableProps {
   editingSlot?: 1 | 2 | 3
   consideredPlayerIds?: number[]
   recentForm?: RecentFormMap
+  playerOdds?: PlayerOddsMap
   readOnly?: boolean
 }
 
@@ -44,6 +48,16 @@ function finishCellClass(finish: PlayerEventFinish | undefined): string {
     return 'text-yellow-400 font-semibold'
   }
   return 'text-gray-300'
+}
+
+/**
+ * Parses American odds string (e.g. "+650", "-110") into a comparable number.
+ * Lower = shorter odds = more favored. No odds sorts last.
+ */
+function parseOddsToNumber(odds: string | undefined): number {
+  if (!odds) return 99999
+  const n = parseInt(odds.replace(/[+,]/g, ''), 10)
+  return isNaN(n) ? 99999 : n
 }
 
 /**
@@ -73,13 +87,15 @@ export function PlanPlayerTable({
   editingSlot = 1,
   consideredPlayerIds = [],
   recentForm = new Map(),
+  playerOdds = new Map(),
   readOnly = false
 }: PlanPlayerTableProps) {
   const hasHistory = historicalYears.length > 0
   const hasRecentForm = recentForm.size > 0
+  const hasOdds = playerOdds.size > 0
   const [searchTerm, setSearchTerm] = useState('')
-  const [sortBy, setSortBy] = useState<'history' | 'recent-form' | 'name'>(() =>
-    hasRecentForm && !hasHistory ? 'recent-form' : 'history'
+  const [sortBy, setSortBy] = useState<'odds' | 'history' | 'recent-form' | 'name'>(() =>
+    hasOdds ? 'odds' : hasRecentForm && !hasHistory ? 'recent-form' : 'history'
   )
 
   const finishLookup = useMemo(() => {
@@ -102,6 +118,13 @@ export function PlanPlayerTable({
     return [...players].sort((a, b) => {
       if (sortBy === 'name') return a.displayName.localeCompare(b.displayName)
 
+      if (sortBy === 'odds' && hasOdds) {
+        const oddsA = parseOddsToNumber(playerOdds.get(a.dgId))
+        const oddsB = parseOddsToNumber(playerOdds.get(b.dgId))
+        if (oddsA !== oddsB) return oddsA - oddsB
+        return a.displayName.localeCompare(b.displayName)
+      }
+
       if (sortBy === 'recent-form' && hasRecentForm) {
         const avgA = recentForm.get(a.dgId) ?? 99999
         const avgB = recentForm.get(b.dgId) ?? 99999
@@ -120,7 +143,7 @@ export function PlanPlayerTable({
       if (rankA !== rankB) return rankA - rankB
       return a.displayName.localeCompare(b.displayName)
     })
-  }, [players, historicalYears, finishLookup, isLoadingHistory, sortBy, hasRecentForm, recentForm])
+  }, [players, historicalYears, finishLookup, isLoadingHistory, sortBy, hasRecentForm, recentForm, hasOdds, playerOdds])
 
   const filtered = useMemo(() => {
     if (!searchTerm.trim()) return sortedPlayers
@@ -175,6 +198,28 @@ export function PlanPlayerTable({
             <thead className="sticky top-0 z-10 bg-gray-800">
               <tr className="text-left text-xs uppercase tracking-wider text-gray-400">
                 <th className="sticky left-0 z-20 bg-gray-800 py-2 pr-3 pl-1 font-medium">Player</th>
+                {hasOdds && (
+                  <th
+                    role="button"
+                    tabIndex={0}
+                    onClick={() => setSortBy((s) => (s === 'odds' ? 'history' : 'odds'))}
+                    onKeyDown={(e) => {
+                      if (e.key === 'Enter' || e.key === ' ') {
+                        e.preventDefault()
+                        setSortBy((s) => (s === 'odds' ? 'history' : 'odds'))
+                      }
+                    }}
+                    className={cn(
+                      'py-2 px-2 text-center font-medium whitespace-nowrap cursor-pointer hover:text-gray-300 transition-colors',
+                      sortBy === 'odds' && 'text-primary'
+                    )}
+                  >
+                    <span className="inline-flex items-center gap-1.5">
+                      Odds
+                      <ArrowUpDown className="h-3 w-3" />
+                    </span>
+                  </th>
+                )}
                 {hasRecentForm && (
                   <th
                     role="button"
@@ -286,6 +331,15 @@ export function PlanPlayerTable({
                         )}
                       </div>
                     </td>
+                    {hasOdds && (
+                      <td className="py-2 px-2 text-center whitespace-nowrap tabular-nums text-gray-300">
+                        {playerOdds.has(player.dgId) ? (
+                          <span className="text-green-400">{playerOdds.get(player.dgId)}</span>
+                        ) : (
+                          <span className="text-gray-600">—</span>
+                        )}
+                      </td>
+                    )}
                     {hasRecentForm && (
                       <td className="py-2 px-2 text-center whitespace-nowrap text-gray-300">
                         {recentForm.has(player.dgId) ? recentForm.get(player.dgId)!.toFixed(1) : '—'}
