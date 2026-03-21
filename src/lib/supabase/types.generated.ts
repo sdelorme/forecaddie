@@ -145,7 +145,6 @@ export type Database = {
         Row: {
           created_at: string | null
           device_id: string | null
-          hidden_events: string[]
           id: string
           name: string
           season: number
@@ -155,7 +154,6 @@ export type Database = {
         Insert: {
           created_at?: string | null
           device_id?: string | null
-          hidden_events?: string[]
           id?: string
           name: string
           season?: number
@@ -165,7 +163,6 @@ export type Database = {
         Update: {
           created_at?: string | null
           device_id?: string | null
-          hidden_events?: string[]
           id?: string
           name?: string
           season?: number
