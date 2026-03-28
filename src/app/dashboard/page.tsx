@@ -4,6 +4,8 @@ import { getPurseMap, attachPurses } from '@/lib/api/supabase/queries/tournament
 import { DashboardClient } from './(components)/dashboard-client'
 import type { CompletedEventResult } from './types'
 
+export const dynamic = 'force-dynamic'
+
 export default async function DashboardPage() {
   let schedule: Awaited<ReturnType<typeof getSchedule>> = []
 

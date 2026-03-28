@@ -6,6 +6,8 @@ import { getSchedule } from '@/lib/api/datagolf'
 import { getPurseMap, attachPurses } from '@/lib/api/supabase/queries/tournament-purses'
 import { getCurrentEvent, getNextEvent } from '@/lib/utils'
 
+export const dynamic = 'force-dynamic'
+
 export const metadata = {
   title: 'Betting Odds',
   description: 'Current PGA Tour tournament betting odds from major sportsbooks.'

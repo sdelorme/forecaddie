@@ -2,6 +2,8 @@ import { Suspense } from 'react'
 import { getPlayerList } from '@/lib/api/datagolf'
 import { PlayerListUI } from '../(components)/all-players'
 
+export const dynamic = 'force-dynamic'
+
 export const metadata = {
   title: 'Player Rankings',
   description: 'PGA Tour player rankings, statistics, and DataGolf skill ratings.'

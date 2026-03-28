@@ -5,6 +5,8 @@ import { getLiveLeaderboard, getSchedule } from '@/lib/api/datagolf'
 import { getPurseMap, attachPurses } from '@/lib/api/supabase/queries/tournament-purses'
 import { getCurrentEvent, getNextEvent } from '@/lib/utils'
 
+export const dynamic = 'force-dynamic'
+
 export const metadata = {
   title: 'Live Leaderboard',
   description: 'Real-time PGA Tour tournament leaderboard with live scoring updates.'

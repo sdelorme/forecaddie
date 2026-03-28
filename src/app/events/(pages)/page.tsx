@@ -2,6 +2,8 @@ import { getSchedule } from '@/lib/api/datagolf'
 import { getPurseMap, attachPurses } from '@/lib/api/supabase/queries/tournament-purses'
 import EventsUI from '../(components)/all-events'
 
+export const dynamic = 'force-dynamic'
+
 export const metadata = {
   title: 'Tournament Schedule',
   description: 'Full PGA Tour tournament schedule with dates, courses, and locations.'
