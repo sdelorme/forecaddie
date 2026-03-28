@@ -2,15 +2,11 @@
 
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui'
 import { CalendarCheck, Trophy } from 'lucide-react'
+import { formatShortName, formatEventDate } from '@/lib/utils'
 import type { CompletedEventResult } from '../types'
 
 interface SeasonResultsTableProps {
   events: CompletedEventResult[]
-}
-
-function formatDate(dateStr: string): string {
-  const date = new Date(dateStr + 'T00:00:00')
-  return date.toLocaleDateString('en-US', { month: 'short', day: 'numeric' })
 }
 
 export function SeasonResultsTable({ events }: SeasonResultsTableProps) {
@@ -60,7 +56,7 @@ export function SeasonResultsTable({ events }: SeasonResultsTableProps) {
                         <span className="inline-flex items-center gap-1.5">
                           {i === 0 && <Trophy className="h-3.5 w-3.5 text-yellow-400" />}
                           <span className={i === 0 ? 'font-semibold text-yellow-400' : 'text-gray-300'}>
-                            {f[i].playerName}
+                            {formatShortName(f[i].playerName)}
                           </span>
                           <span className="text-gray-500 text-xs">({f[i].finishText})</span>
                         </span>
@@ -69,7 +65,7 @@ export function SeasonResultsTable({ events }: SeasonResultsTableProps) {
                       )}
                     </TableCell>
                   ))}
-                  <TableCell className="text-gray-400 text-right">{formatDate(event.startDate)}</TableCell>
+                  <TableCell className="text-gray-400 text-right">{formatEventDate(event.startDate)}</TableCell>
                 </TableRow>
               )
             })}

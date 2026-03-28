@@ -2,6 +2,7 @@
 
 import { useMemo } from 'react'
 import { Trophy, CalendarCheck } from 'lucide-react'
+import { formatPosition, formatEventDate, formatShortName } from '@/lib/utils'
 import type { ProcessedTourEvent } from '@/types/schedule'
 import type { Player } from '@/types/player'
 import type { Pick } from '@/lib/supabase/types'
@@ -22,28 +23,12 @@ interface PastResultRow {
   hasPick: boolean
 }
 
-function formatPosition(pos: number | null): string {
-  if (pos === null) return '—'
-  if (pos === 1) return '1st'
-  if (pos === 2) return '2nd'
-  if (pos === 3) return '3rd'
-  return `T${pos}`
-}
-
 /** DataGolf returns winner as "Last, First (dg_id)" — strip the id and flip to "First Last" */
 function formatWinnerName(raw: string): string {
   const clean = raw.replace(/\s*\(\d+\)/, '').trim()
   const parts = clean.split(', ')
   if (parts.length < 2) return clean
   return `${parts[1]} ${parts[0]}`
-}
-
-function formatDate(dateStr: string): string {
-  const date = new Date(dateStr + 'T00:00:00')
-  return date.toLocaleDateString('en-US', {
-    month: 'short',
-    day: 'numeric'
-  })
 }
 
 export function PlanPastResults({ events, picks, players }: PlanPastResultsProps) {
@@ -61,7 +46,7 @@ export function PlanPastResults({ events, picks, players }: PlanPastResultsProps
           startDate: event.startDate,
           playerName: player?.displayName ?? (pick ? 'Unknown' : null),
           resultPosition: pick?.result_position ?? null,
-          winner: event.winner ? formatWinnerName(event.winner) : null,
+          winner: event.winner ? formatShortName(formatWinnerName(event.winner)) : null,
           hasPick: !!pick
         }
       })
@@ -125,7 +110,7 @@ export function PlanPastResults({ events, picks, players }: PlanPastResultsProps
                   )}
                 </td>
                 <td className="px-4 py-3 text-right text-gray-400">{row.winner ?? '—'}</td>
-                <td className="px-4 py-3 text-right text-gray-400">{formatDate(row.startDate)}</td>
+                <td className="px-4 py-3 text-right text-gray-400">{formatEventDate(row.startDate)}</td>
               </tr>
             ))}
           </tbody>

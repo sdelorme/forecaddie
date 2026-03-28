@@ -1,7 +1,7 @@
 'use client'
 
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
-import { usePicks } from '@/lib/supabase'
+import { usePicks, useComments, useCommentCounts } from '@/lib/supabase'
 import { PlanHeader } from '@/app/dashboard/(components)/plan-header'
 import { PlanSeasonTable } from '@/app/dashboard/(components)/plan-season-table'
 import { PickDialog } from '@/app/dashboard/(components)/pick-dialog'
@@ -57,11 +57,23 @@ export function PlanDetailClient({
 
   const [selectedEventId, setSelectedEventId] = useState<string | null>(null)
   const [pickDialogOpen, setPickDialogOpen] = useState(false)
+
+  const {
+    threads: commentThreads,
+    isLoading: commentsLoading,
+    commentCount,
+    createComment,
+    updateComment,
+    deleteComment
+  } = useComments(planId, selectedEventId)
+
+  const { counts: commentCounts, refetch: refetchCommentCounts } = useCommentCounts(planId)
   const [editingSlot, setEditingSlot] = useState<1 | 2 | 3>(1)
   const [historicalFinishes, setHistoricalFinishes] = useState<Map<number, PlayerEventFinish[]>>(new Map())
   const [isLoadingHistory, setIsLoadingHistory] = useState(false)
   const [fieldData, setFieldData] = useState<FieldUpdate | null>(null)
   const [hiddenEventIds, setHiddenEventIds] = useState<string[]>(initialHiddenEventIds)
+  const [localPurses, setLocalPurses] = useState<Record<string, number>>({})
 
   const latestEventRef = useRef<string | null>(null)
 
@@ -71,7 +83,8 @@ export function PlanDetailClient({
     return [...events]
       .filter((e) => e.startDate.startsWith(String(season)))
       .sort((a, b) => a.startDate.localeCompare(b.startDate))
-  }, [events, season])
+      .map((e) => (localPurses[e.eventId] != null ? { ...e, purse: localPurses[e.eventId] } : e))
+  }, [events, season, localPurses])
 
   const usedPlayerIds = useMemo(() => getUsedPlayerIds(), [getUsedPlayerIds])
 
@@ -278,6 +291,10 @@ export function PlanDetailClient({
     [hiddenEventIds, planId]
   )
 
+  const handlePurseAdded = useCallback((eventId: string, purse: number) => {
+    setLocalPurses((prev) => ({ ...prev, [eventId]: purse }))
+  }, [])
+
   const handleOpenPicker = (eventId: string) => {
     setSelectedEventId(eventId)
     setPickDialogOpen(true)
@@ -318,15 +335,20 @@ export function PlanDetailClient({
         earningsMap={earningsMap}
         priorYearResults={priorYearResults}
         hiddenEventIds={hiddenEventIds}
+        commentCounts={commentCounts}
+        season={season}
         onOpenPicker={handleOpenPicker}
         onToggleHideEvent={handleToggleHideEvent}
+        onPurseAdded={handlePurseAdded}
       />
 
       <PickDialog
         open={pickDialogOpen}
         onOpenChange={setPickDialogOpen}
+        planId={planId}
         eventName={selectedEventName}
         selectedEventId={selectedEventId ?? undefined}
+        currentUserId={currentUserId}
         players={proPlayers}
         usedPlayerIds={usedPlayerIds}
         futurePickEventNames={futurePickEventNames}
@@ -338,6 +360,20 @@ export function PlanDetailClient({
         withdrawnPlayerIds={withdrawnPlayerIds}
         recentForm={recentForm}
         playerOdds={playerOddsMap}
+        commentThreads={commentThreads}
+        commentsLoading={commentsLoading}
+        commentCount={commentCount}
+        onCreateComment={async (body, parentId) => {
+          const result = await createComment(body, parentId)
+          if (result) refetchCommentCounts()
+          return result
+        }}
+        onUpdateComment={updateComment}
+        onDeleteComment={async (commentId) => {
+          const result = await deleteComment(commentId)
+          if (result) refetchCommentCounts()
+          return result
+        }}
         onSelectPlayer={handleSelectPlayer}
         onClearPick={handleClearPick}
         readOnly={!canInvite}

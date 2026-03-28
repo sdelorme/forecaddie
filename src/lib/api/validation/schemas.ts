@@ -35,3 +35,20 @@ export const InvitePlanSchema = z.object({
     .transform((s) => s.toLowerCase().trim()),
   role: z.enum(['editor', 'viewer']).optional().default('editor')
 })
+
+export const CreateCommentSchema = z.object({
+  event_id: z.string().min(1, 'event_id is required'),
+  body: z.string().min(1, 'Comment body is required').max(2000, 'Comment must be 2000 characters or fewer'),
+  parent_id: z.string().uuid().nullable().optional()
+})
+
+export const UpdateCommentSchema = z.object({
+  body: z.string().min(1, 'Comment body is required').max(2000, 'Comment must be 2000 characters or fewer')
+})
+
+export const UpsertPurseSchema = z.object({
+  dg_event_id: z.string().min(1, 'dg_event_id is required'),
+  season: z.number().int().min(2020).max(2100),
+  event_name: z.string().min(1, 'event_name is required'),
+  purse: z.number().int().positive('Purse must be a positive number')
+})

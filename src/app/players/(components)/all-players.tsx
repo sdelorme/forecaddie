@@ -43,7 +43,7 @@ export function PlayerListUI({ players }: PlayerListUIProps) {
   const searchParams = useSearchParams()
   const router = useRouter()
   const { user } = useAuth()
-  const filter = searchParams.get('filter') || 'all'
+  const filter = searchParams.get('filter') || '0'
 
   const filteredPlayers = useMemo(() => {
     return players.filter((player) => {

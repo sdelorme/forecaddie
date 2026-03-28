@@ -36,6 +36,12 @@ export default async function PlanDetailPage({ params }: PageProps) {
     redirect('/login')
   }
 
+  const { data: profile } = await supabase.from('user_profiles').select('username').eq('id', user.id).single()
+
+  if (!profile?.username) {
+    redirect('/setup')
+  }
+
   const planResult = await supabase.from('season_plans').select('*').eq('id', id).single()
 
   if (planResult.error || !planResult.data) {
