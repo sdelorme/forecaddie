@@ -1,5 +1,5 @@
-import { CheckCircle2 } from 'lucide-react'
-import Link from 'next/link'
+import { CheckCircle2, Clock } from 'lucide-react'
+import { AboutCta } from './(components)/about-cta'
 
 export const metadata = {
   title: 'About Forecaddie - Golf Statistics & Tournament Tracking',
@@ -12,19 +12,19 @@ export default function AboutPage() {
     'Live tournament leaderboards with real-time scoring data',
     'Comprehensive PGA Tour player rankings and statistics',
     'Current betting odds from major sportsbooks',
-    'Full season schedule with event details'
+    'Full season schedule with event details',
+    'One-and-Done league planning and pick tracking',
+    'Shared planning workspaces with invite-based collaboration'
   ]
 
   const comingSoon = [
-    'One-and-Done league planning and pick tracking',
-    'Historical performance analysis',
+    'Historical performance deep-dives and trend analysis',
     'Custom player comparisons',
-    'Shared planning workspaces'
+    'Multi-season event archive with year selector'
   ]
 
   return (
     <div className="min-h-screen bg-black">
-      {/* Hero Section */}
       <section className="bg-primary py-16 px-4">
         <div className="max-w-4xl mx-auto text-center">
           <h1 className="text-4xl md:text-5xl font-bold text-white mb-6">Golf Statistics & Tournament Tracking</h1>
@@ -35,14 +35,13 @@ export default function AboutPage() {
         </div>
       </section>
 
-      {/* Features Grid */}
       <section className="py-16 px-4 bg-gradient-to-b from-primary to-black">
         <div className="max-w-6xl mx-auto">
           <h2 className="text-3xl font-bold text-secondary mb-12 text-center">What You Can Do</h2>
-          <div className="grid md:grid-cols-2 gap-8">
+          <div className="grid md:grid-cols-2 gap-6">
             {features.map((feature, idx) => (
               <div key={idx} className="flex items-start space-x-4 bg-gray-900 p-6 rounded-xl">
-                <CheckCircle2 className="w-6 h-6 text-secondary flex-shrink-0" />
+                <CheckCircle2 className="w-6 h-6 text-secondary flex-shrink-0 mt-0.5" />
                 <p className="text-white text-lg">{feature}</p>
               </div>
             ))}
@@ -50,16 +49,13 @@ export default function AboutPage() {
         </div>
       </section>
 
-      {/* Coming Soon */}
       <section className="py-16 px-4 bg-black">
         <div className="max-w-6xl mx-auto">
           <h2 className="text-3xl font-bold text-secondary mb-12 text-center">Coming Soon</h2>
-          <div className="grid md:grid-cols-2 gap-8">
+          <div className="grid md:grid-cols-2 gap-6">
             {comingSoon.map((feature, idx) => (
               <div key={idx} className="flex items-center space-x-4">
-                <div className="w-8 h-8 rounded-full bg-gray-800 text-gray-400 flex items-center justify-center flex-shrink-0">
-                  {idx + 1}
-                </div>
+                <Clock className="w-6 h-6 text-gray-500 flex-shrink-0" />
                 <p className="text-gray-400 text-lg">{feature}</p>
               </div>
             ))}
@@ -67,31 +63,16 @@ export default function AboutPage() {
         </div>
       </section>
 
-      {/* Explore Section */}
       <section className="py-16 px-4 bg-primary">
         <div className="max-w-4xl mx-auto text-center">
           <h2 className="text-3xl font-bold text-secondary mb-6">Start Exploring</h2>
           <p className="text-lg text-gray-200 mb-8">
             Check out live tournament data, player rankings, and current betting odds.
           </p>
-          <div className="flex flex-col sm:flex-row justify-center gap-4">
-            <Link
-              href="/events/live-stats"
-              className="bg-secondary text-primary px-8 py-3 rounded-lg font-bold hover:bg-opacity-90 transition-colors"
-            >
-              Live Leaderboard
-            </Link>
-            <Link
-              href="/players"
-              className="bg-black text-white px-8 py-3 rounded-lg font-bold hover:bg-opacity-90 transition-colors"
-            >
-              Player Rankings
-            </Link>
-          </div>
+          <AboutCta />
         </div>
       </section>
 
-      {/* Data Source */}
       <section className="py-16 px-4 bg-black">
         <div className="max-w-4xl mx-auto text-center">
           <h2 className="text-3xl font-bold text-secondary mb-6">Powered by DataGolf</h2>

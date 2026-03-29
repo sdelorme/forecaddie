@@ -36,6 +36,12 @@ export default async function PlanDetailPage({ params }: PageProps) {
     redirect('/login')
   }
 
+  const { data: profile } = await supabase.from('user_profiles').select('username').eq('id', user.id).single()
+
+  if (!profile?.username) {
+    redirect('/setup')
+  }
+
   const planResult = await supabase.from('season_plans').select('*').eq('id', id).single()
 
   if (planResult.error || !planResult.data) {
@@ -164,7 +170,7 @@ export default async function PlanDetailPage({ params }: PageProps) {
   }
 
   return (
-    <div className="w-full px-6 py-8 min-h-[calc(100vh-4rem-4rem)]">
+    <div className="max-w-6xl mx-auto px-4 py-8 min-h-[calc(100vh-4rem-4rem)]">
       <PlanDetailClient
         planId={plan.id}
         planName={plan.name}

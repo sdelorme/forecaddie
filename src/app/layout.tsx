@@ -1,5 +1,4 @@
 import type { Metadata } from 'next'
-import { Lora } from 'next/font/google'
 import './globals.css'
 import { Header, Footer } from '@/components/shared'
 import { ScrollWrapper, LiveStatsProvider, PlayerFlagsProvider } from '@/components/providers'
@@ -7,16 +6,32 @@ import { TooltipProvider } from '@/components/ui'
 import { getLiveLeaderboard, getSchedule } from '@/lib/api/datagolf'
 import { getCurrentEvent } from '@/lib/utils'
 
-const lora = Lora({ subsets: ['latin'] })
+const baseUrl = process.env.VERCEL_PROJECT_PRODUCTION_URL
+  ? `https://${process.env.VERCEL_PROJECT_PRODUCTION_URL}`
+  : 'http://localhost:3000'
+
+export const dynamic = 'force-dynamic'
 
 export const metadata: Metadata = {
+  metadataBase: new URL(baseUrl),
   title: {
     default: 'Forecaddie - Golf Statistics & Tournament Tracking',
     template: '%s | Forecaddie'
   },
   description: 'Live PGA Tour leaderboards, player rankings, and betting odds powered by DataGolf.',
   icons: {
-    icon: '/favicon.ico'
+    icon: '/Icon.png'
+  },
+  openGraph: {
+    title: 'Forecaddie - Golf Statistics & Tournament Tracking',
+    description: 'Live PGA Tour leaderboards, player rankings, and betting odds powered by DataGolf.',
+    siteName: 'Forecaddie',
+    type: 'website'
+  },
+  twitter: {
+    card: 'summary',
+    title: 'Forecaddie - Golf Statistics & Tournament Tracking',
+    description: 'Live PGA Tour leaderboards, player rankings, and betting odds powered by DataGolf.'
   }
 }
 
@@ -32,7 +47,7 @@ export default async function RootLayout({ children }: { children: React.ReactNo
 
   return (
     <html lang="en" className="h-full">
-      <body className={`${lora.className} bg-black min-h-full flex flex-col`}>
+      <body className="bg-black text-gray-300 min-h-full flex flex-col">
         <TooltipProvider delayDuration={200}>
           <PlayerFlagsProvider eventId={currentEvent?.eventId}>
             <LiveStatsProvider initialData={initialData} isComplete={isComplete}>

@@ -8,6 +8,8 @@ export const ENDPOINTS = {
   SKILL_RATINGS: '/preds/skill-ratings',
   EVENT_LIST: '/historical-event-data/event-list',
   HISTORICAL_EVENT_RESULTS: '/historical-event-data/events',
+  RAW_EVENT_LIST: '/historical-raw-data/event-list',
+  RAW_ROUNDS: '/historical-raw-data/rounds',
   FIELD_UPDATES: '/field-updates'
 } as const
 
@@ -20,6 +22,8 @@ export const CACHE_TAGS = {
   PLAYER_HISTORY: 'player-history',
   HISTORICAL_EVENT_LIST: 'historical-event-list',
   HISTORICAL_EVENT_RESULTS: 'historical-event-results',
+  RAW_EVENT_LIST: 'raw-event-list',
+  RAW_ROUNDS: 'raw-rounds',
   FIELD_UPDATES: 'field-updates'
 } as const
 
@@ -32,6 +36,8 @@ export const REVALIDATE_INTERVALS = {
   PLAYER_HISTORY: 604800, // 1 week
   HISTORICAL_EVENT_LIST: 604800, // 1 week
   HISTORICAL_EVENT_RESULTS: 604800, // 1 week — historical data doesn't change
+  RAW_EVENT_LIST: 604800, // 1 week
+  RAW_ROUNDS: 604800, // 1 week — historical data doesn't change
   FIELD_UPDATES: 3600 // 1 hour
 } as const
 

@@ -1,10 +1,35 @@
 import type { RawLiveModel, RawLiveEventStats, RawLiveModelPlayer } from '../types/live-stats'
 import type { Leaderboard, LeaderboardPlayer } from '@/types/leaderboard'
+import { sortByResult } from '@/lib/utils/sort-results'
+
+const NON_FINISH_POSITIONS = new Set(['CUT', 'MC', 'MDF', 'WD', 'DQ'])
+
+const STATUS_FROM_POS: Record<string, string> = {
+  CUT: 'cut',
+  MC: 'cut',
+  MDF: 'mdf',
+  WD: 'wd',
+  DQ: 'dq'
+}
 
 function formatScore(score: number | null | undefined): string {
   if (score == null) return '-'
   if (score === 0) return 'E'
   return score > 0 ? `+${score}` : `${score}`
+}
+
+function parsePosition(pos: string): number | null {
+  const upper = pos.toUpperCase()
+  if (NON_FINISH_POSITIONS.has(upper)) return null
+  const num = upper.startsWith('T') ? parseInt(upper.slice(1)) : parseInt(upper)
+  return isNaN(num) ? null : num
+}
+
+function parseScoreString(score: string): number | null {
+  if (score === 'E') return 0
+  if (score === '-') return null
+  const n = parseInt(score, 10)
+  return isNaN(n) ? null : n
 }
 
 function normalizeLiveModelPlayer(player: RawLiveModelPlayer): LeaderboardPlayer {
@@ -29,34 +54,12 @@ function normalizeLiveModelPlayer(player: RawLiveModelPlayer): LeaderboardPlayer
   }
 }
 
-/**
- * Converts position string to a number for sorting
- * CUT players are sorted to the end
- * T positions (e.g. T4) are converted to their numeric value
- */
-function getPositionValue(position: string): number {
-  if (position === 'CUT') return Number.MAX_SAFE_INTEGER // Sort CUT players to the end
-  if (position.startsWith('T')) return parseInt(position.slice(1)) // Handle T positions
-  return parseInt(position)
-}
-
-/**
- * Sorts players by position and first name
- */
 function sortPlayers(players: LeaderboardPlayer[]): LeaderboardPlayer[] {
-  return [...players].sort((a, b) => {
-    const posA = getPositionValue(a.currentPosition)
-    const posB = getPositionValue(b.currentPosition)
-
-    // First sort by position
-    if (posA !== posB) {
-      return posA - posB
-    }
-
-    // If positions are equal, sort by last name
-    const nameA = a.playerName.split(', ')[0]
-    const nameB = b.playerName.split(', ')[0]
-    return nameA.localeCompare(nameB)
+  return sortByResult(players, {
+    status: (p) => STATUS_FROM_POS[p.currentPosition.toUpperCase()] ?? 'finished',
+    position: (p) => parsePosition(p.currentPosition),
+    score: (p) => parseScoreString(p.currentScore),
+    name: (p) => p.playerName
   })
 }
 

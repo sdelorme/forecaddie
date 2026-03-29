@@ -22,7 +22,7 @@ export function DashboardClient({ completedEvents }: DashboardClientProps) {
   }
 
   return (
-    <main className="container mx-auto px-4 py-8 min-h-[calc(100vh-4rem-4rem)]">
+    <div className="container mx-auto px-4 py-8 min-h-[calc(100vh-4rem-4rem)]">
       <div className="flex justify-between items-center mb-8">
         <h1 className="text-3xl font-bold text-white">Dashboard</h1>
         <Button variant="default" className="text-white gap-2" onClick={() => setIsModalOpen(true)}>
@@ -53,6 +53,6 @@ export function DashboardClient({ completedEvents }: DashboardClientProps) {
       <SeasonResultsTable events={completedEvents} />
 
       <PlanModal open={isModalOpen} onOpenChange={setIsModalOpen} onCreatePlan={handleCreatePlan} />
-    </main>
+    </div>
   )
 }

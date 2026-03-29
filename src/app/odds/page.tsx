@@ -6,6 +6,8 @@ import { getSchedule } from '@/lib/api/datagolf'
 import { getPurseMap, attachPurses } from '@/lib/api/supabase/queries/tournament-purses'
 import { getCurrentEvent, getNextEvent } from '@/lib/utils'
 
+export const dynamic = 'force-dynamic'
+
 export const metadata = {
   title: 'Betting Odds',
   description: 'Current PGA Tour tournament betting odds from major sportsbooks.'
@@ -27,9 +29,9 @@ export default async function OddsPage() {
   const nextEvent = getNextEvent(schedule, now)
 
   return (
-    <main className="container mx-auto px-4 py-8">
+    <div className="container mx-auto px-4 py-8">
       <OddsHeader eventName={oddsData.eventName} isComplete={isComplete} nextEvent={nextEvent} />
       <OddsTable odds={oddsData} />
-    </main>
+    </div>
   )
 }

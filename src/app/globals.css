@@ -8,24 +8,3 @@
     transform: translateY(-72px);
   }
 }
-
-/* base styles */
-/* base styles */
-body {
-  background: #ebf0fa;
-  @apply text-gray-500 m-1; /* Removed margin on body */
-  font-family: 'Poppins', sans-serif;
-}
-h1,
-h2 {
-  @apply font-bold text-primary text-lg;
-}
-main {
-  @apply my-4 mx-auto px-8;
-}
-main > h2 {
-  @apply mb-4 pb-2 text-base;
-}
-p > a {
-  @apply text-primary underline;
-}

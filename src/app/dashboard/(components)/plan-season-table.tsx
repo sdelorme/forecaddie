@@ -2,7 +2,7 @@
 
 import { useMemo, useState } from 'react'
 import Link from 'next/link'
-import { cn } from '@/lib/utils'
+import { cn, formatShortName, formatPosition, formatEarnings, formatEventDate } from '@/lib/utils'
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui'
 import {
   Check,
@@ -11,6 +11,7 @@ import {
   ChevronRight,
   ExternalLink,
   UserRound,
+  MessageSquare,
   ArrowUpDown,
   ArrowUp,
   ArrowDown,
@@ -18,6 +19,7 @@ import {
   Eye
 } from 'lucide-react'
 import { formatPurse } from '@/lib/utils'
+import { AddPurseButton } from '@/components/shared'
 import type { ProcessedTourEvent } from '@/types/schedule'
 import type { Player } from '@/types/player'
 import type { Pick } from '@/lib/supabase/types'
@@ -31,8 +33,11 @@ interface PlanSeasonTableProps {
   earningsMap: Record<string, Record<number, number>>
   priorYearResults: Record<string, PriorYearTopFinishers>
   hiddenEventIds: string[]
+  commentCounts: Record<string, number>
+  season: number
   onOpenPicker: (eventId: string) => void
   onToggleHideEvent: (eventId: string) => void
+  onPurseAdded: (eventId: string, purse: number) => void
 }
 
 const statusConfig: Record<
@@ -54,36 +59,6 @@ const statusConfig: Record<
     className: 'text-gray-500',
     dotClass: 'fill-gray-500 text-gray-500'
   }
-}
-
-function formatDate(dateString: string): string {
-  const date = new Date(`${dateString}T12:00:00Z`)
-  return new Intl.DateTimeFormat('en-US', {
-    month: 'short',
-    day: 'numeric'
-  }).format(date)
-}
-
-function formatShortName(name: string): string {
-  const [lastName, firstName] = name.split(', ')
-  if (!firstName) return name
-  return `${firstName[0]}. ${lastName}`
-}
-
-function formatPosition(pos: number | null): string {
-  if (pos === null) return '—'
-  if (pos === 1) return '1st'
-  if (pos === 2) return '2nd'
-  if (pos === 3) return '3rd'
-  return `T${pos}`
-}
-
-function formatEarnings(amount: number): string {
-  return new Intl.NumberFormat('en-US', {
-    style: 'currency',
-    currency: 'USD',
-    maximumFractionDigits: 0
-  }).format(amount)
 }
 
 function getPickDisplay(
@@ -121,8 +96,11 @@ export function PlanSeasonTable({
   earningsMap,
   priorYearResults,
   hiddenEventIds,
+  commentCounts,
+  season,
   onOpenPicker,
-  onToggleHideEvent
+  onToggleHideEvent,
+  onPurseAdded
 }: PlanSeasonTableProps) {
   const [sortKey, setSortKey] = useState<SortKey>('date')
   const [sortDir, setSortDir] = useState<SortDir>('asc')
@@ -259,6 +237,12 @@ export function PlanSeasonTable({
                       <div className="flex items-center gap-2">
                         <Circle className={cn('h-2 w-2 flex-shrink-0', status.dotClass)} />
                         <span className="font-medium text-white text-sm leading-tight">{event.eventName}</span>
+                        {(commentCounts[event.eventId] ?? 0) > 0 && (
+                          <span className="inline-flex items-center gap-0.5 text-[10px] text-gray-400 bg-gray-700/60 rounded-full px-1.5 py-0.5 flex-shrink-0">
+                            <MessageSquare className="h-2.5 w-2.5" />
+                            {commentCounts[event.eventId]}
+                          </span>
+                        )}
                       </div>
                       <p className="text-xs text-gray-500 pl-4">{event.course}</p>
                     </div>
@@ -266,12 +250,21 @@ export function PlanSeasonTable({
 
                   {/* Date column */}
                   <TableCell className="text-center text-sm text-gray-400 whitespace-nowrap">
-                    {formatDate(event.startDate)}
+                    {formatEventDate(event.startDate)}
                   </TableCell>
 
                   {/* Purse column */}
                   <TableCell className="text-center text-sm text-gray-400 whitespace-nowrap tabular-nums">
-                    {purse != null ? formatPurse(purse) : '—'}
+                    {purse != null ? (
+                      formatPurse(purse)
+                    ) : (
+                      <AddPurseButton
+                        eventId={event.eventId}
+                        season={season}
+                        eventName={event.eventName}
+                        onPurseAdded={(p) => onPurseAdded(event.eventId, p)}
+                      />
+                    )}
                   </TableCell>
 
                   {/* Selected pick column */}
@@ -288,7 +281,7 @@ export function PlanSeasonTable({
                         <Check className="h-3.5 w-3.5 text-green-500 flex-shrink-0" />
                         <div className="min-w-0">
                           <span className="text-sm font-medium text-white block truncate">
-                            {locked.player.displayName}
+                            {formatShortName(locked.player.displayName)}
                           </span>
                           {isCompleted && (locked.pick.result_position != null || earnings != null) && (
                             <span className="flex items-center gap-1.5 text-xs">
@@ -296,7 +289,13 @@ export function PlanSeasonTable({
                                 <span
                                   className={cn(
                                     'font-medium',
-                                    locked.pick.result_position <= 3 ? 'text-yellow-400' : 'text-gray-400'
+                                    locked.pick.result_position === 1
+                                      ? 'text-yellow-400'
+                                      : locked.pick.result_position <= 5
+                                        ? 'text-green-400'
+                                        : locked.pick.result_position <= 10
+                                          ? 'text-green-500/70'
+                                          : 'text-gray-400'
                                   )}
                                 >
                                   {formatPosition(locked.pick.result_position)}
@@ -324,12 +323,12 @@ export function PlanSeasonTable({
                     <div className="flex flex-wrap items-center gap-1.5">
                       {option1 && (
                         <span className="inline-flex items-center rounded-md bg-slate-600/30 border border-slate-500/50 px-2 py-1 text-xs text-slate-300">
-                          {option1.player.displayName}
+                          {formatShortName(option1.player.displayName)}
                         </span>
                       )}
                       {option2 && (
                         <span className="inline-flex items-center rounded-md bg-slate-600/30 border border-slate-500/50 px-2 py-1 text-xs text-slate-300">
-                          {option2.player.displayName}
+                          {formatShortName(option2.player.displayName)}
                         </span>
                       )}
                       {!option1 && !option2 && <span className="text-xs text-gray-600">—</span>}
@@ -340,19 +339,19 @@ export function PlanSeasonTable({
                   <TableCell className="py-2">
                     {prior && prior.topFinishers.length > 0 ? (
                       <div className="flex flex-wrap items-center gap-x-4 gap-y-0.5">
-                        {prior.topFinishers.map((f, i) => (
-                          <span key={i} className="inline-flex items-center gap-1 text-xs whitespace-nowrap">
-                            {i === 0 && <Trophy className="h-3 w-3 text-yellow-400 flex-shrink-0" />}
-                            <span
-                              className={cn('tabular-nums', i === 0 ? 'text-yellow-400 font-medium' : 'text-gray-400')}
-                            >
-                              {i + 1}.
+                        {prior.topFinishers.map((f, i) => {
+                          const nameColor =
+                            i === 0 ? 'text-yellow-400 font-medium' : i <= 2 ? 'text-gray-200' : 'text-gray-400'
+                          const posColor = i === 0 ? 'text-yellow-400/70' : i <= 2 ? 'text-gray-400' : 'text-gray-500'
+
+                          return (
+                            <span key={i} className="inline-flex items-center gap-1 text-xs whitespace-nowrap">
+                              {i === 0 && <Trophy className="h-3 w-3 text-yellow-400 flex-shrink-0" />}
+                              <span className={nameColor}>{formatShortName(f.playerName)}</span>
+                              <span className={cn('tabular-nums', posColor)}>({f.finishText})</span>
                             </span>
-                            <span className={cn(i === 0 ? 'text-yellow-400 font-medium' : 'text-gray-300')}>
-                              {formatShortName(f.playerName)}
-                            </span>
-                          </span>
-                        ))}
+                          )
+                        })}
                         <Link
                           href={`/events/${event.eventId}?year=${prior.year}`}
                           onClick={(e) => e.stopPropagation()}

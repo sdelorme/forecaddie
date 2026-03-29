@@ -7,7 +7,7 @@ import { Table, TableCaption, TableHeader, TableRow, TableHead, TableBody, Table
 import { SearchInput } from '@/components/shared'
 import { usePlayerFlagsContext } from '@/components/providers'
 import { useSortedLeaderboard } from '@/lib/hooks/use-sorted-leaderboard'
-import { formatPlayerName } from '@/lib/utils'
+import { formatPlayerName, getScoreStyle } from '@/lib/utils'
 import type { LeaderboardPlayer, LeaderboardEvent } from '@/types/leaderboard'
 
 interface LeaderboardTableProps {
@@ -59,12 +59,12 @@ function PlayerRow({ player }: { player: LeaderboardPlayer }) {
           {formatPlayerName(player.playerName)}
         </Link>
       </TableCell>
-      <TableCell>{player.currentScore}</TableCell>
+      <TableCell className={`font-medium ${getScoreStyle(player.currentScore)}`}>{player.currentScore}</TableCell>
       <TableCell>{player.thru}</TableCell>
-      <TableCell>{getRoundValue(player, 1)}</TableCell>
-      <TableCell>{getRoundValue(player, 2)}</TableCell>
-      <TableCell>{getRoundValue(player, 3)}</TableCell>
-      <TableCell>{getRoundValue(player, 4)}</TableCell>
+      <TableCell className="tabular-nums">{getRoundValue(player, 1)}</TableCell>
+      <TableCell className="tabular-nums">{getRoundValue(player, 2)}</TableCell>
+      <TableCell className="tabular-nums">{getRoundValue(player, 3)}</TableCell>
+      <TableCell className="tabular-nums">{getRoundValue(player, 4)}</TableCell>
       <TableCell>{player.winOdds != null ? `${(player.winOdds * 100).toFixed(1)}%` : '—'}</TableCell>
     </TableRow>
   )

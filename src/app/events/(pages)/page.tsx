@@ -2,6 +2,8 @@ import { getSchedule } from '@/lib/api/datagolf'
 import { getPurseMap, attachPurses } from '@/lib/api/supabase/queries/tournament-purses'
 import EventsUI from '../(components)/all-events'
 
+export const dynamic = 'force-dynamic'
+
 export const metadata = {
   title: 'Tournament Schedule',
   description: 'Full PGA Tour tournament schedule with dates, courses, and locations.'
@@ -15,12 +17,12 @@ export default async function EventsPage() {
   const events = attachPurses(rawEvents, purseMap)
 
   return (
-    <main className="container mx-auto px-4 py-8">
+    <div className="container mx-auto px-4 py-8">
       <div className="flex justify-between items-center mb-8">
         <h1 className="text-2xl font-bold text-white">PGA Tour Schedule</h1>
       </div>
 
       <EventsUI events={events} />
-    </main>
+    </div>
   )
 }

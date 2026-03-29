@@ -56,8 +56,8 @@ function LoginForm() {
   return (
     <div className="max-w-md mx-auto">
       <div className="text-center mb-8">
-        <h1 className="text-3xl font-bold text-white mb-2">Welcome back</h1>
-        <p className="text-gray-400">Sign in with your email to access your dashboard</p>
+        <h1 className="text-3xl font-bold text-white mb-2">Sign in</h1>
+        <p className="text-gray-400">Enter your email to get started — no password needed</p>
       </div>
 
       {(error || authError) && (
@@ -110,7 +110,7 @@ function LoginForm() {
 
 export default function LoginPage() {
   return (
-    <main className="container mx-auto px-4 py-16 min-h-[calc(100vh-4rem-4rem)]">
+    <div className="container mx-auto px-4 py-16 min-h-[calc(100vh-4rem-4rem)]">
       <Suspense
         fallback={
           <div className="flex justify-center py-16">
@@ -120,6 +120,6 @@ export default function LoginPage() {
       >
         <LoginForm />
       </Suspense>
-    </main>
+    </div>
   )
 }

@@ -6,7 +6,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 export default function PlayerFilter() {
   const router = useRouter()
   const searchParams = useSearchParams()
-  const filter = searchParams.get('filter') || 'all'
+  const filter = searchParams.get('filter') || '0'
 
   const handleFilterChange = (newFilter: string) => {
     router.push(`/players?filter=${newFilter}`)

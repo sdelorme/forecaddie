@@ -3,21 +3,24 @@
 import { useState } from 'react'
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from '@/components/ui'
 import { PlanPlayerTable } from './plan-player-table'
+import { CommentSection } from './comment-thread'
 import { Button } from '@/components/ui/button'
 import { X, Lock, ListChecks } from 'lucide-react'
-import { cn } from '@/lib/utils'
+import { cn, formatShortName } from '@/lib/utils'
 import type { Player } from '@/types/player'
-import type { Pick } from '@/lib/supabase/types'
+import type { Pick, PlanComment } from '@/lib/supabase/types'
 import type { PlayerEventFinish } from '@/types/historical-events'
-import type { EventPicks } from '@/lib/supabase'
+import type { EventPicks, CommentThread } from '@/lib/supabase'
 import type { RecentFormMap } from '@/types/hottest-golfers'
 import type { PlayerOddsMap } from './plan-player-table'
 
 interface PickDialogProps {
   open: boolean
   onOpenChange: (open: boolean) => void
+  planId: string
   eventName: string | undefined
   selectedEventId: string | undefined
+  currentUserId: string
   players: Player[]
   usedPlayerIds: number[]
   futurePickEventNames?: Map<number, string>
@@ -29,22 +32,24 @@ interface PickDialogProps {
   withdrawnPlayerIds: Set<number>
   recentForm?: RecentFormMap
   playerOdds?: PlayerOddsMap
+  commentThreads: CommentThread[]
+  commentsLoading: boolean
+  commentCount: number
+  onCreateComment: (body: string, parentId?: string) => Promise<PlanComment | null>
+  onUpdateComment: (commentId: string, body: string) => Promise<PlanComment | null>
+  onDeleteComment: (commentId: string) => Promise<boolean>
   onSelectPlayer: (playerDgId: number, slot: 1 | 2 | 3) => void
   onClearPick: (pick: Pick) => void
   readOnly?: boolean
 }
 
-function formatShortName(player: Player): string {
-  const [lastName, firstName] = player.playerName.split(', ')
-  if (!firstName) return player.displayName
-  return `${firstName[0]}. ${lastName}`
-}
-
 export function PickDialog({
   open,
   onOpenChange,
+  planId,
   eventName,
   selectedEventId,
+  currentUserId,
   players,
   usedPlayerIds,
   futurePickEventNames,
@@ -56,6 +61,12 @@ export function PickDialog({
   withdrawnPlayerIds,
   recentForm,
   playerOdds,
+  commentThreads,
+  commentsLoading,
+  commentCount,
+  onCreateComment,
+  onUpdateComment,
+  onDeleteComment,
   onSelectPlayer,
   onClearPick,
   readOnly = false
@@ -121,7 +132,9 @@ export function PickDialog({
                   <span className="text-xs text-gray-500 block">{label}</span>
                   {player ? (
                     <div className="flex items-center justify-between gap-2">
-                      <span className="truncate text-sm font-medium text-white">{formatShortName(player)}</span>
+                      <span className="truncate text-sm font-medium text-white">
+                        {formatShortName(player.playerName)}
+                      </span>
                       {!readOnly && (
                         <Button
                           variant="ghost"
@@ -145,6 +158,19 @@ export function PickDialog({
             )
           })}
         </div>
+
+        <CommentSection
+          planId={planId}
+          eventId={selectedEventId ?? null}
+          threads={commentThreads}
+          isLoading={commentsLoading}
+          commentCount={commentCount}
+          currentUserId={currentUserId}
+          readOnly={readOnly}
+          onCreateComment={onCreateComment}
+          onUpdateComment={onUpdateComment}
+          onDeleteComment={onDeleteComment}
+        />
 
         <div className="flex-1 overflow-y-auto min-h-0">
           <PlanPlayerTable
