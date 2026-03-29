@@ -68,6 +68,54 @@ export type Database = {
           }
         ]
       }
+      plan_comments: {
+        Row: {
+          body: string
+          created_at: string | null
+          event_id: string
+          id: string
+          parent_id: string | null
+          plan_id: string
+          updated_at: string | null
+          user_id: string
+        }
+        Insert: {
+          body: string
+          created_at?: string | null
+          event_id: string
+          id?: string
+          parent_id?: string | null
+          plan_id: string
+          updated_at?: string | null
+          user_id: string
+        }
+        Update: {
+          body?: string
+          created_at?: string | null
+          event_id?: string
+          id?: string
+          parent_id?: string | null
+          plan_id?: string
+          updated_at?: string | null
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: 'plan_comments_parent_id_fkey'
+            columns: ['parent_id']
+            isOneToOne: false
+            referencedRelation: 'plan_comments'
+            referencedColumns: ['id']
+          },
+          {
+            foreignKeyName: 'plan_comments_plan_id_fkey'
+            columns: ['plan_id']
+            isOneToOne: false
+            referencedRelation: 'season_plans'
+            referencedColumns: ['id']
+          }
+        ]
+      }
       plan_members: {
         Row: {
           created_at: string | null
@@ -145,6 +193,7 @@ export type Database = {
         Row: {
           created_at: string | null
           device_id: string | null
+          hidden_events: string[] | null
           id: string
           name: string
           season: number
@@ -154,6 +203,7 @@ export type Database = {
         Insert: {
           created_at?: string | null
           device_id?: string | null
+          hidden_events?: string[] | null
           id?: string
           name: string
           season?: number
@@ -163,6 +213,7 @@ export type Database = {
         Update: {
           created_at?: string | null
           device_id?: string | null
+          hidden_events?: string[] | null
           id?: string
           name?: string
           season?: number
@@ -203,6 +254,30 @@ export type Database = {
           id?: string
           purse?: number
           season?: number
+        }
+        Relationships: []
+      }
+      user_profiles: {
+        Row: {
+          created_at: string | null
+          email: string | null
+          id: string
+          updated_at: string | null
+          username: string | null
+        }
+        Insert: {
+          created_at?: string | null
+          email?: string | null
+          id: string
+          updated_at?: string | null
+          username?: string | null
+        }
+        Update: {
+          created_at?: string | null
+          email?: string | null
+          id?: string
+          updated_at?: string | null
+          username?: string | null
         }
         Relationships: []
       }
