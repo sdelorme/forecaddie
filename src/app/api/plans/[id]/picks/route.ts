@@ -16,7 +16,11 @@ export async function GET(_request: NextRequest, { params }: RouteParams) {
     const { supabase, user } = await authenticateRoute()
     if (!supabase || !user) return unauthorizedResponse()
 
-    const { data, error } = await supabase.from('picks').select('*').eq('plan_id', id).order('created_at')
+    const { data, error } = await supabase
+      .from('picks')
+      .select('id, plan_id, event_id, player_dg_id, slot, user_id, result_position, created_at, updated_at')
+      .eq('plan_id', id)
+      .order('created_at')
 
     if (error) {
       console.error('[picks:list]', { userId: user.id, error: error.message })
@@ -98,7 +102,7 @@ export async function POST(request: NextRequest, { params }: RouteParams) {
         player_dg_id: player_dg_id ?? null,
         slot
       })
-      .select()
+      .select('id, plan_id, event_id, player_dg_id, slot, user_id, result_position, created_at, updated_at')
       .single()
 
     if (error) {

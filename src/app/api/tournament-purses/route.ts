@@ -2,11 +2,17 @@ import { NextRequest, NextResponse } from 'next/server'
 import { authenticateRoute, unauthorizedResponse } from '@/lib/supabase/route-auth'
 import { parseBody } from '@/lib/api/validation/utils'
 import { UpsertPurseSchema } from '@/lib/api/validation/schemas'
+import { rateLimit } from '@/lib/api/rate-limit'
 
 export async function POST(request: NextRequest) {
   try {
     const { supabase, user } = await authenticateRoute()
     if (!supabase || !user) return unauthorizedResponse()
+
+    const { allowed } = rateLimit(`purse:${user.id}`, { max: 10, windowMs: 60_000 })
+    if (!allowed) {
+      return NextResponse.json({ error: 'Too many requests' }, { status: 429 })
+    }
 
     const parsed = await parseBody(request, UpsertPurseSchema)
     if (parsed.error) return parsed.error
@@ -15,8 +21,8 @@ export async function POST(request: NextRequest) {
 
     const { data, error } = await supabase
       .from('tournament_purses')
-      .upsert({ dg_event_id, season, event_name, purse }, { onConflict: 'dg_event_id,season' })
-      .select()
+      .upsert({ dg_event_id, season, event_name, purse, updated_by: user.id }, { onConflict: 'dg_event_id,season' })
+      .select('id, dg_event_id, season, event_name, purse, created_at')
       .single()
 
     if (error) {

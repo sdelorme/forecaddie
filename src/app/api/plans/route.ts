@@ -54,7 +54,7 @@ export async function POST(request: NextRequest) {
         name,
         season: validatedSeason
       })
-      .select()
+      .select('id, name, season, user_id, hidden_events, created_at, updated_at')
       .single()
 
     if (error) {

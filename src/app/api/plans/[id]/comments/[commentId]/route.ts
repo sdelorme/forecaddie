@@ -28,7 +28,7 @@ export async function PATCH(request: NextRequest, { params }: RouteParams) {
       .eq('id', commentId)
       .eq('plan_id', id)
       .eq('user_id', user.id)
-      .select()
+      .select('id, plan_id, event_id, user_id, body, parent_id, created_at, updated_at')
       .single()
 
     if (error) {

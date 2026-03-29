@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server'
 import { authenticateRoute, unauthorizedResponse } from '@/lib/supabase/route-auth'
 import { isValidUUID, invalidUUIDResponse, parseBody } from '@/lib/api/validation/utils'
 import { CreateCommentSchema } from '@/lib/api/validation/schemas'
+import { rateLimit } from '@/lib/api/rate-limit'
 
 type RouteParams = {
   params: Promise<{ id: string }>
@@ -13,8 +14,11 @@ export async function GET(request: NextRequest, { params }: RouteParams) {
   if (!isValidUUID(id)) return invalidUUIDResponse('id')
 
   const eventId = request.nextUrl.searchParams.get('event_id')
-  if (!eventId) {
-    return NextResponse.json({ error: 'event_id query param is required' }, { status: 400 })
+  if (!eventId || eventId.length > 100) {
+    return NextResponse.json(
+      { error: 'event_id query param is required and must be 100 chars or fewer' },
+      { status: 400 }
+    )
   }
 
   try {
@@ -23,7 +27,7 @@ export async function GET(request: NextRequest, { params }: RouteParams) {
 
     const { data: comments, error } = await supabase
       .from('plan_comments')
-      .select('*')
+      .select('id, plan_id, event_id, user_id, body, parent_id, created_at, updated_at')
       .eq('plan_id', id)
       .eq('event_id', eventId)
       .order('created_at', { ascending: true })
@@ -60,6 +64,11 @@ export async function POST(request: NextRequest, { params }: RouteParams) {
   try {
     const { supabase, user } = await authenticateRoute()
     if (!supabase || !user) return unauthorizedResponse()
+
+    const { allowed } = rateLimit(`comment:${user.id}`, { max: 20, windowMs: 60_000 })
+    if (!allowed) {
+      return NextResponse.json({ error: 'Too many requests' }, { status: 429 })
+    }
 
     const parsed = await parseBody(request, CreateCommentSchema)
     if (parsed.error) return parsed.error
@@ -98,7 +107,7 @@ export async function POST(request: NextRequest, { params }: RouteParams) {
         parent_id: parent_id ?? null,
         body
       })
-      .select()
+      .select('id, plan_id, event_id, user_id, body, parent_id, created_at, updated_at')
       .single()
 
     if (error) {

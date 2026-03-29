@@ -1,7 +1,8 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { authenticateRoute, unauthorizedResponse } from '@/lib/supabase/route-auth'
-
-const USERNAME_RE = /^[a-z0-9][a-z0-9_]*[a-z0-9]$/
+import { parseBody } from '@/lib/api/validation/utils'
+import { UpdateProfileSchema } from '@/lib/api/validation/schemas'
+import { rateLimit } from '@/lib/api/rate-limit'
 
 export async function GET() {
   try {
@@ -29,19 +30,15 @@ export async function PATCH(request: NextRequest) {
     const { supabase, user } = await authenticateRoute()
     if (!supabase || !user) return unauthorizedResponse()
 
-    const body = await request.json()
-    const username = typeof body.username === 'string' ? body.username.trim().toLowerCase() : null
-
-    if (!username || username.length < 3 || username.length > 20) {
-      return NextResponse.json({ error: 'Username must be 3–20 characters' }, { status: 400 })
+    const { allowed } = rateLimit(`profile:${user.id}`, { max: 10, windowMs: 60_000 })
+    if (!allowed) {
+      return NextResponse.json({ error: 'Too many requests' }, { status: 429 })
     }
 
-    if (!USERNAME_RE.test(username)) {
-      return NextResponse.json(
-        { error: 'Username can only contain lowercase letters, numbers, and underscores' },
-        { status: 400 }
-      )
-    }
+    const parsed = await parseBody(request, UpdateProfileSchema)
+    if (parsed.error) return parsed.error
+
+    const { username } = parsed.data
 
     const { data: existing } = await supabase
       .from('user_profiles')
@@ -58,7 +55,7 @@ export async function PATCH(request: NextRequest) {
       .from('user_profiles')
       .update({ username, updated_at: new Date().toISOString() })
       .eq('id', user.id)
-      .select()
+      .select('id, username, email, updated_at')
       .single()
 
     if (error) {

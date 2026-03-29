@@ -66,7 +66,7 @@ export async function PATCH(request: NextRequest, { params }: RouteParams) {
       .update(updatePayload)
       .eq('id', pickId)
       .eq('plan_id', id)
-      .select()
+      .select('id, plan_id, event_id, player_dg_id, slot, user_id, result_position, created_at, updated_at')
       .single()
 
     if (error) {

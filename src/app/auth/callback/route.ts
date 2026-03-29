@@ -1,13 +1,14 @@
 import { NextResponse } from 'next/server'
 import { createClient } from '@/lib/supabase/server'
 
-/**
- * Sanitize redirect path to prevent open redirect vulnerabilities.
- * Only allows relative paths starting with '/'.
- */
+const ALLOWED_REDIRECT_PREFIXES = ['/dashboard', '/events', '/players', '/odds', '/setup']
+
 function sanitizeRedirectPath(redirect: string | null): string {
   if (!redirect) return '/dashboard'
   if (!redirect.startsWith('/') || redirect.startsWith('//')) {
+    return '/dashboard'
+  }
+  if (!ALLOWED_REDIRECT_PREFIXES.some((prefix) => redirect.startsWith(prefix))) {
     return '/dashboard'
   }
   return redirect

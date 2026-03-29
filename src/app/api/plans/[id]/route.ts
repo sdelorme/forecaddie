@@ -17,7 +17,11 @@ export async function GET(_request: NextRequest, { params }: RouteParams) {
     if (!supabase || !user) return unauthorizedResponse()
 
     // RLS ensures only plan members can access this plan
-    const { data, error } = await supabase.from('season_plans').select('*').eq('id', id).single()
+    const { data, error } = await supabase
+      .from('season_plans')
+      .select('id, name, season, user_id, hidden_events, created_at, updated_at')
+      .eq('id', id)
+      .single()
 
     if (error) {
       if (error.code === 'PGRST116') {
@@ -58,7 +62,12 @@ export async function PATCH(request: NextRequest, { params }: RouteParams) {
     if (hidden_events !== undefined) updates.hidden_events = hidden_events
 
     // RLS ensures only owner/editor members can update this plan
-    const { data, error } = await supabase.from('season_plans').update(updates).eq('id', id).select().single()
+    const { data, error } = await supabase
+      .from('season_plans')
+      .update(updates)
+      .eq('id', id)
+      .select('id, name, season, user_id, hidden_events, created_at, updated_at')
+      .single()
 
     if (error) {
       if (error.code === 'PGRST116') {

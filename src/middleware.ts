@@ -1,15 +1,14 @@
 import { createServerClient } from '@supabase/ssr'
 import { NextResponse, type NextRequest } from 'next/server'
 
-/**
- * Sanitize redirect path to prevent open redirect vulnerabilities.
- * Only allows relative paths starting with '/'.
- */
+const ALLOWED_REDIRECT_PREFIXES = ['/dashboard', '/events', '/players', '/odds', '/setup']
+
 function sanitizeRedirectPath(redirect: string | null): string {
   if (!redirect) return '/dashboard'
-  // Only allow relative paths starting with '/'
-  // Reject protocol-relative URLs (//), external URLs, and malformed paths
   if (!redirect.startsWith('/') || redirect.startsWith('//')) {
+    return '/dashboard'
+  }
+  if (!ALLOWED_REDIRECT_PREFIXES.some((prefix) => redirect.startsWith(prefix))) {
     return '/dashboard'
   }
   return redirect
@@ -23,6 +22,9 @@ export async function middleware(request: NextRequest) {
   const apiKey = publishableKey || anonKey
 
   if (!apiKey || !process.env.NEXT_PUBLIC_SUPABASE_URL) {
+    if (process.env.NODE_ENV === 'production') {
+      return new NextResponse('Service unavailable', { status: 503 })
+    }
     return supabaseResponse
   }
 
