@@ -30,7 +30,8 @@ export async function GET(_request: Request, { params }: RouteParams) {
     return NextResponse.json(counts, {
       headers: { 'Cache-Control': 'no-store' }
     })
-  } catch {
+  } catch (err) {
+    console.error('[comment-counts]', err)
     return NextResponse.json({ error: 'Failed to fetch comment counts' }, { status: 500 })
   }
 }

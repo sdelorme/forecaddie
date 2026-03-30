@@ -1,6 +1,7 @@
 'use client'
 
 import { useEffect } from 'react'
+import * as Sentry from '@sentry/nextjs'
 import { Button } from '@/components/ui'
 
 interface ErrorFallbackProps {
@@ -12,9 +13,7 @@ interface ErrorFallbackProps {
 
 export function ErrorFallback({ error, title = 'Something went wrong', message, onRetry }: ErrorFallbackProps) {
   useEffect(() => {
-    // Log the error to an error reporting service
-    // TODO: Replace with Sentry or similar when integrated
-    console.error('Page error:', error)
+    Sentry.captureException(error)
   }, [error])
 
   return (

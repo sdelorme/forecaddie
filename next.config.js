@@ -1,3 +1,5 @@
+const { withSentryConfig } = require('@sentry/nextjs')
+
 /** @type {import('next').NextConfig} */
 const nextConfig = {
   async headers() {
@@ -19,7 +21,7 @@ const nextConfig = {
               "script-src 'self' 'unsafe-inline' 'unsafe-eval'",
               "style-src 'self' 'unsafe-inline'",
               "img-src 'self' data: https:",
-              `connect-src 'self' https://${supabaseHost} wss://${supabaseHost}`,
+              `connect-src 'self' https://${supabaseHost} wss://${supabaseHost} https://*.ingest.sentry.io`,
               "font-src 'self'",
               "frame-ancestors 'none'",
               "base-uri 'self'",
@@ -36,4 +38,11 @@ const nextConfig = {
   }
 }
 
-module.exports = nextConfig
+module.exports = withSentryConfig(nextConfig, {
+  org: process.env.SENTRY_ORG,
+  project: process.env.SENTRY_PROJECT,
+  silent: !process.env.CI,
+  authToken: process.env.SENTRY_AUTH_TOKEN,
+  widenClientFileUpload: true,
+  tunnelRoute: '/monitoring'
+})

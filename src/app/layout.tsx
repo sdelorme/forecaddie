@@ -5,6 +5,8 @@ import { ScrollWrapper, LiveStatsProvider, PlayerFlagsProvider } from '@/compone
 import { TooltipProvider } from '@/components/ui'
 import { getLiveLeaderboard, getSchedule } from '@/lib/api/datagolf'
 import { getCurrentEvent } from '@/lib/utils'
+import { Analytics } from '@vercel/analytics/react'
+import { SpeedInsights } from '@vercel/speed-insights/next'
 
 const baseUrl = process.env.VERCEL_PROJECT_PRODUCTION_URL
   ? `https://${process.env.VERCEL_PROJECT_PRODUCTION_URL}`
@@ -61,6 +63,8 @@ export default async function RootLayout({ children }: { children: React.ReactNo
             </LiveStatsProvider>
           </PlayerFlagsProvider>
         </TooltipProvider>
+        <Analytics />
+        <SpeedInsights />
       </body>
     </html>
   )
