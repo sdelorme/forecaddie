@@ -18,7 +18,7 @@ const HeroSection: React.FC = () => {
             fill
             className="opacity-25 pointer-events-none object-contain scale-[1.2] sm:scale-100 -translate-x-[5%] translate-y-[15%] sm:translate-y-[-15%] md:translate-y-[-25%] lg:translate-y-[-35%]"
             sizes="100vw"
-            quality={100}
+            priority
           />
         </div>
       </div>

@@ -11,9 +11,9 @@ type LeaderboardHeaderProps = {
 export function LeaderboardHeader({ eventInfo, isComplete, nextEvent }: LeaderboardHeaderProps) {
   return (
     <div className="mb-6">
-      <div className="flex items-center gap-3 mb-2">
+      <div className="flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-3 mb-2">
         <TournamentStatusBadge status={isComplete ? 'final' : 'live'} size="md" />
-        <h1 className="text-3xl font-bold text-white">{eventInfo.eventName}</h1>
+        <h1 className="text-2xl sm:text-3xl font-bold text-white min-w-0">{eventInfo.eventName}</h1>
       </div>
       <p className="text-gray-400 mb-4">{eventInfo.course}</p>
       {isComplete && nextEvent && (

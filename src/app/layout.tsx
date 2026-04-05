@@ -56,7 +56,7 @@ export default async function RootLayout({ children }: { children: React.ReactNo
               <ScrollWrapper>
                 <Header />
               </ScrollWrapper>
-              <div className="pt-[144px]">
+              <div className="pt-[var(--header-h,144px)]">
                 <main className="flex-1">{children}</main>
                 <Footer />
               </div>

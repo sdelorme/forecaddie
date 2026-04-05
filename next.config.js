@@ -44,5 +44,5 @@ module.exports = withSentryConfig(nextConfig, {
   silent: !process.env.CI,
   authToken: process.env.SENTRY_AUTH_TOKEN,
   widenClientFileUpload: true,
-  tunnelRoute: '/monitoring'
+  tunnelRoute: process.env.NODE_ENV === 'production' ? '/monitoring' : undefined
 })
