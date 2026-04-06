@@ -2,6 +2,7 @@
 
 import { useCallback, useEffect, useState } from 'react'
 import { createClient } from '../client'
+import { getPublicSiteOrigin } from '../public-site-origin'
 import type { User, AuthError } from '@supabase/supabase-js'
 
 type AuthState = {
@@ -70,7 +71,7 @@ export function useAuth(): UseAuthReturn {
     async (email: string, redirectPath?: string | null) => {
       setState((prev) => ({ ...prev, isLoading: true, error: null }))
 
-      const callbackUrl = new URL('/auth/callback', window.location.origin)
+      const callbackUrl = new URL('/auth/callback', getPublicSiteOrigin())
       if (redirectPath && redirectPath.startsWith('/') && !redirectPath.startsWith('//')) {
         callbackUrl.searchParams.set('redirect', redirectPath)
       }
