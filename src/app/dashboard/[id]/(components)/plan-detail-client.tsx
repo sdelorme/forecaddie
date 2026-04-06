@@ -73,7 +73,7 @@ export function PlanDetailClient({
   const [isLoadingHistory, setIsLoadingHistory] = useState(false)
   const [fieldData, setFieldData] = useState<FieldUpdate | null>(null)
   const [hiddenEventIds, setHiddenEventIds] = useState<string[]>(initialHiddenEventIds)
-  const [localPurses, setLocalPurses] = useState<Record<string, number>>({})
+  const [localPurses, setLocalPurses] = useState<Record<string, { purse: number; isUserAdded: boolean }>>({})
 
   const latestEventRef = useRef<string | null>(null)
 
@@ -83,7 +83,10 @@ export function PlanDetailClient({
     return [...events]
       .filter((e) => e.startDate.startsWith(String(season)))
       .sort((a, b) => a.startDate.localeCompare(b.startDate))
-      .map((e) => (localPurses[e.eventId] != null ? { ...e, purse: localPurses[e.eventId] } : e))
+      .map((e) => {
+        const local = localPurses[e.eventId]
+        return local != null ? { ...e, purse: local.purse, purseIsUserAdded: local.isUserAdded } : e
+      })
   }, [events, season, localPurses])
 
   const usedPlayerIds = useMemo(() => getUsedPlayerIds(), [getUsedPlayerIds])
@@ -292,7 +295,7 @@ export function PlanDetailClient({
   )
 
   const handlePurseAdded = useCallback((eventId: string, purse: number) => {
-    setLocalPurses((prev) => ({ ...prev, [eventId]: purse }))
+    setLocalPurses((prev) => ({ ...prev, [eventId]: { purse, isUserAdded: true } }))
   }, [])
 
   const handleOpenPicker = (eventId: string) => {
