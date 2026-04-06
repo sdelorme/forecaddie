@@ -3,7 +3,7 @@ import { getPlayerList } from '@/lib/api/datagolf/queries/players'
 import { getHistoricalEventList, getHistoricalEventResults } from '@/lib/api/datagolf/queries/historical-events'
 import { getHottestGolfers } from '@/lib/api/datagolf/queries/hottest-golfers'
 import { getOutrightOdds } from '@/lib/api/datagolf/queries/odds'
-import { getPurseMap, attachPurses } from '@/lib/api/supabase/queries/tournament-purses'
+import { getPurseMap, attachPurses, type PurseEntry } from '@/lib/api/supabase/queries/tournament-purses'
 import { createClient } from '@/lib/supabase/server'
 import { notFound, redirect } from 'next/navigation'
 import { PlanDetailClient } from './(components)/plan-detail-client'
@@ -71,7 +71,7 @@ export default async function PlanDetailPage({ params }: PageProps) {
       getPurseMap(plan.season)
     ])
     const rawEvents = scheduleResult.status === 'fulfilled' ? scheduleResult.value : []
-    const purseMap = purseMapResult.status === 'fulfilled' ? purseMapResult.value : new Map<string, number>()
+    const purseMap = purseMapResult.status === 'fulfilled' ? purseMapResult.value : new Map<string, PurseEntry>()
     events = attachPurses(rawEvents, purseMap)
     players = playerResult.status === 'fulfilled' ? playerResult.value : []
     historicalEvents = historicalResult.status === 'fulfilled' ? historicalResult.value : []

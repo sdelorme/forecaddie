@@ -3,6 +3,7 @@ import { authenticateRoute, unauthorizedResponse } from '@/lib/supabase/route-au
 import { parseBody } from '@/lib/api/validation/utils'
 import { UpsertPurseSchema } from '@/lib/api/validation/schemas'
 import { rateLimit } from '@/lib/api/rate-limit'
+import { createAdminClient } from '@/lib/supabase/server'
 
 export async function POST(request: NextRequest) {
   try {
@@ -18,6 +19,21 @@ export async function POST(request: NextRequest) {
     if (parsed.error) return parsed.error
 
     const { dg_event_id, season, event_name, purse } = parsed.data
+
+    const admin = createAdminClient()
+    const { data: existing } = await admin
+      .from('tournament_purses')
+      .select('updated_by')
+      .eq('dg_event_id', dg_event_id)
+      .eq('season', season)
+      .maybeSingle()
+
+    if (existing && existing.updated_by == null) {
+      return NextResponse.json(
+        { error: 'This purse was set during the season seed and cannot be overwritten' },
+        { status: 409 }
+      )
+    }
 
     const { data, error } = await supabase
       .from('tournament_purses')

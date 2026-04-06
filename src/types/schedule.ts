@@ -18,6 +18,7 @@ export interface ProcessedTourEvent extends TourEvent {
   href: string
   isComplete: boolean
   purse?: number
+  purseIsUserAdded?: boolean
 }
 
 export interface TourSchedule {

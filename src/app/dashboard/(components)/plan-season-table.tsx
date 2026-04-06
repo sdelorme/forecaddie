@@ -19,7 +19,7 @@ import {
   Eye
 } from 'lucide-react'
 import { formatPurse } from '@/lib/utils'
-import { AddPurseButton } from '@/components/shared'
+import { AddPurseButton, UserAddedPurse } from '@/components/shared'
 import type { ProcessedTourEvent } from '@/types/schedule'
 import type { Player } from '@/types/player'
 import type { Pick } from '@/lib/supabase/types'
@@ -256,7 +256,11 @@ export function PlanSeasonTable({
                   {/* Purse column */}
                   <TableCell className="text-center text-sm text-gray-400 whitespace-nowrap tabular-nums">
                     {purse != null ? (
-                      formatPurse(purse)
+                      event.purseIsUserAdded ? (
+                        <UserAddedPurse purse={purse} />
+                      ) : (
+                        formatPurse(purse)
+                      )
                     ) : (
                       <AddPurseButton
                         eventId={event.eventId}

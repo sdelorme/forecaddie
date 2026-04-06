@@ -326,6 +326,7 @@ export default async function EventDetailPage({ params, searchParams }: EventDet
               season={season}
               eventName={event.eventName}
               initialPurse={event.purse ?? null}
+              isUserAdded={event.purseIsUserAdded}
             />
           </div>
         </div>
@@ -373,6 +374,7 @@ export default async function EventDetailPage({ params, searchParams }: EventDet
             season={season}
             eventName={event.eventName}
             initialPurse={event.purse ?? null}
+            isUserAdded={event.purseIsUserAdded}
           />
         </div>
 
