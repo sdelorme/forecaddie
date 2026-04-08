@@ -3,7 +3,7 @@ import { authenticateRoute, unauthorizedResponse } from '@/lib/supabase/route-au
 import { parseBody } from '@/lib/api/validation/utils'
 import { UpsertPurseSchema } from '@/lib/api/validation/schemas'
 import { rateLimit } from '@/lib/api/rate-limit'
-import { createAdminClient } from '@/lib/supabase/server'
+import { createPublicClient } from '@/lib/supabase/server'
 
 export async function POST(request: NextRequest) {
   try {
@@ -20,8 +20,8 @@ export async function POST(request: NextRequest) {
 
     const { dg_event_id, season, event_name, purse } = parsed.data
 
-    const admin = createAdminClient()
-    const { data: existing } = await admin
+    const publicClient = createPublicClient()
+    const { data: existing } = await publicClient
       .from('tournament_purses')
       .select('updated_by')
       .eq('dg_event_id', dg_event_id)
