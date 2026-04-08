@@ -1,4 +1,4 @@
-import { createAdminClient } from '@/lib/supabase/server'
+import { createPublicClient } from '@/lib/supabase/server'
 import type { ProcessedTourEvent } from '@/types/schedule'
 
 export interface PurseEntry {
@@ -8,7 +8,7 @@ export interface PurseEntry {
 
 /**
  * Fetch all purse amounts for a season, returning a Map keyed by DG event ID.
- * Uses the admin client so no auth/RLS overhead — purse data is public.
+ * Uses the public (anon) client — tournament_purses has public SELECT via RLS.
  * Returns an empty map if Supabase env vars are missing (e.g. during build).
  *
  * `isUserAdded` is true when `updated_by` is set (i.e. submitted by a user
@@ -16,7 +16,7 @@ export interface PurseEntry {
  */
 export async function getPurseMap(season: number): Promise<Map<string, PurseEntry>> {
   try {
-    const supabase = createAdminClient()
+    const supabase = createPublicClient()
     const { data, error } = await supabase
       .from('tournament_purses')
       .select('dg_event_id, purse, updated_by')

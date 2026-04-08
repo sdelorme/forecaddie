@@ -47,15 +47,19 @@ export async function POST(request: NextRequest) {
     const { name, season } = parsed.data
     const validatedSeason = season ?? new Date().getFullYear()
 
-    const { data, error } = await supabase
-      .from('season_plans')
-      .insert({
-        user_id: user.id,
-        name,
-        season: validatedSeason
-      })
-      .select('id, name, season, user_id, hidden_events, created_at, updated_at')
-      .single()
+    // Generate ID server-side so we can return it without RETURNING.
+    // PostgREST applies the SELECT RLS policy to RETURNING rows, but the
+    // AFTER INSERT trigger that creates the plan_members row hasn't fired
+    // yet at that point — causing .select().single() to return 0 rows.
+    const id = crypto.randomUUID()
+    const now = new Date().toISOString()
+
+    const { error } = await supabase.from('season_plans').insert({
+      id,
+      user_id: user.id,
+      name,
+      season: validatedSeason
+    })
 
     if (error) {
       console.error('[plans:create]', {
@@ -70,10 +74,21 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: 'Failed to create plan' }, { status: 500 })
     }
 
-    return NextResponse.json(data, {
-      status: 201,
-      headers: { 'Cache-Control': 'no-store' }
-    })
+    return NextResponse.json(
+      {
+        id,
+        name,
+        season: validatedSeason,
+        user_id: user.id,
+        hidden_events: null,
+        created_at: now,
+        updated_at: now
+      },
+      {
+        status: 201,
+        headers: { 'Cache-Control': 'no-store' }
+      }
+    )
   } catch (error) {
     console.error('[plans:create]', error)
     return NextResponse.json({ error: 'Failed to create plan' }, { status: 500 })

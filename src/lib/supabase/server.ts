@@ -12,6 +12,19 @@ export function createAdminClient() {
   return createSupabaseClient<Database>(url, serviceKey, { auth: { persistSession: false } })
 }
 
+/**
+ * Lightweight server-side client using the anon key — no cookies, no auth.
+ * Use for public reads where RLS already grants access (e.g. tournament_purses).
+ */
+export function createPublicClient() {
+  const url = process.env.NEXT_PUBLIC_SUPABASE_URL
+  const anonKey = process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY || process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY
+  if (!url || !anonKey) {
+    throw new Error('Missing SUPABASE_URL or anon key for public client')
+  }
+  return createSupabaseClient<Database>(url, anonKey, { auth: { persistSession: false } })
+}
+
 export async function createClient() {
   const cookieStore = await cookies()
   const publishableKey = process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY
