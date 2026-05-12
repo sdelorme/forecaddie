@@ -229,10 +229,20 @@ export function PlanDetailClient({
     }
   }, [selectedEventId, seasonEvents])
 
+  const fieldPlayerIds = useMemo(() => {
+    if (!fieldData) return null
+    return new Set<number>(fieldData.players.map((p) => p.dgId))
+  }, [fieldData])
+
   const withdrawnPlayerIds = useMemo(() => {
     if (!fieldData) return new Set<number>()
-    return new Set<number>()
+    return new Set(fieldData.players.filter((p) => p.teeTime === null && p.wave === null).map((p) => p.dgId))
   }, [fieldData])
+
+  const fieldPlayers = useMemo(() => {
+    if (!fieldPlayerIds) return proPlayers
+    return proPlayers.filter((p) => fieldPlayerIds.has(p.dgId))
+  }, [proPlayers, fieldPlayerIds])
 
   const playerOddsMap = useMemo(() => {
     const map = new Map<number, string>()
@@ -352,7 +362,7 @@ export function PlanDetailClient({
         eventName={selectedEventName}
         selectedEventId={selectedEventId ?? undefined}
         currentUserId={currentUserId}
-        players={proPlayers}
+        players={fieldPlayers}
         usedPlayerIds={usedPlayerIds}
         futurePickEventNames={futurePickEventNames}
         optionPickEventNames={optionPickEventNames}
