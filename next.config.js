@@ -18,10 +18,10 @@ const nextConfig = {
             key: 'Content-Security-Policy',
             value: [
               "default-src 'self'",
-              "script-src 'self' 'unsafe-inline' 'unsafe-eval' https://trk.caddie.bet",
+              "script-src 'self' 'unsafe-inline' 'unsafe-eval' https://trk.caddie.bet https://freshpaint-cdn.com",
               "style-src 'self' 'unsafe-inline'",
               "img-src 'self' data: https:",
-              `connect-src 'self' https://${supabaseHost} wss://${supabaseHost} https://*.ingest.sentry.io https://trk.caddie.bet`,
+              `connect-src 'self' https://${supabaseHost} wss://${supabaseHost} https://*.ingest.sentry.io https://trk.caddie.bet https://freshpaint-cdn.com`,
               "font-src 'self'",
               "frame-ancestors 'none'",
               "base-uri 'self'",
